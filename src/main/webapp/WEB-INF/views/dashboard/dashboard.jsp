@@ -33,6 +33,12 @@
             <%= user.getRole() %>
         </p>
         
+        <p>
+    <a href="<%= request.getContextPath() %>/patients">
+        Manage Patients
+    </a>
+</p>
+        
         <a href="<%= request.getContextPath() %>/logout">
     Logout
 </a>

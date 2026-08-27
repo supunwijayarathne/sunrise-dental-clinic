@@ -10,7 +10,7 @@ public class DBConnection {
             "jdbc:mysql://localhost:3306/sunrise_dental_db";
 
     private static final String USERNAME = "root";
-    private static final String PASSWORD = "YOUR_MYSQL_PASSWORD";
+    private static final String PASSWORD = "root";
 
     public static Connection getConnection()
             throws ClassNotFoundException, SQLException {
