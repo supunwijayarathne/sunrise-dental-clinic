@@ -1,6 +1,7 @@
 package com.sunrise.controller;
 
 import java.io.IOException;
+import java.time.Year;
 import java.util.List;
 
 import com.sunrise.dao.AppointmentDAO;
@@ -8,6 +9,7 @@ import com.sunrise.dao.BillDAO;
 import com.sunrise.dao.DentistDAO;
 import com.sunrise.dao.PatientDAO;
 import com.sunrise.dao.TreatmentDAO;
+
 import com.sunrise.model.Appointment;
 import com.sunrise.model.Bill;
 import com.sunrise.model.Dentist;
@@ -32,6 +34,11 @@ public class BillingController extends HttpServlet {
     private PatientDAO patientDAO;
     private DentistDAO dentistDAO;
     private TreatmentDAO treatmentDAO;
+
+
+    // =========================================================
+    // INITIALIZE
+    // =========================================================
 
     @Override
     public void init() {
@@ -127,15 +134,24 @@ public class BillingController extends HttpServlet {
 
             keyword = keyword.trim();
 
-            bills = billDAO.searchBills(keyword);
+            bills =
+                    billDAO.searchBills(keyword);
 
         } else {
 
-            bills = billDAO.getAllBills();
+            bills =
+                    billDAO.getAllBills();
         }
 
-        request.setAttribute("bills", bills);
-        request.setAttribute("keyword", keyword);
+        request.setAttribute(
+                "bills",
+                bills
+        );
+
+        request.setAttribute(
+                "keyword",
+                keyword
+        );
 
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-list.jsp"
@@ -152,13 +168,9 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        List<Appointment> appointments =
-                appointmentDAO.getAllAppointments();
+        loadBillFormData(request);
 
-        request.setAttribute(
-                "appointments",
-                appointments
-        );
+        generateBillNumber(request);
 
         request.setAttribute(
                 "formMode",
@@ -180,39 +192,12 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String billNumber =
-                clean(
-                        request.getParameter("billNumber")
-                );
-
         String appointmentIdText =
                 clean(
-                        request.getParameter("appointmentId")
+                        request.getParameter(
+                                "appointmentId"
+                        )
                 );
-
-
-        if (billNumber.isEmpty()) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Bill number is required."
-            );
-
-            return;
-        }
-
-
-        if (billNumber.length() > 30) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Bill number cannot exceed 30 characters."
-            );
-
-            return;
-        }
 
 
         int appointmentId;
@@ -230,22 +215,6 @@ public class BillingController extends HttpServlet {
                     request,
                     response,
                     "Please select a valid appointment."
-            );
-
-            return;
-        }
-
-
-        // =====================================================
-        // CHECK BILL NUMBER
-        // =====================================================
-
-        if (billDAO.billNumberExists(billNumber)) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Bill number already exists."
             );
 
             return;
@@ -333,7 +302,7 @@ public class BillingController extends HttpServlet {
 
 
         // =====================================================
-        // CALCULATE BILL
+        // CALCULATE FEES
         // =====================================================
 
         double consultationFee =
@@ -347,7 +316,7 @@ public class BillingController extends HttpServlet {
 
 
         // =====================================================
-        // GET LOGGED USER
+        // GET LOGGED-IN USER
         // =====================================================
 
         HttpSession session =
@@ -385,7 +354,36 @@ public class BillingController extends HttpServlet {
 
 
         // =====================================================
-        // CREATE BILL OBJECT
+        // GENERATE BILL NUMBER
+        // =====================================================
+
+        int nextBillId =
+                billDAO.getNextBillId();
+
+        if (nextBillId <= 0) {
+
+            showAddError(
+                    request,
+                    response,
+                    "Unable to generate bill number."
+            );
+
+            return;
+        }
+
+
+        String billNumber =
+                "BILL-"
+                + Year.now().getValue()
+                + "-"
+                + String.format(
+                        "%04d",
+                        nextBillId
+                );
+
+
+        // =====================================================
+        // CREATE BILL
         // =====================================================
 
         Bill bill =
@@ -446,7 +444,9 @@ public class BillingController extends HttpServlet {
 
 
             Bill bill =
-                    billDAO.getBillById(billId);
+                    billDAO.getBillById(
+                            billId
+                    );
 
 
             if (bill == null) {
@@ -468,7 +468,10 @@ public class BillingController extends HttpServlet {
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/bills/bill-details.jsp"
-            ).forward(request, response);
+            ).forward(
+                    request,
+                    response
+            );
 
 
         } catch (NumberFormatException e) {
@@ -499,7 +502,9 @@ public class BillingController extends HttpServlet {
 
 
             Bill bill =
-                    billDAO.getBillById(billId);
+                    billDAO.getBillById(
+                            billId
+                    );
 
 
             if (bill == null) {
@@ -521,7 +526,10 @@ public class BillingController extends HttpServlet {
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/bills/bill-print.jsp"
-            ).forward(request, response);
+            ).forward(
+                    request,
+                    response
+            );
 
 
         } catch (NumberFormatException e) {
@@ -600,14 +608,11 @@ public class BillingController extends HttpServlet {
 
 
     // =========================================================
-    // ADD ERROR
+    // LOAD FORM DATA
     // =========================================================
 
-    private void showAddError(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            String error)
-            throws ServletException, IOException {
+    private void loadBillFormData(
+            HttpServletRequest request) {
 
         List<Appointment> appointments =
                 appointmentDAO.getAllAppointments();
@@ -616,6 +621,51 @@ public class BillingController extends HttpServlet {
                 "appointments",
                 appointments
         );
+    }
+
+
+    // =========================================================
+    // GENERATE DISPLAY BILL NUMBER
+    // =========================================================
+
+    private void generateBillNumber(
+            HttpServletRequest request) {
+
+        int nextBillId =
+                billDAO.getNextBillId();
+
+        if (nextBillId > 0) {
+
+            String billNumber =
+                    "BILL-"
+                    + Year.now().getValue()
+                    + "-"
+                    + String.format(
+                            "%04d",
+                            nextBillId
+                    );
+
+            request.setAttribute(
+                    "generatedBillNumber",
+                    billNumber
+            );
+        }
+    }
+
+
+    // =========================================================
+    // SHOW ADD ERROR
+    // =========================================================
+
+    private void showAddError(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String error)
+            throws ServletException, IOException {
+
+        loadBillFormData(request);
+
+        generateBillNumber(request);
 
         request.setAttribute(
                 "formMode",
@@ -629,7 +679,10 @@ public class BillingController extends HttpServlet {
 
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-form.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 
 

@@ -19,540 +19,577 @@
 
     Treatment treatment =
         (Treatment) request.getAttribute("treatment");
-%>
 
-<!DOCTYPE html>
-<html>
-
-<head>
-
-<meta charset="UTF-8">
-
-<title>
-    Appointment Details - Sunrise Dental Clinic
-</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    color: #222;
-}
-
-.container {
-    max-width: 800px;
-    margin: 40px auto;
-    background: white;
-    padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
-
-.header h1 {
-    margin-top: 0;
-    margin-bottom: 8px;
-}
-
-.header p {
-    color: #666;
-}
-
-.appointment-number {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 9px 13px;
-    background: #f0f2f4;
-    border-radius: 6px;
-    font-weight: bold;
-}
-
-.section {
-    margin-top: 30px;
-}
-
-.section-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-.detail {
-    padding: 16px 0;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.label {
-    font-size: 13px;
-    font-weight: bold;
-    color: #777;
-    margin-bottom: 6px;
-}
-
-.value {
-    font-size: 17px;
-}
-
-.notes {
-    line-height: 1.6;
-}
-
-.status {
-    font-weight: bold;
-}
-
-.scheduled {
-    color: #1769aa;
-}
-
-.completed {
-    color: #16803c;
-}
-
-.cancelled {
-    color: #b00020;
-}
-
-.no-show {
-    color: #a15c00;
-}
-
-.billed {
-    color: #6a1b9a;
-}
-
-.success {
-    background: #e6f7e9;
-    color: #176b2c;
-    padding: 13px;
-    margin-top: 20px;
-    border-radius: 6px;
-}
-
-.actions {
-    margin-top: 30px;
-}
-
-.edit-button {
-    display: inline-block;
-    padding: 11px 18px;
-    background: #222;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-    margin-right: 8px;
-}
-
-.back-button {
-    display: inline-block;
-    padding: 11px 18px;
-    border: 1px solid #ccc;
-    color: #222;
-    text-decoration: none;
-    border-radius: 6px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="container">
-
-
-<!-- HEADER -->
-
-<div class="header">
-
-<h1>
-    Appointment Details
-</h1>
-
-<p>
-    Complete information about this appointment.
-</p>
-
-<div class="appointment-number">
-
-    <%= appointment.getAppointmentNumber() %>
-
-</div>
-
-</div>
-
-
-<!-- SUCCESS -->
-
-<% if ("1".equals(request.getParameter("updated"))) { %>
-
-<div class="success">
-
-    Appointment updated successfully.
-
-</div>
-
-<% } %>
-
-
-<!-- APPOINTMENT INFORMATION -->
-
-<div class="section">
-
-<div class="section-title">
-    Appointment Information
-</div>
-
-
-<div class="detail">
-
-<div class="label">
-    Appointment ID
-</div>
-
-<div class="value">
-
-    <%= appointment.getAppointmentId() %>
-
-</div>
-
-</div>
-
-
-<div class="detail">
-
-<div class="label">
-    Date
-</div>
-
-<div class="value">
-
-    <%= appointment.getAppointmentDate() %>
-
-</div>
-
-</div>
-
-
-<div class="detail">
-
-<div class="label">
-    Time
-</div>
-
-<div class="value">
-
-    <%= appointment.getAppointmentTime() %>
-
-</div>
-
-</div>
-
-
-<div class="detail">
-
-<div class="label">
-    Status
-</div>
-
-<div class="value">
-
-<%
     String status =
         appointment.getStatus();
 
-    String statusClass =
-        status.toLowerCase().replace("_", "-");
+    String statusBg =
+        "bg-blue-50 text-blue-700";
+
+    if ("COMPLETED".equals(status)) {
+        statusBg = "bg-emerald-50 text-emerald-700";
+    } else if ("CANCELLED".equals(status)) {
+        statusBg = "bg-red-50 text-red-700";
+    } else if ("NO_SHOW".equals(status)) {
+        statusBg = "bg-amber-50 text-amber-700";
+    } else if ("BILLED".equals(status)) {
+        statusBg = "bg-violet-50 text-violet-700";
+    }
 %>
 
-<span class="status <%= statusClass %>">
+<!DOCTYPE html>
 
-    <%= status.replace("_", " ") %>
+<html lang="en">
 
-</span>
+<head>
 
-</div>
+    <meta charset="UTF-8">
 
-</div>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-</div>
+    <title>
+        Appointment Details | Sunrise Dental Clinic
+    </title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<!-- PATIENT -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        manrope: ['Manrope', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-<div class="section">
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
 
-<div class="section-title">
-    Patient
-</div>
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
-<div class="detail">
+</head>
 
-<div class="label">
-    Patient Code
-</div>
 
-<div class="value">
+<body class="min-h-screen bg-[#F5F7FB] font-manrope text-[#172033]">
 
-<%= patient != null
-    ? patient.getPatientCode()
-    : "N/A" %>
 
-</div>
+<div class="flex min-h-screen">
 
-</div>
+    <jsp:include page="../common/sidebar.jsp" />
 
 
-<div class="detail">
+    <main class="ml-[250px] min-h-screen flex-1 px-8 py-7">
 
-<div class="label">
-    Patient Name
-</div>
 
-<div class="value">
+        <!-- HEADER -->
 
-<%= patient != null
-    ? patient.getName()
-    : "N/A" %>
+        <div class="mb-7">
 
-</div>
+            <h1 class="text-[24px] font-extrabold tracking-[-0.6px]">
+                Appointment Details
+            </h1>
 
-</div>
+            <p class="mt-1 font-inter text-xs text-slate-500">
+                Complete information about this appointment
+            </p>
 
+        </div>
 
-<div class="detail">
 
-<div class="label">
-    Contact Number
-</div>
+        <!-- APPOINTMENT HEADER -->
 
-<div class="value">
+        <div class="mb-5 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-5">
 
-<%= patient != null
-    ? patient.getContactNumber()
-    : "N/A" %>
 
-</div>
+            <div class="flex items-center gap-4">
 
-</div>
 
-</div>
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-sm font-extrabold text-blue-600">
+                    A
+                </div>
 
 
-<!-- DENTIST -->
+                <div>
 
-<div class="section">
+                    <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                        Appointment Number
+                    </p>
 
-<div class="section-title">
-    Dentist
-</div>
+                    <h2 class="mt-1 text-base font-extrabold">
+                        <%= appointment.getAppointmentNumber() %>
+                    </h2>
 
+                </div>
 
-<div class="detail">
 
-<div class="label">
-    Dentist Name
-</div>
+            </div>
 
-<div class="value">
 
-<%= dentist != null
-    ? dentist.getDentistName()
-    : "N/A" %>
+            <span class="rounded-full px-3 py-1.5 font-inter text-[9px] font-semibold <%= statusBg %>">
 
-</div>
+                <%= status.replace("_", " ") %>
 
-</div>
+            </span>
 
 
-<div class="detail">
+        </div>
 
-<div class="label">
-    Specialization
-</div>
 
-<div class="value">
+        <!-- SUCCESS -->
 
-<%= dentist != null
-    ? dentist.getSpecialization()
-    : "N/A" %>
+        <% if ("1".equals(request.getParameter("updated"))) { %>
 
-</div>
+            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
 
-</div>
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
+                    ✓
+                </span>
 
-</div>
+                Appointment updated successfully.
 
+            </div>
 
-<!-- TREATMENT -->
+        <% } %>
 
-<div class="section">
 
-<div class="section-title">
-    Treatment
-</div>
+        <!-- GRID -->
 
+        <div class="grid grid-cols-2 gap-5">
 
-<div class="detail">
 
-<div class="label">
-    Treatment Name
-</div>
+            <!-- APPOINTMENT -->
 
-<div class="value">
+            <div class="rounded-xl border border-slate-200 bg-white p-6">
 
-<%= treatment != null
-    ? treatment.getTreatmentName()
-    : "N/A" %>
 
-</div>
+                <div class="mb-5 flex items-center gap-3">
 
-</div>
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        A
+                    </div>
 
+                    <h2 class="text-sm font-extrabold">
+                        Appointment Information
+                    </h2>
 
-<div class="detail">
+                </div>
 
-<div class="label">
-    Treatment Fee
-</div>
 
-<div class="value">
+                <div class="grid grid-cols-2">
 
-<% if (treatment != null) { %>
 
-    LKR
-    <%= String.format(
-        "%.2f",
-        treatment.getTreatmentFee()
-    ) %>
+                    <div class="border-b border-slate-100 py-3">
 
-<% } else { %>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Appointment ID
+                        </p>
 
-    N/A
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getAppointmentId() %>
+                        </p>
 
-<% } %>
+                    </div>
 
-</div>
 
-</div>
+                    <div class="border-b border-slate-100 py-3">
 
-</div>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Appointment Number
+                        </p>
 
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getAppointmentNumber() %>
+                        </p>
 
-<!-- NOTES -->
+                    </div>
 
-<div class="section">
 
-<div class="section-title">
-    Notes
-</div>
+                    <div class="border-b border-slate-100 py-3">
 
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Date
+                        </p>
 
-<div class="detail">
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getAppointmentDate() %>
+                        </p>
 
-<div class="value notes">
+                    </div>
 
-<%= appointment.getNotes() != null
-    && !appointment.getNotes().isBlank()
-    ? appointment.getNotes()
-    : "No additional notes." %>
 
-</div>
+                    <div class="border-b border-slate-100 py-3">
 
-</div>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Time
+                        </p>
 
-</div>
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getAppointmentTime() %>
+                        </p>
 
+                    </div>
 
-<!-- TIMESTAMPS -->
 
-<div class="section">
+                    <div class="py-3">
 
-<div class="section-title">
-    System Information
-</div>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Status
+                        </p>
 
+                        <p class="mt-2">
 
-<div class="detail">
+                            <span class="rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold <%= statusBg %>">
+                                <%= status.replace("_", " ") %>
+                            </span>
 
-<div class="label">
-    Created By
-</div>
+                        </p>
 
-<div class="value">
+                    </div>
 
-    User ID:
-    <%= appointment.getCreatedBy() %>
 
-</div>
+                </div>
 
-</div>
 
+            </div>
 
-<div class="detail">
 
-<div class="label">
-    Created At
-</div>
+            <!-- PATIENT -->
 
-<div class="value">
+            <div class="rounded-xl border border-slate-200 bg-white p-6">
 
-    <%= appointment.getCreatedAt() != null
-        ? appointment.getCreatedAt()
-        : "N/A" %>
 
-</div>
+                <div class="mb-5 flex items-center gap-3">
 
-</div>
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        P
+                    </div>
 
+                    <h2 class="text-sm font-extrabold">
+                        Patient
+                    </h2>
 
-<div class="detail">
+                </div>
 
-<div class="label">
-    Last Updated
-</div>
 
-<div class="value">
+                <div class="space-y-4">
 
-    <%= appointment.getUpdatedAt() != null
-        ? appointment.getUpdatedAt()
-        : "N/A" %>
 
-</div>
+                    <div>
 
-</div>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Patient Code
+                        </p>
 
-</div>
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= patient != null
+                                ? patient.getPatientCode()
+                                : "N/A" %>
+                        </p>
 
+                    </div>
 
-<!-- ACTIONS -->
 
-<div class="actions">
+                    <div>
 
-<a
-    class="edit-button"
-    href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>">
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Patient Name
+                        </p>
 
-    Edit Appointment
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= patient != null
+                                ? patient.getName()
+                                : "N/A" %>
+                        </p>
 
-</a>
+                    </div>
 
-<a
-    class="back-button"
-    href="<%= request.getContextPath() %>/appointments">
 
-    ← Back to Appointments
+                    <div>
 
-</a>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Contact Number
+                        </p>
 
-</div>
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= patient != null
+                                ? patient.getContactNumber()
+                                : "N/A" %>
+                        </p>
 
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- DENTIST -->
+
+            <div class="rounded-xl border border-slate-200 bg-white p-6">
+
+
+                <div class="mb-5 flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        D
+                    </div>
+
+                    <h2 class="text-sm font-extrabold">
+                        Dentist
+                    </h2>
+
+                </div>
+
+
+                <div class="space-y-4">
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Dentist Name
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= dentist != null
+                                ? dentist.getDentistName()
+                                : "N/A" %>
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Specialization
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= dentist != null
+                                ? dentist.getSpecialization()
+                                : "N/A" %>
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- TREATMENT -->
+
+            <div class="rounded-xl border border-slate-200 bg-white p-6">
+
+
+                <div class="mb-5 flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        T
+                    </div>
+
+                    <h2 class="text-sm font-extrabold">
+                        Treatment
+                    </h2>
+
+                </div>
+
+
+                <div class="space-y-4">
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Treatment Name
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= treatment != null
+                                ? treatment.getTreatmentName()
+                                : "N/A" %>
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Treatment Fee
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+
+                            <% if (treatment != null) { %>
+
+                                LKR
+                                <%= String.format(
+                                    "%.2f",
+                                    treatment.getTreatmentFee()
+                                ) %>
+
+                            <% } else { %>
+
+                                N/A
+
+                            <% } %>
+
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <div class="col-span-2 rounded-xl border border-slate-200 bg-white p-6">
+
+
+                <div class="mb-5 flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        N
+                    </div>
+
+                    <h2 class="text-sm font-extrabold">
+                        Notes
+                    </h2>
+
+                </div>
+
+
+                <div class="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 font-inter text-[11px] leading-7 text-slate-600">
+
+                    <%= appointment.getNotes() != null
+                        && !appointment.getNotes().isBlank()
+                        ? appointment.getNotes()
+                        : "No additional notes." %>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- SYSTEM -->
+
+            <div class="col-span-2 rounded-xl border border-slate-200 bg-white p-6">
+
+
+                <div class="mb-5 flex items-center gap-3">
+
+                    <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                        S
+                    </div>
+
+                    <h2 class="text-sm font-extrabold">
+                        System Information
+                    </h2>
+
+                </div>
+
+
+                <div class="grid grid-cols-3 gap-5">
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Created By
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            User ID: <%= appointment.getCreatedBy() %>
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Created At
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getCreatedAt() != null
+                                ? appointment.getCreatedAt()
+                                : "N/A" %>
+                        </p>
+
+                    </div>
+
+
+                    <div>
+
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Last Updated
+                        </p>
+
+                        <p class="mt-1 text-xs font-semibold">
+                            <%= appointment.getUpdatedAt() != null
+                                ? appointment.getUpdatedAt()
+                                : "N/A" %>
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+        <!-- ACTIONS -->
+
+        <div class="mt-5 flex gap-2">
+
+
+            <a
+                href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>"
+                class="rounded-lg bg-[#2563EB] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#1D4ED8]"
+            >
+                Edit Appointment
+            </a>
+
+
+            <a
+                href="<%= request.getContextPath() %>/appointments"
+                class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+                ← Back to Appointments
+            </a>
+
+
+        </div>
+
+
+    </main>
 
 </div>
 

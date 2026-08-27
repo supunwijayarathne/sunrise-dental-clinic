@@ -3,8 +3,6 @@ package com.sunrise.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Date;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +48,42 @@ public class BillDAO {
 
 
     // =========================================================
+    // GET NEXT BILL ID
+    // =========================================================
+
+    public int getNextBillId() {
+
+        String sql =
+                "SELECT AUTO_INCREMENT " +
+                "FROM INFORMATION_SCHEMA.TABLES " +
+                "WHERE TABLE_SCHEMA = DATABASE() " +
+                "AND TABLE_NAME = 'bills'";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement st = con.prepareStatement(sql);
+            ResultSet rs = st.executeQuery()
+        ) {
+
+            if (rs.next()) {
+
+                return rs.getInt("AUTO_INCREMENT");
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ERROR GETTING NEXT BILL ID:"
+            );
+
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+
+    // =========================================================
     // GET ALL BILLS
     // =========================================================
 
@@ -70,13 +104,16 @@ public class BillDAO {
             while (rs.next()) {
 
                 bills.add(
-                    mapResultSetToBill(rs)
+                        mapResultSetToBill(rs)
                 );
             }
 
         } catch (Exception e) {
 
-            System.out.println("ERROR LOADING BILLS:");
+            System.out.println(
+                    "ERROR LOADING BILLS:"
+            );
+
             e.printStackTrace();
         }
 
@@ -111,7 +148,10 @@ public class BillDAO {
 
         } catch (Exception e) {
 
-            System.out.println("ERROR FINDING BILL:");
+            System.out.println(
+                    "ERROR FINDING BILL:"
+            );
+
             e.printStackTrace();
         }
 
@@ -148,7 +188,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR FINDING BILL FOR APPOINTMENT:"
+                    "ERROR FINDING BILL FOR APPOINTMENT:"
             );
 
             e.printStackTrace();
@@ -188,7 +228,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR CHECKING BILL NUMBER:"
+                    "ERROR CHECKING BILL NUMBER:"
             );
 
             e.printStackTrace();
@@ -199,7 +239,7 @@ public class BillDAO {
 
 
     // =========================================================
-    // CHECK WHETHER APPOINTMENT IS ALREADY BILLED
+    // CHECK APPOINTMENT ALREADY BILLED
     // =========================================================
 
     public boolean appointmentAlreadyBilled(
@@ -228,7 +268,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR CHECKING APPOINTMENT BILL:"
+                    "ERROR CHECKING APPOINTMENT BILL:"
             );
 
             e.printStackTrace();
@@ -265,7 +305,8 @@ public class BillDAO {
             PreparedStatement st = con.prepareStatement(sql)
         ) {
 
-            String value = "%" + keyword + "%";
+            String value =
+                    "%" + keyword + "%";
 
             st.setString(1, value);
             st.setString(2, value);
@@ -277,7 +318,7 @@ public class BillDAO {
                 while (rs.next()) {
 
                     bills.add(
-                        mapResultSetToBill(rs)
+                            mapResultSetToBill(rs)
                     );
                 }
             }
@@ -285,7 +326,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR SEARCHING BILLS:"
+                    "ERROR SEARCHING BILLS:"
             );
 
             e.printStackTrace();
@@ -324,7 +365,7 @@ public class BillDAO {
                 while (rs.next()) {
 
                     bills.add(
-                        mapResultSetToBill(rs)
+                            mapResultSetToBill(rs)
                     );
                 }
             }
@@ -332,7 +373,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR LOADING PATIENT BILLS:"
+                    "ERROR LOADING PATIENT BILLS:"
             );
 
             e.printStackTrace();
@@ -365,7 +406,7 @@ public class BillDAO {
         } catch (Exception e) {
 
             System.out.println(
-                "ERROR GETTING BILL COUNT:"
+                    "ERROR GETTING BILL COUNT:"
             );
 
             e.printStackTrace();

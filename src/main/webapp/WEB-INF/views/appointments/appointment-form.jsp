@@ -35,571 +35,553 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<title>
-    <%= title %> - Sunrise Dental Clinic
-</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<style>
+    <title><%= title %> | Sunrise Dental Clinic</title>
 
-* {
-    box-sizing: border-box;
-}
+    <script src="https://cdn.tailwindcss.com"></script>
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    color: #222;
-}
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        manrope: ['Manrope', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-.container {
-    max-width: 750px;
-    margin: 40px auto;
-    background: white;
-    padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
 
-h1 {
-    margin-top: 0;
-    margin-bottom: 8px;
-}
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
 
-.description {
-    color: #666;
-    margin-bottom: 30px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 7px;
-    font-weight: bold;
-}
-
-input,
-select,
-textarea {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-}
-
-textarea {
-    min-height: 110px;
-    resize: vertical;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: #333;
-}
-
-.error {
-    background: #ffe5e5;
-    color: #a40000;
-    padding: 13px;
-    margin-bottom: 22px;
-    border-radius: 6px;
-}
-
-.info-box {
-    background: #f1f3f5;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-.required {
-    color: #c00;
-}
-
-.optional {
-    color: #888;
-    font-size: 12px;
-    font-weight: normal;
-}
-
-.actions {
-    margin-top: 30px;
-    display: flex;
-    gap: 10px;
-}
-
-button {
-    padding: 12px 20px;
-    background: #222;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-button:hover {
-    background: #444;
-}
-
-.cancel {
-    padding: 12px 20px;
-    border: 1px solid #ccc;
-    color: #222;
-    text-decoration: none;
-    border-radius: 6px;
-}
-
-</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
 </head>
 
-<body>
 
-<div class="container">
+<body class="min-h-screen bg-[#F5F7FB] font-manrope text-[#172033]">
 
-<h1>
-    <%= title %>
-</h1>
 
-<p class="description">
+<div class="flex min-h-screen">
 
-<%= editMode
-    ? "Update the appointment details."
-    : "Create a new patient appointment." %>
+    <jsp:include page="../common/sidebar.jsp" />
 
-</p>
 
+    <main class="ml-[250px] min-h-screen flex-1 px-8 py-7">
 
-<!-- ERROR -->
 
-<% if (request.getAttribute("error") != null) { %>
+        <!-- HEADER -->
 
-<div class="error">
+        <div class="mb-7">
 
-    <%= request.getAttribute("error") %>
+            <h1 class="text-[24px] font-extrabold tracking-[-0.6px]">
+                <%= title %>
+            </h1>
 
-</div>
+            <p class="mt-1 font-inter text-xs text-slate-500">
+                <%= editMode
+                    ? "Update the appointment details below."
+                    : "Create a new patient appointment." %>
+            </p>
 
-<% } %>
+        </div>
 
 
-<!-- APPOINTMENT ID -->
+        <div class="mx-auto max-w-[950px]">
 
-<% if (editMode) { %>
 
-<div class="info-box">
+            <!-- ERROR -->
 
-    Appointment ID:
+            <% if (request.getAttribute("error") != null) { %>
 
-    <strong>
-        <%= appointment.getAppointmentId() %>
-    </strong>
+                <div class="mb-5 flex gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-xs font-semibold text-red-700">
 
-    <br><br>
+                    <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100">
+                        !
+                    </span>
 
-    Appointment Number:
+                    <%= request.getAttribute("error") %>
 
-    <strong>
-        <%= appointment.getAppointmentNumber() %>
-    </strong>
+                </div>
 
-</div>
+            <% } %>
 
-<% } %>
 
+            <!-- EDIT INFO -->
 
-<form
-    method="post"
-    action="<%= request.getContextPath() %>/appointments/<%= editMode ? "edit" : "add" %>"
->
+            <% if (editMode) { %>
 
+                <div class="mb-5 flex gap-8 rounded-xl border border-slate-200 bg-white px-5 py-4">
 
-<!-- HIDDEN ID -->
+                    <div>
 
-<% if (editMode) { %>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Appointment ID
+                        </p>
 
-<input
-    type="hidden"
-    name="appointmentId"
-    value="<%= appointment.getAppointmentId() %>"
->
+                        <p class="mt-1 text-xs font-bold">
+                            <%= appointment.getAppointmentId() %>
+                        </p>
 
-<% } %>
+                    </div>
 
 
-<!-- APPOINTMENT NUMBER -->
+                    <div>
 
-<% if (!editMode) { %>
+                        <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+                            Appointment Number
+                        </p>
 
-<div class="form-group">
+                        <p class="mt-1 text-xs font-bold">
+                            <%= appointment.getAppointmentNumber() %>
+                        </p>
 
-<label for="appointmentNumber">
+                    </div>
 
-    Appointment Number
-    <span class="required">*</span>
+                </div>
 
-</label>
+            <% } %>
 
-<input
-    type="text"
-    id="appointmentNumber"
-    name="appointmentNumber"
-    maxlength="30"
-    placeholder="e.g. APT-2026-001"
-    required
->
 
-</div>
+            <form
+                method="post"
+                action="<%= request.getContextPath() %>/appointments/<%= editMode ? "edit" : "add" %>"
+            >
 
-<% } %>
 
+                <% if (editMode) { %>
 
-<!-- PATIENT -->
+                    <input
+                        type="hidden"
+                        name="appointmentId"
+                        value="<%= appointment.getAppointmentId() %>"
+                    >
 
-<div class="form-group">
+                <% } %>
 
-<label for="patientId">
 
-    Patient
-    <span class="required">*</span>
+                <!-- APPOINTMENT DETAILS -->
 
-</label>
+                <div class="mb-5 rounded-xl border border-slate-200 bg-white p-6">
 
-<select
-    id="patientId"
-    name="patientId"
-    required
->
 
-<option value="">
-    -- Select Patient --
-</option>
+                    <div class="mb-6 flex items-center gap-3">
 
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                            A
+                        </div>
 
-<% if (patients != null) { %>
+                        <h2 class="text-sm font-extrabold">
+                            Appointment Details
+                        </h2>
 
-<% for (Patient patient : patients) { %>
+                    </div>
 
-<option
-    value="<%= patient.getPatientId() %>"
 
-    <%= appointment != null
-        && appointment.getPatientId()
-        == patient.getPatientId()
-        ? "selected"
-        : "" %>
->
+                    <div class="grid grid-cols-2 gap-x-5 gap-y-5">
 
-    <%= patient.getPatientCode() %>
-    -
-    <%= patient.getName() %>
 
-</option>
+                        <% if (!editMode) { %>
 
-<% } %>
+                            <div class="col-span-2">
 
-<% } %>
+                                <label class="mb-1.5 block text-[10px] font-bold">
+                                    Appointment Number
+                                    <span class="text-red-500">*</span>
+                                </label>
 
-</select>
+                                <input
+                                    type="text"
+                                    name="appointmentNumber"
+                                    maxlength="30"
+                                    placeholder="e.g. APT-2026-001"
+                                    required
+                                    class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-xs outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                                >
 
-</div>
+                            </div>
 
+                        <% } %>
 
-<!-- DENTIST -->
 
-<div class="form-group">
+                        <!-- PATIENT -->
 
-<label for="dentistId">
+                        <div>
 
-    Dentist
-    <span class="required">*</span>
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Patient
+                                <span class="text-red-500">*</span>
+                            </label>
 
-</label>
+                            <select
+                                name="patientId"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-<select
-    id="dentistId"
-    name="dentistId"
-    required
->
+                                <option value="">
+                                    -- Select Patient --
+                                </option>
 
-<option value="">
-    -- Select Dentist --
-</option>
+                                <% if (patients != null) { %>
 
+                                    <% for (Patient patient : patients) { %>
 
-<% if (dentists != null) { %>
+                                        <option
+                                            value="<%= patient.getPatientId() %>"
+                                            <%= appointment != null
+                                                && appointment.getPatientId()
+                                                == patient.getPatientId()
+                                                ? "selected"
+                                                : "" %>
+                                        >
 
-<% for (Dentist dentist : dentists) { %>
+                                            <%= patient.getPatientCode() %>
+                                            -
+                                            <%= patient.getName() %>
 
-<option
-    value="<%= dentist.getDentistId() %>"
+                                        </option>
 
-    <%= appointment != null
-        && appointment.getDentistId()
-        == dentist.getDentistId()
-        ? "selected"
-        : "" %>
->
+                                    <% } %>
 
-    <%= dentist.getDentistName() %>
-    -
-    <%= dentist.getSpecialization() %>
+                                <% } %>
 
-</option>
+                            </select>
 
-<% } %>
+                        </div>
 
-<% } %>
 
-</select>
+                        <!-- DENTIST -->
 
-</div>
+                        <div>
 
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Dentist
+                                <span class="text-red-500">*</span>
+                            </label>
 
-<!-- TREATMENT -->
+                            <select
+                                name="dentistId"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-<div class="form-group">
+                                <option value="">
+                                    -- Select Dentist --
+                                </option>
 
-<label for="treatmentId">
+                                <% if (dentists != null) { %>
 
-    Treatment
-    <span class="required">*</span>
+                                    <% for (Dentist dentist : dentists) { %>
 
-</label>
+                                        <option
+                                            value="<%= dentist.getDentistId() %>"
+                                            <%= appointment != null
+                                                && appointment.getDentistId()
+                                                == dentist.getDentistId()
+                                                ? "selected"
+                                                : "" %>
+                                        >
 
-<select
-    id="treatmentId"
-    name="treatmentId"
-    required
->
+                                            <%= dentist.getDentistName() %>
+                                            -
+                                            <%= dentist.getSpecialization() %>
 
-<option value="">
-    -- Select Treatment --
-</option>
+                                        </option>
 
+                                    <% } %>
 
-<% if (treatments != null) { %>
+                                <% } %>
 
-<% for (Treatment treatment : treatments) { %>
+                            </select>
 
-<option
-    value="<%= treatment.getTreatmentId() %>"
+                        </div>
 
-    <%= appointment != null
-        && appointment.getTreatmentId()
-        == treatment.getTreatmentId()
-        ? "selected"
-        : "" %>
->
 
-    <%= treatment.getTreatmentName() %>
-    -
-    LKR
-    <%= String.format(
-        "%.2f",
-        treatment.getTreatmentFee()
-    ) %>
+                        <!-- TREATMENT -->
 
-</option>
+                        <div class="col-span-2">
 
-<% } %>
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Treatment
+                                <span class="text-red-500">*</span>
+                            </label>
 
-<% } %>
+                            <select
+                                name="treatmentId"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-</select>
+                                <option value="">
+                                    -- Select Treatment --
+                                </option>
 
-</div>
+                                <% if (treatments != null) { %>
 
+                                    <% for (Treatment treatment : treatments) { %>
 
-<!-- DATE -->
+                                        <option
+                                            value="<%= treatment.getTreatmentId() %>"
+                                            <%= appointment != null
+                                                && appointment.getTreatmentId()
+                                                == treatment.getTreatmentId()
+                                                ? "selected"
+                                                : "" %>
+                                        >
 
-<div class="form-group">
+                                            <%= treatment.getTreatmentName() %>
+                                            -
+                                            LKR
+                                            <%= String.format(
+                                                "%.2f",
+                                                treatment.getTreatmentFee()
+                                            ) %>
 
-<label for="appointmentDate">
+                                        </option>
 
-    Appointment Date
-    <span class="required">*</span>
+                                    <% } %>
 
-</label>
+                                <% } %>
 
-<input
-    type="date"
-    id="appointmentDate"
-    name="appointmentDate"
+                            </select>
 
-    value="<%= appointment != null
-        && appointment.getAppointmentDate() != null
-        ? appointment.getAppointmentDate()
-        : "" %>"
+                        </div>
 
-    required
->
 
-</div>
+                    </div>
 
+                </div>
 
-<!-- TIME -->
 
-<div class="form-group">
+                <!-- SCHEDULE -->
 
-<label for="appointmentTime">
+                <div class="mb-5 rounded-xl border border-slate-200 bg-white p-6">
 
-    Appointment Time
-    <span class="required">*</span>
 
-</label>
+                    <div class="mb-6 flex items-center gap-3">
 
-<input
-    type="time"
-    id="appointmentTime"
-    name="appointmentTime"
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                            C
+                        </div>
 
-    value="<%= appointment != null
-        && appointment.getAppointmentTime() != null
-        ? appointment.getAppointmentTime()
-        : "" %>"
+                        <h2 class="text-sm font-extrabold">
+                            Schedule &amp; Status
+                        </h2>
 
-    required
->
+                    </div>
 
-</div>
 
+                    <div class="grid grid-cols-2 gap-5">
 
-<!-- STATUS -->
 
-<div class="form-group">
+                        <div>
 
-<label for="status">
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Appointment Date
+                                <span class="text-red-500">*</span>
+                            </label>
 
-    Status
-    <span class="required">*</span>
+                            <input
+                                type="date"
+                                name="appointmentDate"
+                                value="<%= appointment != null
+                                    && appointment.getAppointmentDate() != null
+                                    ? appointment.getAppointmentDate()
+                                    : "" %>"
+                                required
+                                class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-</label>
+                        </div>
 
-<select
-    id="status"
-    name="status"
-    required
->
 
-<option
-    value="SCHEDULED"
-    <%= appointment == null
-        || "SCHEDULED".equals(appointment.getStatus())
-        ? "selected"
-        : "" %>
->
-    Scheduled
-</option>
+                        <div>
 
-<option
-    value="COMPLETED"
-    <%= appointment != null
-        && "COMPLETED".equals(appointment.getStatus())
-        ? "selected"
-        : "" %>
->
-    Completed
-</option>
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Appointment Time
+                                <span class="text-red-500">*</span>
+                            </label>
 
-<option
-    value="CANCELLED"
-    <%= appointment != null
-        && "CANCELLED".equals(appointment.getStatus())
-        ? "selected"
-        : "" %>
->
-    Cancelled
-</option>
+                            <input
+                                type="time"
+                                name="appointmentTime"
+                                value="<%= appointment != null
+                                    && appointment.getAppointmentTime() != null
+                                    ? appointment.getAppointmentTime()
+                                    : "" %>"
+                                required
+                                class="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-<option
-    value="NO_SHOW"
-    <%= appointment != null
-        && "NO_SHOW".equals(appointment.getStatus())
-        ? "selected"
-        : "" %>
->
-    No Show
-</option>
+                        </div>
 
-<option
-    value="BILLED"
-    <%= appointment != null
-        && "BILLED".equals(appointment.getStatus())
-        ? "selected"
-        : "" %>
->
-    Billed
-</option>
 
-</select>
+                        <div class="col-span-2">
 
-</div>
+                            <label class="mb-1.5 block text-[10px] font-bold">
+                                Status
+                                <span class="text-red-500">*</span>
+                            </label>
 
+                            <select
+                                name="status"
+                                required
+                                class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                            >
 
-<!-- NOTES -->
+                                <option
+                                    value="SCHEDULED"
+                                    <%= appointment == null
+                                        || "SCHEDULED".equals(appointment.getStatus())
+                                        ? "selected"
+                                        : "" %>
+                                >
+                                    Scheduled
+                                </option>
 
-<div class="form-group">
+                                <option
+                                    value="COMPLETED"
+                                    <%= appointment != null
+                                        && "COMPLETED".equals(appointment.getStatus())
+                                        ? "selected"
+                                        : "" %>
+                                >
+                                    Completed
+                                </option>
 
-<label for="notes">
+                                <option
+                                    value="CANCELLED"
+                                    <%= appointment != null
+                                        && "CANCELLED".equals(appointment.getStatus())
+                                        ? "selected"
+                                        : "" %>
+                                >
+                                    Cancelled
+                                </option>
 
-    Notes
-    <span class="optional">
-        (Optional)
-    </span>
+                                <option
+                                    value="NO_SHOW"
+                                    <%= appointment != null
+                                        && "NO_SHOW".equals(appointment.getStatus())
+                                        ? "selected"
+                                        : "" %>
+                                >
+                                    No Show
+                                </option>
 
-</label>
+                                <option
+                                    value="BILLED"
+                                    <%= appointment != null
+                                        && "BILLED".equals(appointment.getStatus())
+                                        ? "selected"
+                                        : "" %>
+                                >
+                                    Billed
+                                </option>
 
-<textarea
-    id="notes"
-    name="notes"
-    maxlength="500"
-    placeholder="Enter any additional notes..."
-><%= appointment != null
-    && appointment.getNotes() != null
-    ? appointment.getNotes()
-    : "" %></textarea>
+                            </select>
 
-</div>
+                        </div>
 
+                    </div>
 
-<!-- ACTIONS -->
+                </div>
 
-<div class="actions">
 
-<button type="submit">
+                <!-- NOTES -->
 
-    <%= buttonText %>
+                <div class="mb-5 rounded-xl border border-slate-200 bg-white p-6">
 
-</button>
+                    <div class="mb-6 flex items-center gap-3">
 
-<a
-    class="cancel"
-    href="<%= request.getContextPath() %>/appointments">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-xs font-extrabold text-blue-600">
+                            N
+                        </div>
 
-    Cancel
+                        <h2 class="text-sm font-extrabold">
+                            Additional Notes
+                        </h2>
 
-</a>
+                    </div>
 
-</div>
 
-</form>
+                    <label class="mb-1.5 block text-[10px] font-bold">
+                        Notes
+                        <span class="ml-1 font-inter text-[9px] font-medium text-slate-400">
+                            Optional
+                        </span>
+                    </label>
+
+
+                    <textarea
+                        name="notes"
+                        maxlength="500"
+                        placeholder="Enter any additional notes..."
+                        class="min-h-[110px] w-full resize-y rounded-lg border border-slate-200 px-3 py-2.5 text-xs leading-relaxed outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                    ><%= appointment != null
+                        && appointment.getNotes() != null
+                        ? appointment.getNotes()
+                        : "" %></textarea>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+
+                <div class="flex items-center justify-between">
+
+                    <p class="font-inter text-[9px] text-slate-400">
+                        <span class="text-red-500">*</span>
+                        Required fields
+                    </p>
+
+
+                    <div class="flex gap-2">
+
+                        <a
+                            href="<%= request.getContextPath() %>/appointments"
+                            class="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                        >
+                            Cancel
+                        </a>
+
+
+                        <button
+                            type="submit"
+                            class="rounded-lg bg-[#2563EB] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#1D4ED8]"
+                        >
+                            <%= buttonText %>
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+
+    </main>
 
 </div>
 
 </body>
-
 </html>

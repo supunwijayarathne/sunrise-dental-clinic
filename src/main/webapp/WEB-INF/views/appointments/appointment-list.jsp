@@ -7,7 +7,6 @@
 <%@ page import="com.sunrise.model.Patient" %>
 <%@ page import="com.sunrise.model.Dentist" %>
 <%@ page import="com.sunrise.model.Treatment" %>
-
 <%@ page import="com.sunrise.dao.PatientDAO" %>
 <%@ page import="com.sunrise.dao.DentistDAO" %>
 <%@ page import="com.sunrise.dao.TreatmentDAO" %>
@@ -19,491 +18,423 @@
     String keyword =
         (String) request.getAttribute("keyword");
 
-    PatientDAO patientDAO =
-        new PatientDAO();
-
-    DentistDAO dentistDAO =
-        new DentistDAO();
-
-    TreatmentDAO treatmentDAO =
-        new TreatmentDAO();
+    PatientDAO patientDAO = new PatientDAO();
+    DentistDAO dentistDAO = new DentistDAO();
+    TreatmentDAO treatmentDAO = new TreatmentDAO();
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<title>
-    Appointments - Sunrise Dental Clinic
-</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<style>
+    <title>Appointments | Sunrise Dental Clinic</title>
 
-* {
-    box-sizing: border-box;
-}
+    <script src="https://cdn.tailwindcss.com"></script>
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f5f7fa;
-    color: #222;
-}
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        manrope: ['Manrope', 'sans-serif'],
+                        inter: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-.container {
-    max-width: 1350px;
-    margin: 40px auto;
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-}
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
 
-.header h1 {
-    margin: 0 0 7px;
-}
-
-.header p {
-    color: #666;
-}
-
-.add-button {
-    padding: 11px 18px;
-    background: #222;
-    color: white;
-    text-decoration: none;
-    border-radius: 6px;
-}
-
-.add-button:hover {
-    background: #444;
-}
-
-.search-box {
-    margin-top: 30px;
-    padding: 18px;
-    background: #f5f6f7;
-    border-radius: 8px;
-}
-
-.search-form {
-    display: flex;
-    gap: 10px;
-}
-
-.search-input {
-    flex: 1;
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-}
-
-.search-button {
-    padding: 11px 20px;
-    background: #222;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.clear-button {
-    padding: 11px 18px;
-    background: white;
-    border: 1px solid #ccc;
-    color: #222;
-    text-decoration: none;
-    border-radius: 6px;
-}
-
-.stats {
-    margin-top: 25px;
-    color: #555;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th {
-    background: #f0f2f4;
-    text-align: left;
-    padding: 13px;
-    white-space: nowrap;
-}
-
-td {
-    padding: 13px;
-    border-bottom: 1px solid #e5e5e5;
-}
-
-tr:hover {
-    background: #fafafa;
-}
-
-.status {
-    font-weight: bold;
-}
-
-.scheduled {
-    color: #1769aa;
-}
-
-.completed {
-    color: #16803c;
-}
-
-.cancelled {
-    color: #b00020;
-}
-
-.no-show {
-    color: #a15c00;
-}
-
-.billed {
-    color: #6a1b9a;
-}
-
-.action-link {
-    color: #222;
-    text-decoration: none;
-}
-
-.action-link:hover {
-    text-decoration: underline;
-}
-
-.success {
-    background: #e6f7e9;
-    color: #176b2c;
-    padding: 13px;
-    margin-top: 20px;
-    border-radius: 6px;
-}
-
-.empty {
-    text-align: center;
-    padding: 50px;
-    color: #777;
-}
-
-.back {
-    display: inline-block;
-    margin-top: 25px;
-    color: #222;
-}
-
-</style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
 
 </head>
 
-<body>
 
-<div class="container">
+<body class="min-h-screen bg-[#F5F7FB] font-manrope text-[#172033]">
 
 
-<!-- HEADER -->
+<div class="flex min-h-screen">
 
-<div class="header">
+    <jsp:include page="../common/sidebar.jsp" />
 
-<div>
 
-<h1>
-    Appointments
-</h1>
+    <main class="ml-[250px] min-h-screen flex-1 px-8 py-7">
 
-<p>
-    Manage patient appointments and schedules.
-</p>
 
-</div>
+        <!-- HEADER -->
 
+        <div class="mb-7 flex items-center justify-between">
 
-<a
-    class="add-button"
-    href="<%= request.getContextPath() %>/appointments/add">
+            <div>
 
-    + Book Appointment
+                <h1 class="text-[24px] font-extrabold tracking-[-0.6px]">
+                    Appointments
+                </h1>
 
-</a>
+                <p class="mt-1 font-inter text-xs text-slate-500">
+                    Manage patient appointments and schedules
+                </p>
 
-</div>
+            </div>
 
 
-<!-- SUCCESS -->
+            <a
+                href="<%= request.getContextPath() %>/appointments/add"
+                class="rounded-lg bg-[#2563EB] px-4 py-2.5 text-xs font-bold text-white transition hover:bg-[#1D4ED8]"
+            >
+                + Book Appointment
+            </a>
 
-<% if ("1".equals(request.getParameter("success"))) { %>
+        </div>
 
-<div class="success">
 
-    Appointment created successfully.
+        <!-- SUCCESS -->
 
-</div>
+        <% if ("1".equals(request.getParameter("success"))) { %>
 
-<% } %>
+            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
 
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
+                    ✓
+                </span>
 
-<% if ("1".equals(request.getParameter("updated"))) { %>
+                Appointment created successfully.
 
-<div class="success">
+            </div>
 
-    Appointment updated successfully.
+        <% } %>
 
-</div>
 
-<% } %>
+        <% if ("1".equals(request.getParameter("updated"))) { %>
 
+            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
 
-<!-- SEARCH -->
+                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
+                    ✓
+                </span>
 
-<div class="search-box">
+                Appointment updated successfully.
 
-<form
-    class="search-form"
-    method="get"
-    action="<%= request.getContextPath() %>/appointments"
->
+            </div>
 
-<input
-    class="search-input"
-    type="text"
-    name="keyword"
-    placeholder="Search appointment number, patient, dentist, treatment or status..."
-    value="<%= keyword != null ? keyword : "" %>"
->
+        <% } %>
 
-<button
-    class="search-button"
-    type="submit">
 
-    Search
+        <!-- SEARCH -->
 
-</button>
+        <div class="mb-5 rounded-xl border border-slate-200 bg-white p-4">
 
+            <form
+                method="get"
+                action="<%= request.getContextPath() %>/appointments"
+                class="flex gap-2"
+            >
 
-<% if (keyword != null
-        && !keyword.trim().isEmpty()) { %>
+                <div class="relative flex-1">
 
-<a
-    class="clear-button"
-    href="<%= request.getContextPath() %>/appointments">
+                    <input
+                        type="text"
+                        name="keyword"
+                        value="<%= keyword != null ? keyword : "" %>"
+                        placeholder="Search appointment number, patient, dentist, treatment or status..."
+                        class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                    >
 
-    Clear
+                </div>
 
-</a>
 
-<% } %>
+                <button
+                    type="submit"
+                    class="rounded-lg bg-[#2563EB] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#1D4ED8]"
+                >
+                    Search
+                </button>
 
-</form>
 
-</div>
+                <% if (keyword != null && !keyword.trim().isEmpty()) { %>
 
+                    <a
+                        href="<%= request.getContextPath() %>/appointments"
+                        class="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    >
+                        Clear
+                    </a>
 
-<!-- COUNT -->
+                <% } %>
 
-<div class="stats">
+            </form>
 
-Total Appointments:
+        </div>
 
-<strong>
-    <%= appointments != null ? appointments.size() : 0 %>
-</strong>
 
-</div>
+        <!-- TABLE -->
 
+        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
 
-<!-- TABLE -->
 
-<% if (appointments != null && !appointments.isEmpty()) { %>
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
 
-<table>
+                <h2 class="text-sm font-extrabold">
+                    Appointment List
+                </h2>
 
-<thead>
+                <span class="font-inter text-[10px] text-slate-500">
 
-<tr>
+                    Total:
+                    <strong class="text-slate-700">
+                        <%= appointments != null ? appointments.size() : 0 %>
+                    </strong>
 
-<th>Appointment No.</th>
-<th>Patient</th>
-<th>Dentist</th>
-<th>Treatment</th>
-<th>Date</th>
-<th>Time</th>
-<th>Status</th>
-<th>Actions</th>
+                </span>
 
-</tr>
+            </div>
 
-</thead>
 
+            <% if (appointments != null && !appointments.isEmpty()) { %>
 
-<tbody>
 
-<% for (Appointment appointment : appointments) {
+                <div class="overflow-x-auto">
 
-    Patient patient =
-        patientDAO.getPatientById(
-            appointment.getPatientId()
-        );
+                    <table class="w-full min-w-[900px]">
 
-    Dentist dentist =
-        dentistDAO.getDentistById(
-            appointment.getDentistId()
-        );
+                        <thead class="bg-slate-50">
 
-    Treatment treatment =
-        treatmentDAO.getTreatmentById(
-            appointment.getTreatmentId()
-        );
-%>
+                            <tr>
 
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Appointment No.
+                                </th>
 
-<tr>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Patient
+                                </th>
 
-<td>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Dentist
+                                </th>
 
-<strong>
-    <%= appointment.getAppointmentNumber() %>
-</strong>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Treatment
+                                </th>
 
-</td>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Date
+                                </th>
 
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Time
+                                </th>
 
-<td>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Status
+                                </th>
 
-<%= patient != null
-    ? patient.getName()
-    : "Unknown Patient" %>
+                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                    Actions
+                                </th>
 
-</td>
+                            </tr>
 
+                        </thead>
 
-<td>
 
-<%= dentist != null
-    ? dentist.getDentistName()
-    : "Unknown Dentist" %>
+                        <tbody>
 
-</td>
 
+                        <% for (Appointment appointment : appointments) {
 
-<td>
+                            Patient patient =
+                                patientDAO.getPatientById(
+                                    appointment.getPatientId()
+                                );
 
-<%= treatment != null
-    ? treatment.getTreatmentName()
-    : "Unknown Treatment" %>
+                            Dentist dentist =
+                                dentistDAO.getDentistById(
+                                    appointment.getDentistId()
+                                );
 
-</td>
+                            Treatment treatment =
+                                treatmentDAO.getTreatmentById(
+                                    appointment.getTreatmentId()
+                                );
 
+                            String status =
+                                appointment.getStatus();
 
-<td>
+                            String statusClass =
+                                status.toLowerCase()
+                                      .replace("_", "-");
 
-<%= appointment.getAppointmentDate() %>
+                            String statusBg = "bg-blue-50 text-blue-700";
 
-</td>
+                            if ("COMPLETED".equals(status)) {
+                                statusBg = "bg-emerald-50 text-emerald-700";
+                            } else if ("CANCELLED".equals(status)) {
+                                statusBg = "bg-red-50 text-red-700";
+                            } else if ("NO_SHOW".equals(status)) {
+                                statusBg = "bg-amber-50 text-amber-700";
+                            } else if ("BILLED".equals(status)) {
+                                statusBg = "bg-violet-50 text-violet-700";
+                            }
+                        %>
 
 
-<td>
+                            <tr class="border-t border-slate-100 transition hover:bg-slate-50/70">
 
-<%= appointment.getAppointmentTime() %>
 
-</td>
+                                <td class="px-4 py-3">
 
+                                    <a
+                                        href="<%= request.getContextPath() %>/appointments/view?id=<%= appointment.getAppointmentId() %>"
+                                        class="text-[10px] font-extrabold text-blue-600 hover:underline"
+                                    >
+                                        <%= appointment.getAppointmentNumber() %>
+                                    </a>
 
-<td>
+                                </td>
 
-<%
-    String status =
-        appointment.getStatus();
 
-    String statusClass =
-        status.toLowerCase().replace("_", "-");
-%>
+                                <td class="px-4 py-3 text-[10px] font-medium">
 
-<span class="status <%= statusClass %>">
+                                    <%= patient != null
+                                        ? patient.getName()
+                                        : "Unknown Patient" %>
 
-<%= status.replace("_", " ") %>
+                                </td>
 
-</span>
 
-</td>
+                                <td class="px-4 py-3 text-[10px] font-medium">
 
+                                    <%= dentist != null
+                                        ? dentist.getDentistName()
+                                        : "Unknown Dentist" %>
 
-<td>
+                                </td>
 
-<a
-    class="action-link"
-    href="<%= request.getContextPath() %>/appointments/view?id=<%= appointment.getAppointmentId() %>">
 
-    View
+                                <td class="px-4 py-3 text-[10px] font-medium">
 
-</a>
+                                    <%= treatment != null
+                                        ? treatment.getTreatmentName()
+                                        : "Unknown Treatment" %>
 
-&nbsp; | &nbsp;
+                                </td>
 
-<a
-    class="action-link"
-    href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>">
 
-    Edit
+                                <td class="px-4 py-3 font-inter text-[10px] text-slate-500">
 
-</a>
+                                    <%= appointment.getAppointmentDate() %>
 
-</td>
+                                </td>
 
-</tr>
 
+                                <td class="px-4 py-3 font-inter text-[10px] text-slate-500">
 
-<% } %>
+                                    <%= appointment.getAppointmentTime() %>
 
-</tbody>
+                                </td>
 
-</table>
 
+                                <td class="px-4 py-3">
 
-<% } else { %>
+                                    <span class="inline-flex rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold <%= statusBg %>">
 
-<div class="empty">
+                                        <%= status.replace("_", " ") %>
 
-<% if (keyword != null
-        && !keyword.trim().isEmpty()) { %>
+                                    </span>
 
-    No appointments found for
-    "<strong><%= keyword %></strong>".
+                                </td>
 
-<% } else { %>
 
-    No appointments have been booked yet.
+                                <td class="px-4 py-3">
 
-<% } %>
+                                    <div class="flex gap-1">
 
-</div>
+                                        <a
+                                            href="<%= request.getContextPath() %>/appointments/view?id=<%= appointment.getAppointmentId() %>"
+                                            class="rounded-md px-2 py-1 text-[9px] font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                                        >
+                                            View
+                                        </a>
 
-<% } %>
+                                        <a
+                                            href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>"
+                                            class="rounded-md px-2 py-1 text-[9px] font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                                        >
+                                            Edit
+                                        </a>
 
+                                    </div>
 
-<a
-    class="back"
-    href="<%= request.getContextPath() %>/dashboard">
+                                </td>
 
-    ← Back to Dashboard
 
-</a>
+                            </tr>
 
+
+                        <% } %>
+
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            <% } else { %>
+
+
+                <div class="px-5 py-16 text-center">
+
+                    <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                        &#9638;
+                    </div>
+
+                    <h3 class="text-sm font-extrabold">
+                        No appointments found
+                    </h3>
+
+                    <p class="mt-1 font-inter text-[10px] text-slate-500">
+
+                        <% if (keyword != null && !keyword.trim().isEmpty()) { %>
+
+                            No appointments found for
+                            "<strong><%= keyword %></strong>".
+
+                        <% } else { %>
+
+                            No appointments have been booked yet.
+
+                        <% } %>
+
+                    </p>
+
+                </div>
+
+
+            <% } %>
+
+
+        </div>
+
+
+    </main>
 
 </div>
 
 </body>
-
 </html>
