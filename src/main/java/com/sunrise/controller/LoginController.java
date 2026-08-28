@@ -41,25 +41,61 @@ public class LoginController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String username =
+                request.getParameter("username");
 
-        User user = userDAO.login(username, password);
+        String password =
+                request.getParameter("password");
+
+        User user =
+                userDAO.login(username, password);
 
         if (user != null) {
 
-            HttpSession session = request.getSession();
+            HttpSession session =
+                    request.getSession();
 
-            session.setAttribute("loggedUser", user);
+            session.setAttribute(
+                    "loggedUser",
+                    user
+            );
 
-            response.sendRedirect(
-                    request.getContextPath() + "/dashboard");
+            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/admin/dashboard"
+                );
+
+            } else if (
+                    "RECEPTIONIST"
+                    .equalsIgnoreCase(user.getRole())) {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/dashboard"
+                );
+
+            } else {
+
+                session.invalidate();
+
+                request.setAttribute(
+                        "error",
+                        "Invalid user role."
+                );
+
+                request.getRequestDispatcher(
+                        "/WEB-INF/views/auth/login.jsp")
+                        .forward(request, response);
+            }
 
         } else {
 
             request.setAttribute(
                     "error",
-                    "Invalid username or password.");
+                    "Invalid username or password."
+            );
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/auth/login.jsp")

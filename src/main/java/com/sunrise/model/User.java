@@ -4,23 +4,16 @@ public class User {
 
     private int userId;
     private String fullName;
+    private String email;
+    private String phone;
+    private String address;
+    private String position;
     private String username;
     private String passwordHash;
     private String role;
     private boolean active;
 
     public User() {
-    }
-
-    public User(int userId, String fullName, String username,
-            String passwordHash, String role, boolean active) {
-
-        this.userId = userId;
-        this.fullName = fullName;
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.role = role;
-        this.active = active;
     }
 
     public int getUserId() {
@@ -37,6 +30,38 @@ public class User {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
     }
 
     public String getUsername() {

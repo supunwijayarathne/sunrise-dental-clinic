@@ -5,11 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import com.sunrise.model.Appointment;
 import com.sunrise.util.DBConnection;
+
 
 public class AppointmentDAO {
 
@@ -390,6 +393,77 @@ public class AppointmentDAO {
 
         return false;
     }
+    
+ // =========================================================
+ // APPOINTMENT NUMBER
+ // =========================================================
+
+ public String generateNextAppointmentNumber() {
+
+     String sql =
+             "SELECT appointment_number " +
+             "FROM appointments " +
+             "ORDER BY appointment_id DESC " +
+             "LIMIT 1";
+
+     try (
+         Connection con = DBConnection.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()
+     ) {
+
+         if (rs.next()) {
+
+             String lastNumber =
+                     rs.getString("appointment_number");
+
+             if (lastNumber != null
+                     && lastNumber.startsWith("APT-")) {
+
+                 try {
+
+                     int number =
+                             Integer.parseInt(
+                                     lastNumber.substring(4)
+                             );
+
+                     return String.format(
+                             "APT-%03d",
+                             number + 1
+                     );
+
+                 } catch (NumberFormatException e) {
+
+                     System.out.println(
+                             "Invalid appointment number: "
+                             + lastNumber
+                     );
+
+                     e.printStackTrace();
+                 }
+             }
+         }
+
+     } catch (ClassNotFoundException e) {
+
+         System.out.println(
+                 "MySQL JDBC Driver not found."
+         );
+
+         e.printStackTrace();
+
+     } catch (SQLException e) {
+
+         System.out.println(
+                 "ERROR GENERATING APPOINTMENT NUMBER:"
+         );
+
+         e.printStackTrace();
+     }
+
+     // First appointment / fallback
+     return "APT-001";
+ }
 
 
     // =========================================================
