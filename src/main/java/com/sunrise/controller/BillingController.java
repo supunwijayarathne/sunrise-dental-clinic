@@ -44,13 +44,9 @@ public class BillingController extends HttpServlet {
     public void init() {
 
         billDAO = new BillDAO();
-
         appointmentDAO = new AppointmentDAO();
-
         patientDAO = new PatientDAO();
-
         dentistDAO = new DentistDAO();
-
         treatmentDAO = new TreatmentDAO();
     }
 
@@ -67,32 +63,23 @@ public class BillingController extends HttpServlet {
 
         String path = request.getPathInfo();
 
-
         if (path == null || "/".equals(path)) {
 
             listBills(request, response);
 
-        }
-
-        else if ("/add".equals(path)) {
+        } else if ("/add".equals(path)) {
 
             showAddForm(request, response);
 
-        }
-
-        else if ("/view".equals(path)) {
+        } else if ("/view".equals(path)) {
 
             viewBill(request, response);
 
-        }
-
-        else if ("/print".equals(path)) {
+        } else if ("/print".equals(path)) {
 
             printBill(request, response);
 
-        }
-
-        else {
+        } else {
 
             response.sendError(
                     HttpServletResponse.SC_NOT_FOUND
@@ -115,14 +102,11 @@ public class BillingController extends HttpServlet {
 
         String path = request.getPathInfo();
 
-
         if ("/add".equals(path)) {
 
             addBill(request, response);
 
-        }
-
-        else {
+        } else {
 
             response.sendError(
                     HttpServletResponse.SC_NOT_FOUND
@@ -146,9 +130,7 @@ public class BillingController extends HttpServlet {
         String billType =
                 clean(request.getParameter("billType"));
 
-
         List<Bill> bills;
-
 
         if (!keyword.isEmpty()) {
 
@@ -157,9 +139,7 @@ public class BillingController extends HttpServlet {
                     billType
             );
 
-        }
-
-        else if (!billType.isEmpty()
+        } else if (!billType.isEmpty()
                 && !"ALL".equalsIgnoreCase(billType)) {
 
             bills = billDAO.searchBills(
@@ -167,13 +147,10 @@ public class BillingController extends HttpServlet {
                     billType
             );
 
-        }
-
-        else {
+        } else {
 
             bills = billDAO.getAllBills();
         }
-
 
         request.setAttribute(
                 "bills",
@@ -189,7 +166,6 @@ public class BillingController extends HttpServlet {
                 "billType",
                 billType
         );
-
 
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-list.jsp"
@@ -210,15 +186,12 @@ public class BillingController extends HttpServlet {
             throws ServletException, IOException {
 
         loadBillFormData(request);
-
         generateBillNumber(request);
-
 
         request.setAttribute(
                 "formMode",
                 "add"
         );
-
 
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-form.jsp"
@@ -238,13 +211,12 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-
         String billType =
                 clean(request.getParameter("billType"));
 
 
         // =====================================================
-        // VALID BILL TYPE
+        // VALIDATE BILL TYPE
         // =====================================================
 
         if (!"APPOINTMENT".equals(billType)
@@ -267,7 +239,6 @@ public class BillingController extends HttpServlet {
         HttpSession session =
                 request.getSession(false);
 
-
         if (session == null) {
 
             response.sendRedirect(
@@ -283,7 +254,6 @@ public class BillingController extends HttpServlet {
                 (User) session.getAttribute(
                         "loggedUser"
                 );
-
 
         if (loggedUser == null) {
 
@@ -305,13 +275,11 @@ public class BillingController extends HttpServlet {
         // =====================================================
 
         Integer appointmentId = null;
-
         Integer treatmentId = null;
 
         int patientId;
 
         double consultationFee;
-
         double treatmentFee;
 
 
@@ -320,7 +288,6 @@ public class BillingController extends HttpServlet {
         // =====================================================
 
         if ("APPOINTMENT".equals(billType)) {
-
 
             String appointmentIdText =
                     clean(
@@ -341,9 +308,7 @@ public class BillingController extends HttpServlet {
                                 appointmentIdText
                         );
 
-            }
-
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
 
                 showAddError(
                         request,
@@ -363,7 +328,6 @@ public class BillingController extends HttpServlet {
                     appointmentDAO.getAppointmentById(
                             appointmentId
                     );
-
 
             if (appointment == null) {
 
@@ -401,12 +365,10 @@ public class BillingController extends HttpServlet {
             patientId =
                     appointment.getPatientId();
 
-
             Patient patient =
                     patientDAO.getPatientById(
                             patientId
                     );
-
 
             if (patient == null) {
 
@@ -428,11 +390,11 @@ public class BillingController extends HttpServlet {
                     appointment.getTreatmentId();
 
 
+
             Treatment treatment =
                     treatmentDAO.getTreatmentById(
                             treatmentId
                     );
-
 
             if (treatment == null) {
 
@@ -455,7 +417,6 @@ public class BillingController extends HttpServlet {
                             appointment.getDentistId()
                     );
 
-
             if (dentist == null) {
 
                 showAddError(
@@ -475,18 +436,16 @@ public class BillingController extends HttpServlet {
             consultationFee =
                     dentist.getConsultationFee();
 
-
             treatmentFee =
                     treatment.getTreatmentFee();
         }
 
 
         // =====================================================
-        // WALK-IN / CUSTOM BILL
+        // WALK-IN BILL
         // =====================================================
 
         else {
-
 
             String patientIdText =
                     clean(
@@ -495,14 +454,12 @@ public class BillingController extends HttpServlet {
                             )
                     );
 
-
             String treatmentIdText =
                     clean(
                             request.getParameter(
                                     "treatmentId"
                             )
                     );
-
 
             String consultationFeeText =
                     clean(
@@ -523,9 +480,7 @@ public class BillingController extends HttpServlet {
                                 patientIdText
                         );
 
-            }
-
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
 
                 showAddError(
                         request,
@@ -545,7 +500,6 @@ public class BillingController extends HttpServlet {
                     patientDAO.getPatientById(
                             patientId
                     );
-
 
             if (patient == null) {
 
@@ -570,9 +524,7 @@ public class BillingController extends HttpServlet {
                                 treatmentIdText
                         );
 
-            }
-
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
 
                 showAddError(
                         request,
@@ -592,7 +544,6 @@ public class BillingController extends HttpServlet {
                     treatmentDAO.getTreatmentById(
                             treatmentId
                     );
-
 
             if (treatment == null) {
 
@@ -617,9 +568,7 @@ public class BillingController extends HttpServlet {
                                 consultationFeeText
                         );
 
-            }
-
-            catch (NumberFormatException e) {
+            } catch (NumberFormatException e) {
 
                 showAddError(
                         request,
@@ -667,7 +616,6 @@ public class BillingController extends HttpServlet {
         int nextBillId =
                 billDAO.getNextBillId();
 
-
         if (nextBillId <= 0) {
 
             showAddError(
@@ -708,6 +656,10 @@ public class BillingController extends HttpServlet {
                 );
 
 
+        // =====================================================
+        // SAVE BILL
+        // =====================================================
+
         boolean success =
                 billDAO.addBill(bill);
 
@@ -718,9 +670,12 @@ public class BillingController extends HttpServlet {
 
         if (success) {
 
-
             Bill savedBill = null;
 
+
+            // -------------------------------------------------
+            // APPOINTMENT BILL
+            // -------------------------------------------------
 
             if (appointmentId != null) {
 
@@ -731,6 +686,10 @@ public class BillingController extends HttpServlet {
             }
 
 
+            // -------------------------------------------------
+            // WALK-IN BILL
+            // -------------------------------------------------
+
             else {
 
                 savedBill =
@@ -739,6 +698,10 @@ public class BillingController extends HttpServlet {
                         );
             }
 
+
+            // -------------------------------------------------
+            // REDIRECT
+            // -------------------------------------------------
 
             if (savedBill != null) {
 
@@ -749,9 +712,7 @@ public class BillingController extends HttpServlet {
                         + "&success=1"
                 );
 
-            }
-
-            else {
+            } else {
 
                 response.sendRedirect(
                         request.getContextPath()
@@ -759,10 +720,7 @@ public class BillingController extends HttpServlet {
                 );
             }
 
-        }
-
-
-        else {
+        } else {
 
             showAddError(
                     request,
@@ -779,7 +737,6 @@ public class BillingController extends HttpServlet {
 
     private Bill findBillByNumber(
             String billNumber) {
-
 
         if (billNumber == null
                 || billNumber.isEmpty()) {
@@ -818,15 +775,15 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-
         try {
 
-            int billId =
-                    Integer.parseInt(
-                            request.getParameter(
-                                    "id"
-                            )
+            String idText =
+                    clean(
+                            request.getParameter("id")
                     );
+
+            int billId =
+                    Integer.parseInt(idText);
 
 
             Bill bill =
@@ -860,9 +817,7 @@ public class BillingController extends HttpServlet {
             );
 
 
-        }
-
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
 
             response.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,
@@ -881,15 +836,15 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-
         try {
 
-            int billId =
-                    Integer.parseInt(
-                            request.getParameter(
-                                    "id"
-                            )
+            String idText =
+                    clean(
+                            request.getParameter("id")
                     );
+
+            int billId =
+                    Integer.parseInt(idText);
 
 
             Bill bill =
@@ -923,9 +878,7 @@ public class BillingController extends HttpServlet {
             );
 
 
-        }
-
-        catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
 
             response.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,
@@ -956,10 +909,12 @@ public class BillingController extends HttpServlet {
 
         // -----------------------------------------------------
         // TREATMENT
+        // IMPORTANT:
+        // Get treatment directly from BILL
+        // This works for WALK_IN and APPOINTMENT bills.
         // -----------------------------------------------------
 
         Treatment treatment = null;
-
 
         if (bill.getTreatmentId() != null) {
 
@@ -981,7 +936,6 @@ public class BillingController extends HttpServlet {
 
         if (bill.getAppointmentId() != null) {
 
-
             appointment =
                     appointmentDAO.getAppointmentById(
                             bill.getAppointmentId()
@@ -999,7 +953,7 @@ public class BillingController extends HttpServlet {
 
 
         // -----------------------------------------------------
-        // SEND TO JSP
+        // SEND DATA TO JSP
         // -----------------------------------------------------
 
         request.setAttribute(
@@ -1007,24 +961,20 @@ public class BillingController extends HttpServlet {
                 bill
         );
 
-
         request.setAttribute(
                 "patient",
                 patient
         );
-
 
         request.setAttribute(
                 "treatment",
                 treatment
         );
 
-
         request.setAttribute(
                 "appointment",
                 appointment
         );
-
 
         request.setAttribute(
                 "dentist",
@@ -1105,13 +1055,11 @@ public class BillingController extends HttpServlet {
     private void generateBillNumber(
             HttpServletRequest request) {
 
-
         int nextBillId =
                 billDAO.getNextBillId();
 
 
         if (nextBillId > 0) {
-
 
             String billNumber =
                     "BILL-"
@@ -1143,7 +1091,6 @@ public class BillingController extends HttpServlet {
 
 
         loadBillFormData(request);
-
         generateBillNumber(request);
 
 

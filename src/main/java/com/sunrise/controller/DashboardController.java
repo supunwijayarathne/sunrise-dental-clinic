@@ -36,11 +36,12 @@ public class DashboardController extends HttpServlet {
 
 
         // =====================================================
-        // CHECK LOGIN
+        // CHECK SESSION
         // =====================================================
 
         HttpSession session =
                 request.getSession(false);
+
 
         if (session == null) {
 
@@ -57,6 +58,7 @@ public class DashboardController extends HttpServlet {
                 (User) session.getAttribute(
                         "loggedUser"
                 );
+
 
         if (loggedUser == null) {
 
@@ -77,10 +79,19 @@ public class DashboardController extends HttpServlet {
                 dashboardDAO.getDashboardStats();
 
 
+        // =====================================================
+        // SEND STATS OBJECT
+        // =====================================================
+
         request.setAttribute(
                 "stats",
                 stats
         );
+
+
+        // =====================================================
+        // SEND LOGGED USER
+        // =====================================================
 
         request.setAttribute(
                 "loggedUser",
@@ -89,7 +100,59 @@ public class DashboardController extends HttpServlet {
 
 
         // =====================================================
-        // OPEN DASHBOARD JSP
+        // INDIVIDUAL VALUES FOR JSP
+        // =====================================================
+
+        request.setAttribute(
+                "totalPatients",
+                stats.getTotalPatients()
+        );
+
+
+        request.setAttribute(
+                "totalDentists",
+                stats.getTotalDentists()
+        );
+
+
+        request.setAttribute(
+                "totalTreatments",
+                stats.getTotalTreatments()
+        );
+
+
+        request.setAttribute(
+                "totalAppointments",
+                stats.getTotalAppointments()
+        );
+
+
+        request.setAttribute(
+                "scheduledAppointments",
+                stats.getScheduledAppointments()
+        );
+
+
+        request.setAttribute(
+                "completedAppointments",
+                stats.getCompletedAppointments()
+        );
+
+
+        request.setAttribute(
+                "cancelledAppointments",
+                stats.getCancelledAppointments()
+        );
+
+
+        request.setAttribute(
+                "totalBills",
+                stats.getTotalBills()
+        );
+
+
+        // =====================================================
+        // OPEN DASHBOARD
         // =====================================================
 
         request.getRequestDispatcher(

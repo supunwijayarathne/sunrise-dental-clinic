@@ -24,13 +24,38 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <title><%= bill.getBillNumber() %></title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>
+        <%= bill.getBillNumber() %> | Sunrise Dental
+    </title>
+
+
+    <!-- =====================================================
+         FONTS
+    ====================================================== -->
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+        rel="stylesheet">
+
 
     <style>
 
@@ -38,252 +63,456 @@
             box-sizing: border-box;
         }
 
+
         body {
-
             margin: 0;
+            padding: 40px 20px;
+            background: #F5F7FB;
+            color: #172033;
+            font-family: 'Inter', sans-serif;
+        }
 
-            padding: 40px;
 
-            font-family: Arial, sans-serif;
+        .font-manrope {
+            font-family: 'Manrope', sans-serif;
+        }
 
-            background: #f5f7fb;
+
+        .font-inter {
+            font-family: 'Inter', sans-serif;
+        }
+
+
+        /* =====================================================
+           PRINT BUTTON
+        ====================================================== */
+
+        .print-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+
+            margin: 0 auto 20px;
+
+            padding: 11px 18px;
+
+            background: #2563EB;
+            color: #FFFFFF;
+
+            border: none;
+            border-radius: 8px;
+
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+
+            cursor: pointer;
+
+            transition:
+                background 0.2s ease,
+                transform 0.2s ease;
+        }
+
+
+        .print-button:hover {
+            background: #1D4ED8;
+        }
+
+
+        /* =====================================================
+           RECEIPT
+        ====================================================== */
+
+        .receipt {
+            width: 100%;
+            max-width: 760px;
+
+            margin: 0 auto;
+
+            background: #FFFFFF;
+
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+
+            padding: 42px;
+
+            box-shadow:
+                0 4px 20px rgba(15, 23, 42, 0.06);
+        }
+
+
+        /* =====================================================
+           HEADER
+        ====================================================== */
+
+        .header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            padding-bottom: 24px;
+
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+
+        .brand {
+            font-family: 'Manrope', sans-serif;
+            font-size: 23px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
 
             color: #172033;
         }
 
-        .receipt {
-
-            max-width: 760px;
-
-            margin: auto;
-
-            background: white;
-
-            padding: 45px;
-
-            border-radius: 12px;
-
-            box-shadow:
-                0 4px 20px rgba(0,0,0,0.06);
-        }
-
-        .header {
-
-            display: flex;
-
-            justify-content: space-between;
-
-            border-bottom: 1px solid #e5e7eb;
-
-            padding-bottom: 25px;
-        }
-
-        .brand {
-
-            font-size: 24px;
-
-            font-weight: bold;
-        }
 
         .subtitle {
-
             margin-top: 5px;
 
-            color: #64748b;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
 
-            font-size: 12px;
+            color: #64748B;
         }
 
-        .bill-number {
 
+        .bill-number {
             text-align: right;
         }
 
+
         .label {
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
 
-            font-size: 11px;
-
-            color: #94a3b8;
+            color: #94A3B8;
 
             text-transform: uppercase;
+            letter-spacing: 0.07em;
         }
+
 
         .value {
-
             margin-top: 5px;
 
+            font-family: 'Manrope', sans-serif;
             font-size: 14px;
+            font-weight: 800;
 
-            font-weight: bold;
+            color: #172033;
         }
+
+
+        /* =====================================================
+           SECTIONS
+        ====================================================== */
 
         .section {
-
-            margin-top: 30px;
+            margin-top: 28px;
         }
+
 
         .section-title {
-
             margin-bottom: 12px;
 
+            font-family: 'Manrope', sans-serif;
             font-size: 13px;
+            font-weight: 800;
 
-            font-weight: bold;
+            color: #172033;
         }
 
-        .info-grid {
 
+        /* =====================================================
+           INFO GRID
+        ====================================================== */
+
+        .info-grid {
             display: grid;
 
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
 
             gap: 12px;
         }
 
+
         .info {
-
-            background: #f8fafc;
-
             padding: 14px;
 
+            background: #F8FAFC;
+
+            border: 1px solid #F1F5F9;
             border-radius: 8px;
         }
 
-        .table {
 
+        .info .value {
+            margin-top: 5px;
+
+            font-family: 'Manrope', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+
+            color: #334155;
+        }
+
+
+        /* =====================================================
+           BILL SUMMARY TABLE
+        ====================================================== */
+
+        .table {
             width: 100%;
 
-            margin-top: 20px;
+            margin-top: 18px;
 
             border-collapse: collapse;
         }
 
+
         .table th {
-
-            text-align: left;
-
-            background: #f8fafc;
-
             padding: 12px;
 
-            font-size: 12px;
+            background: #F8FAFC;
 
-            color: #64748b;
+            border-bottom: 1px solid #E5E7EB;
+
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+
+            color: #64748B;
+
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+
+            text-align: left;
         }
+
 
         .table td {
-
             padding: 14px 12px;
 
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid #E5E7EB;
 
-            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+
+            color: #475569;
         }
 
-        .amount {
 
+        .table td.amount {
+            font-family: 'Manrope', sans-serif;
+            font-weight: 700;
+
+            color: #334155;
+        }
+
+
+        .amount {
             text-align: right;
         }
 
+
+        /* =====================================================
+           TOTAL
+        ====================================================== */
+
         .total {
-
-            margin-top: 20px;
-
             display: flex;
-
+            align-items: center;
             justify-content: flex-end;
 
-            gap: 50px;
+            gap: 55px;
 
-            font-size: 18px;
+            margin-top: 20px;
+            padding-top: 16px;
 
-            font-weight: bold;
+            border-top: 1px solid #E5E7EB;
         }
 
+
+        .total-label {
+            font-family: 'Manrope', sans-serif;
+            font-size: 16px;
+            font-weight: 800;
+
+            color: #172033;
+        }
+
+
+        .total-value {
+            font-family: 'Manrope', sans-serif;
+            font-size: 19px;
+            font-weight: 800;
+
+            color: #2563EB;
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ====================================================== */
+
         .footer {
-
-            margin-top: 40px;
-
+            margin-top: 38px;
             padding-top: 20px;
 
-            border-top: 1px solid #e5e7eb;
+            border-top: 1px solid #E5E7EB;
 
             text-align: center;
 
-            color: #94a3b8;
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            font-weight: 500;
 
-            font-size: 11px;
+            line-height: 1.7;
+
+            color: #94A3B8;
         }
 
-        .print-button {
 
-            display: block;
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
 
-            margin: 20px auto;
+        @media (max-width: 640px) {
 
-            padding: 12px 20px;
+            body {
+                padding: 20px 10px;
+            }
 
-            background: #2563eb;
 
-            color: white;
+            .receipt {
+                padding: 25px 20px;
+                border-radius: 10px;
+            }
 
-            border: none;
 
-            border-radius: 8px;
+            .header {
+                flex-direction: column;
+                gap: 18px;
+            }
 
-            cursor: pointer;
+
+            .bill-number {
+                text-align: left;
+            }
+
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+
+            .total {
+                gap: 25px;
+            }
+
         }
+
+
+        /* =====================================================
+           PRINT
+        ====================================================== */
 
         @media print {
 
             body {
-
                 padding: 0;
-
-                background: white;
+                background: #FFFFFF;
             }
+
 
             .receipt {
-
-                box-shadow: none;
-
                 max-width: none;
 
+                margin: 0;
+
+                padding: 30px;
+
+                border: none;
                 border-radius: 0;
+
+                box-shadow: none;
             }
+
 
             .print-button {
-
                 display: none;
             }
+
         }
 
     </style>
 
 </head>
 
+
 <body>
 
-    <button class="print-button"
-            onclick="window.print()">
+
+    <!-- =====================================================
+         PRINT BUTTON
+    ====================================================== -->
+
+    <button
+        type="button"
+        class="print-button"
+        onclick="window.print()">
+
+
+        <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round">
+
+            <path d="M6 9V2h12v7"/>
+
+            <path
+                d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+
+            <path d="M6 14h12v8H6z"/>
+
+        </svg>
+
 
         Print Bill
 
     </button>
 
 
+
+    <!-- =====================================================
+         RECEIPT
+    ====================================================== -->
+
     <div class="receipt">
 
 
-        <!-- HEADER -->
+        <!-- =================================================
+             HEADER
+        ================================================== -->
 
         <div class="header">
+
 
             <div>
 
                 <div class="brand">
                     Sunrise Dental
                 </div>
+
 
                 <div class="subtitle">
                     Clinic Management System
@@ -292,11 +521,13 @@
             </div>
 
 
+
             <div class="bill-number">
 
                 <div class="label">
                     Bill Number
                 </div>
+
 
                 <div class="value">
                     <%= bill.getBillNumber() %>
@@ -304,12 +535,17 @@
 
             </div>
 
+
         </div>
 
 
-        <!-- PATIENT -->
+
+        <!-- =================================================
+             PATIENT INFORMATION
+        ================================================== -->
 
         <div class="section">
+
 
             <div class="section-title">
                 Patient Information
@@ -318,11 +554,15 @@
 
             <div class="info-grid">
 
+
+                <!-- PATIENT -->
+
                 <div class="info">
 
                     <div class="label">
                         Patient
                     </div>
+
 
                     <div class="value">
 
@@ -335,11 +575,15 @@
                 </div>
 
 
+
+                <!-- BILL TYPE -->
+
                 <div class="info">
 
                     <div class="label">
                         Bill Type
                     </div>
+
 
                     <div class="value">
 
@@ -352,16 +596,22 @@
 
                 </div>
 
+
             </div>
 
         </div>
 
 
-        <!-- APPOINTMENT -->
+
+        <!-- =================================================
+             APPOINTMENT INFORMATION
+        ================================================== -->
 
         <% if (appointment != null) { %>
 
+
         <div class="section">
+
 
             <div class="section-title">
                 Appointment Information
@@ -370,11 +620,15 @@
 
             <div class="info-grid">
 
+
+                <!-- APPOINTMENT -->
+
                 <div class="info">
 
                     <div class="label">
                         Appointment
                     </div>
+
 
                     <div class="value">
                         <%= appointment.getAppointmentNumber() %>
@@ -383,34 +637,42 @@
                 </div>
 
 
+
+                <!-- DENTIST -->
+
                 <div class="info">
 
-<div class="info">
+                    <div class="label">
+                        Dentist
+                    </div>
 
-    <p class="text-xs text-slate-400">
-        Dentist
-    </p>
 
-    <p class="mt-1 text-sm font-semibold text-slate-800">
+                    <div class="value">
 
-        <%= dentist != null
-            ? dentist.getDentistName()
-            : "Not available" %>
+                        <%= dentist != null
+                            ? dentist.getDentistName()
+                            : "Not available" %>
 
-    </p>
+                    </div>
 
-</div>
+                </div>
+
 
             </div>
 
         </div>
 
+
         <% } %>
 
 
-        <!-- BILL ITEMS -->
+
+        <!-- =================================================
+             BILL SUMMARY
+        ================================================== -->
 
         <div class="section">
+
 
             <div class="section-title">
                 Bill Summary
@@ -418,6 +680,7 @@
 
 
             <table class="table">
+
 
                 <thead>
 
@@ -438,11 +701,15 @@
 
                 <tbody>
 
+
+                    <!-- CONSULTATION -->
+
                     <tr>
 
                         <td>
                             Consultation Fee
                         </td>
+
 
                         <td class="amount">
 
@@ -457,6 +724,9 @@
                     </tr>
 
 
+
+                    <!-- TREATMENT -->
+
                     <tr>
 
                         <td>
@@ -466,6 +736,7 @@
                                 : "Treatment" %>
 
                         </td>
+
 
                         <td class="amount">
 
@@ -479,18 +750,26 @@
 
                     </tr>
 
+
                 </tbody>
 
             </table>
 
 
+
+            <!-- =================================================
+                 TOTAL
+            ================================================== -->
+
             <div class="total">
 
-                <span>
+
+                <span class="total-label">
                     Total
                 </span>
 
-                <span>
+
+                <span class="total-value">
 
                     LKR
                     <%= String.format(
@@ -500,12 +779,17 @@
 
                 </span>
 
+
             </div>
+
 
         </div>
 
 
-        <!-- FOOTER -->
+
+        <!-- =================================================
+             FOOTER
+        ================================================== -->
 
         <div class="footer">
 
@@ -519,6 +803,7 @@
 
 
     </div>
+
 
 </body>
 

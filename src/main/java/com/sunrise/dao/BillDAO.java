@@ -11,53 +11,108 @@ import com.sunrise.util.DBConnection;
 
 public class BillDAO {
 
-    // =========================================================
-    // ADD BILL
-    // =========================================================
+	// =========================================================
+	// ADD BILL
+	// =========================================================
 
-    public boolean addBill(Bill bill) {
+	public boolean addBill(Bill bill) {
 
-        String sql =
-                "INSERT INTO bills " +
-                "(bill_number, appointment_id, patient_id, bill_type, " +
-                "consultation_fee, treatment_fee, total_amount, created_by) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+	    String sql =
+	            "INSERT INTO bills " +
+	            "(bill_number, appointment_id, patient_id, treatment_id, " +
+	            "bill_type, consultation_fee, treatment_fee, " +
+	            "total_amount, created_by) " +
+	            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
+	    try (
+	        Connection con = DBConnection.getConnection();
+	        PreparedStatement st = con.prepareStatement(sql)
+	    ) {
 
-            st.setString(1, bill.getBillNumber());
+	        // 1. BILL NUMBER
+	        st.setString(
+	                1,
+	                bill.getBillNumber()
+	        );
 
-            if (bill.getAppointmentId() == null) {
-                st.setNull(2, java.sql.Types.INTEGER);
-            } else {
-                st.setInt(2, bill.getAppointmentId());
-            }
+	        // 2. APPOINTMENT ID
+	        if (bill.getAppointmentId() == null) {
 
-            st.setInt(3, bill.getPatientId());
+	            st.setNull(
+	                    2,
+	                    java.sql.Types.INTEGER
+	            );
 
-            st.setString(4, bill.getBillType());
+	        } else {
 
-            st.setDouble(5, bill.getConsultationFee());
+	            st.setInt(
+	                    2,
+	                    bill.getAppointmentId()
+	            );
+	        }
 
-            st.setDouble(6, bill.getTreatmentFee());
+	        // 3. PATIENT ID
+	        st.setInt(
+	                3,
+	                bill.getPatientId()
+	        );
 
-            st.setDouble(7, bill.getTotalAmount());
+	        // 4. TREATMENT ID
+	        if (bill.getTreatmentId() == null) {
 
-            st.setInt(8, bill.getCreatedBy());
+	            st.setNull(
+	                    4,
+	                    java.sql.Types.INTEGER
+	            );
 
-            return st.executeUpdate() > 0;
+	        } else {
 
-        } catch (Exception e) {
+	            st.setInt(
+	                    4,
+	                    bill.getTreatmentId()
+	            );
+	        }
 
-            System.out.println("ERROR ADDING BILL:");
-            e.printStackTrace();
-        }
+	        // 5. BILL TYPE
+	        st.setString(
+	                5,
+	                bill.getBillType()
+	        );
 
-        return false;
-    }
+	        // 6. CONSULTATION FEE
+	        st.setDouble(
+	                6,
+	                bill.getConsultationFee()
+	        );
+
+	        // 7. TREATMENT FEE
+	        st.setDouble(
+	                7,
+	                bill.getTreatmentFee()
+	        );
+
+	        // 8. TOTAL
+	        st.setDouble(
+	                8,
+	                bill.getTotalAmount()
+	        );
+
+	        // 9. CREATED BY
+	        st.setInt(
+	                9,
+	                bill.getCreatedBy()
+	        );
+
+	        return st.executeUpdate() > 0;
+
+	    } catch (Exception e) {
+
+	        System.out.println("ERROR ADDING BILL:");
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 
 
     // =========================================================
@@ -442,63 +497,135 @@ public class BillDAO {
     // MAP RESULT SET
     // =========================================================
 
-    private Bill mapResultSetToBill(
-            ResultSet rs) throws Exception {
+ // =========================================================
+ // MAP RESULT SET TO BILL
+ // =========================================================
 
-        Bill bill = new Bill();
+ private Bill mapResultSetToBill(
+         ResultSet rs) throws Exception {
 
-        bill.setBillId(
-                rs.getInt("bill_id")
-        );
+     Bill bill = new Bill();
 
-        bill.setBillNumber(
-                rs.getString("bill_number")
-        );
+     // -----------------------------------------------------
+     // BILL ID
+     // -----------------------------------------------------
 
-
-        int appointmentId =
-                rs.getInt("appointment_id");
-
-        if (rs.wasNull()) {
-
-            bill.setAppointmentId(null);
-
-        } else {
-
-            bill.setAppointmentId(
-                    appointmentId
-            );
-        }
+     bill.setBillId(
+             rs.getInt("bill_id")
+     );
 
 
-        bill.setPatientId(
-                rs.getInt("patient_id")
-        );
+     // -----------------------------------------------------
+     // BILL NUMBER
+     // -----------------------------------------------------
 
-        bill.setBillType(
-                rs.getString("bill_type")
-        );
+     bill.setBillNumber(
+             rs.getString("bill_number")
+     );
 
-        bill.setConsultationFee(
-                rs.getDouble("consultation_fee")
-        );
 
-        bill.setTreatmentFee(
-                rs.getDouble("treatment_fee")
-        );
+     // -----------------------------------------------------
+     // APPOINTMENT ID
+     // Can be NULL for WALK_IN bills
+     // -----------------------------------------------------
 
-        bill.setTotalAmount(
-                rs.getDouble("total_amount")
-        );
+     int appointmentId =
+             rs.getInt("appointment_id");
 
-        bill.setCreatedBy(
-                rs.getInt("created_by")
-        );
+     if (rs.wasNull()) {
 
-        bill.setCreatedAt(
-                rs.getTimestamp("created_at")
-        );
+         bill.setAppointmentId(null);
 
-        return bill;
-    }
-}
+     } else {
+
+         bill.setAppointmentId(
+                 appointmentId
+         );
+     }
+
+
+     // -----------------------------------------------------
+     // PATIENT ID
+     // -----------------------------------------------------
+
+     bill.setPatientId(
+             rs.getInt("patient_id")
+     );
+
+
+     // -----------------------------------------------------
+     // TREATMENT ID
+     // IMPORTANT FIX
+     // -----------------------------------------------------
+
+     int treatmentId =
+             rs.getInt("treatment_id");
+
+     if (rs.wasNull()) {
+
+         bill.setTreatmentId(null);
+
+     } else {
+
+         bill.setTreatmentId(
+                 treatmentId
+         );
+     }
+
+
+     // -----------------------------------------------------
+     // BILL TYPE
+     // -----------------------------------------------------
+
+     bill.setBillType(
+             rs.getString("bill_type")
+     );
+
+
+     // -----------------------------------------------------
+     // CONSULTATION FEE
+     // -----------------------------------------------------
+
+     bill.setConsultationFee(
+             rs.getDouble("consultation_fee")
+     );
+
+
+     // -----------------------------------------------------
+     // TREATMENT FEE
+     // -----------------------------------------------------
+
+     bill.setTreatmentFee(
+             rs.getDouble("treatment_fee")
+     );
+
+
+     // -----------------------------------------------------
+     // TOTAL AMOUNT
+     // -----------------------------------------------------
+
+     bill.setTotalAmount(
+             rs.getDouble("total_amount")
+     );
+
+
+     // -----------------------------------------------------
+     // CREATED BY
+     // -----------------------------------------------------
+
+     bill.setCreatedBy(
+             rs.getInt("created_by")
+     );
+
+
+     // -----------------------------------------------------
+     // CREATED AT
+     // -----------------------------------------------------
+
+     bill.setCreatedAt(
+             rs.getTimestamp("created_at")
+     );
+
+
+     return bill;
+}}

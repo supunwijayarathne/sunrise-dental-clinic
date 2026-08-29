@@ -241,10 +241,8 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-
-                            0
-
-                        </p>
+    ${stats.todayAppointments}
+</p>
 
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
@@ -303,10 +301,8 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-
-                            0
-
-                        </p>
+    ${stats.todayBills}
+</p>
 
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
@@ -363,11 +359,8 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-
-                            Rs. 0
-
-                        </p>
-
+    Rs. ${stats.todayRevenue}
+</p>
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
 
