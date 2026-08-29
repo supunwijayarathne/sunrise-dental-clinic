@@ -216,6 +216,14 @@ public class ReportDAO {
 
     // =========================================================
     // TREATMENT REPORT
+    //
+    // Counts treatments from BILLS.
+    //
+    // This includes:
+    // 1. Appointment bills
+    // 2. Walk-in bills
+    //
+    // The report is based on bill creation date.
     // =========================================================
 
     private void loadTreatmentReport(
@@ -230,14 +238,21 @@ public class ReportDAO {
         String sql =
                 "SELECT " +
                 "t.treatment_name, " +
-                "COUNT(a.appointment_id) AS completed_count " +
-                "FROM appointments a " +
+                "COUNT(b.bill_id) AS completed_count " +
+
+                "FROM bills b " +
+
                 "INNER JOIN treatments t " +
-                "ON a.treatment_id = t.treatment_id " +
-                "WHERE a.status = 'COMPLETED' " +
-                "AND a.appointment_date BETWEEN ? AND ? " +
-                "GROUP BY t.treatment_id, t.treatment_name " +
-                "ORDER BY completed_count DESC, " +
+                "ON b.treatment_id = t.treatment_id " +
+
+                "WHERE DATE(b.created_at) BETWEEN ? AND ? " +
+
+                "GROUP BY " +
+                "t.treatment_id, " +
+                "t.treatment_name " +
+
+                "ORDER BY " +
+                "completed_count DESC, " +
                 "t.treatment_name ASC";
 
 
@@ -249,8 +264,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (
@@ -263,17 +285,20 @@ public class ReportDAO {
                     ReportTreatment treatment =
                             new ReportTreatment();
 
+
                     treatment.setTreatmentName(
                             rs.getString(
                                     "treatment_name"
                             )
                     );
 
+
                     treatment.setCompletedCount(
                             rs.getInt(
                                     "completed_count"
                             )
                     );
+
 
                     treatments.add(
                             treatment
@@ -339,8 +364,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (
@@ -475,8 +507,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (
@@ -524,11 +563,15 @@ public class ReportDAO {
 
 
         LocalDate start =
-                LocalDate.parse(startDate);
+                LocalDate.parse(
+                        startDate
+                );
 
 
         LocalDate end =
-                LocalDate.parse(endDate);
+                LocalDate.parse(
+                        endDate
+                );
 
 
         LocalDate current =
@@ -631,8 +674,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (
@@ -741,8 +791,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (
@@ -794,9 +851,20 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, status);
-            ps.setString(2, startDate);
-            ps.setString(3, endDate);
+            ps.setString(
+                    1,
+                    status
+            );
+
+            ps.setString(
+                    2,
+                    startDate
+            );
+
+            ps.setString(
+                    3,
+                    endDate
+            );
 
 
             try (
@@ -841,8 +909,15 @@ public class ReportDAO {
                         con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, startDate);
-            ps.setString(2, endDate);
+            ps.setString(
+                    1,
+                    startDate
+            );
+
+            ps.setString(
+                    2,
+                    endDate
+            );
 
 
             try (

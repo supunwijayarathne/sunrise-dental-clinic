@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Date;
 import java.sql.Time;
-import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -218,7 +217,8 @@ public class AppointmentDAO {
 
     public List<Appointment> searchAppointments(String keyword) {
 
-        List<Appointment> appointments = new ArrayList<>();
+        List<Appointment> appointments =
+                new ArrayList<>();
 
         String sql =
                 "SELECT a.* " +
@@ -393,77 +393,128 @@ public class AppointmentDAO {
 
         return false;
     }
-    
- // =========================================================
- // APPOINTMENT NUMBER
- // =========================================================
 
- public String generateNextAppointmentNumber() {
 
-     String sql =
-             "SELECT appointment_number " +
-             "FROM appointments " +
-             "ORDER BY appointment_id DESC " +
-             "LIMIT 1";
+    // =========================================================
+    // GET BOOKED TIMES FOR DENTIST
+    // =========================================================
 
-     try (
-         Connection con = DBConnection.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()
-     ) {
+    public List<java.time.LocalTime> getBookedTimes(
+            int dentistId,
+            java.time.LocalDate appointmentDate,
+            int appointmentId) {
 
-         if (rs.next()) {
+        List<java.time.LocalTime> bookedTimes =
+                new ArrayList<>();
 
-             String lastNumber =
-                     rs.getString("appointment_number");
+        String sql =
+                "SELECT appointment_time " +
+                "FROM appointments " +
+                "WHERE dentist_id = ? " +
+                "AND appointment_date = ? " +
+                "AND status NOT IN ('CANCELLED', 'NO_SHOW') " +
+                "AND appointment_id <> ? " +
+                "ORDER BY appointment_time ASC";
 
-             if (lastNumber != null
-                     && lastNumber.startsWith("APT-")) {
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement st = con.prepareStatement(sql)
+        ) {
 
-                 try {
+            st.setInt(1, dentistId);
 
-                     int number =
-                             Integer.parseInt(
-                                     lastNumber.substring(4)
-                             );
+            st.setDate(
+                    2,
+                    Date.valueOf(appointmentDate)
+            );
 
-                     return String.format(
-                             "APT-%03d",
-                             number + 1
-                     );
+            st.setInt(3, appointmentId);
 
-                 } catch (NumberFormatException e) {
+            try (ResultSet rs = st.executeQuery()) {
 
-                     System.out.println(
-                             "Invalid appointment number: "
-                             + lastNumber
-                     );
+                while (rs.next()) {
 
-                     e.printStackTrace();
-                 }
-             }
-         }
+                    Time time =
+                            rs.getTime("appointment_time");
 
-     } catch (ClassNotFoundException e) {
+                    if (time != null) {
 
-         System.out.println(
-                 "MySQL JDBC Driver not found."
-         );
+                        bookedTimes.add(
+                                time.toLocalTime()
+                        );
+                    }
+                }
+            }
 
-         e.printStackTrace();
+        } catch (Exception e) {
 
-     } catch (SQLException e) {
+            System.out.println(
+                    "ERROR LOADING BOOKED TIMES:"
+            );
 
-         System.out.println(
-                 "ERROR GENERATING APPOINTMENT NUMBER:"
-         );
+            e.printStackTrace();
+        }
 
-         e.printStackTrace();
-     }
+        return bookedTimes;
+    }
 
-     // First appointment / fallback
-     return "APT-001";
- }
+
+    // =========================================================
+    // APPOINTMENT NUMBER
+    // =========================================================
+
+    public String generateNextAppointmentNumber() {
+
+        String sql =
+                "SELECT appointment_number " +
+                "FROM appointments " +
+                "ORDER BY appointment_id DESC " +
+                "LIMIT 1";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery()
+        ) {
+
+            if (rs.next()) {
+
+                String lastNumber =
+                        rs.getString("appointment_number");
+
+                if (lastNumber != null
+                        && lastNumber.startsWith("APT-")) {
+
+                    try {
+
+                        int number =
+                                Integer.parseInt(
+                                        lastNumber.substring(4)
+                                );
+
+                        return String.format(
+                                "APT-%03d",
+                                number + 1
+                        );
+
+                    } catch (NumberFormatException e) {
+
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ERROR GENERATING APPOINTMENT NUMBER:"
+            );
+
+            e.printStackTrace();
+        }
+
+        return "APT-001";
+    }
 
 
     // =========================================================
@@ -510,7 +561,7 @@ public class AppointmentDAO {
 
 
     // =========================================================
-    // GET TODAY'S APPOINTMENTS
+    // TODAY'S APPOINTMENTS
     // =========================================================
 
     public List<Appointment> getTodayAppointments() {
@@ -550,7 +601,7 @@ public class AppointmentDAO {
 
 
     // =========================================================
-    // GET APPOINTMENTS BY PATIENT
+    // PATIENT APPOINTMENTS
     // =========================================================
 
     public List<Appointment> getAppointmentsByPatient(
@@ -596,7 +647,7 @@ public class AppointmentDAO {
 
 
     // =========================================================
-    // GET APPOINTMENTS BY DENTIST
+    // DENTIST APPOINTMENTS
     // =========================================================
 
     public List<Appointment> getAppointmentsByDentist(
@@ -642,7 +693,7 @@ public class AppointmentDAO {
 
 
     // =========================================================
-    // MAP RESULT SET TO APPOINTMENT
+    // MAP
     // =========================================================
 
     private Appointment mapResultSetToAppointment(

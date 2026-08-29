@@ -11,108 +11,270 @@ import com.sunrise.util.DBConnection;
 
 public class BillDAO {
 
-	// =========================================================
-	// ADD BILL
-	// =========================================================
+    // =========================================================
+    // ADD BILL
+    //
+    // APPOINTMENT BILL:
+    // 1. Insert bill
+    // 2. Change appointment status to COMPLETED
+    // 3. Commit both together
+    //
+    // WALK-IN BILL:
+    // Only insert the bill.
+    // =========================================================
 
-	public boolean addBill(Bill bill) {
+    public boolean addBill(Bill bill) {
 
-	    String sql =
-	            "INSERT INTO bills " +
-	            "(bill_number, appointment_id, patient_id, treatment_id, " +
-	            "bill_type, consultation_fee, treatment_fee, " +
-	            "total_amount, created_by) " +
-	            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String insertSql =
+                "INSERT INTO bills " +
+                "(bill_number, appointment_id, patient_id, treatment_id, " +
+                "bill_type, consultation_fee, treatment_fee, " +
+                "total_amount, created_by) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	    try (
-	        Connection con = DBConnection.getConnection();
-	        PreparedStatement st = con.prepareStatement(sql)
-	    ) {
 
-	        // 1. BILL NUMBER
-	        st.setString(
-	                1,
-	                bill.getBillNumber()
-	        );
+        String updateAppointmentSql =
+                "UPDATE appointments " +
+                "SET status = 'COMPLETED' " +
+                "WHERE appointment_id = ? " +
+                "AND status NOT IN ('CANCELLED', 'NO_SHOW')";
 
-	        // 2. APPOINTMENT ID
-	        if (bill.getAppointmentId() == null) {
 
-	            st.setNull(
-	                    2,
-	                    java.sql.Types.INTEGER
-	            );
+        Connection con = null;
 
-	        } else {
 
-	            st.setInt(
-	                    2,
-	                    bill.getAppointmentId()
-	            );
-	        }
+        try {
 
-	        // 3. PATIENT ID
-	        st.setInt(
-	                3,
-	                bill.getPatientId()
-	        );
+            con = DBConnection.getConnection();
 
-	        // 4. TREATMENT ID
-	        if (bill.getTreatmentId() == null) {
+            // Start transaction
+            con.setAutoCommit(false);
 
-	            st.setNull(
-	                    4,
-	                    java.sql.Types.INTEGER
-	            );
 
-	        } else {
+            // =================================================
+            // INSERT BILL
+            // =================================================
 
-	            st.setInt(
-	                    4,
-	                    bill.getTreatmentId()
-	            );
-	        }
+            try (PreparedStatement st =
+                    con.prepareStatement(insertSql)) {
 
-	        // 5. BILL TYPE
-	        st.setString(
-	                5,
-	                bill.getBillType()
-	        );
 
-	        // 6. CONSULTATION FEE
-	        st.setDouble(
-	                6,
-	                bill.getConsultationFee()
-	        );
+                // 1. BILL NUMBER
 
-	        // 7. TREATMENT FEE
-	        st.setDouble(
-	                7,
-	                bill.getTreatmentFee()
-	        );
+                st.setString(
+                        1,
+                        bill.getBillNumber()
+                );
 
-	        // 8. TOTAL
-	        st.setDouble(
-	                8,
-	                bill.getTotalAmount()
-	        );
 
-	        // 9. CREATED BY
-	        st.setInt(
-	                9,
-	                bill.getCreatedBy()
-	        );
+                // 2. APPOINTMENT ID
 
-	        return st.executeUpdate() > 0;
+                if (bill.getAppointmentId() == null) {
 
-	    } catch (Exception e) {
+                    st.setNull(
+                            2,
+                            java.sql.Types.INTEGER
+                    );
 
-	        System.out.println("ERROR ADDING BILL:");
-	        e.printStackTrace();
-	    }
+                } else {
 
-	    return false;
-	}
+                    st.setInt(
+                            2,
+                            bill.getAppointmentId()
+                    );
+                }
+
+
+                // 3. PATIENT ID
+
+                st.setInt(
+                        3,
+                        bill.getPatientId()
+                );
+
+
+                // 4. TREATMENT ID
+
+                if (bill.getTreatmentId() == null) {
+
+                    st.setNull(
+                            4,
+                            java.sql.Types.INTEGER
+                    );
+
+                } else {
+
+                    st.setInt(
+                            4,
+                            bill.getTreatmentId()
+                    );
+                }
+
+
+                // 5. BILL TYPE
+
+                st.setString(
+                        5,
+                        bill.getBillType()
+                );
+
+
+                // 6. CONSULTATION FEE
+
+                st.setDouble(
+                        6,
+                        bill.getConsultationFee()
+                );
+
+
+                // 7. TREATMENT FEE
+
+                st.setDouble(
+                        7,
+                        bill.getTreatmentFee()
+                );
+
+
+                // 8. TOTAL AMOUNT
+
+                st.setDouble(
+                        8,
+                        bill.getTotalAmount()
+                );
+
+
+                // 9. CREATED BY
+
+                st.setInt(
+                        9,
+                        bill.getCreatedBy()
+                );
+
+
+                int billRows =
+                        st.executeUpdate();
+
+
+                if (billRows <= 0) {
+
+                    con.rollback();
+
+                    return false;
+                }
+            }
+
+
+            // =================================================
+            // UPDATE APPOINTMENT STATUS
+            //
+            // Only appointment bills have appointmentId.
+            // Walk-in bills skip this section.
+            // =================================================
+
+            if (bill.getAppointmentId() != null) {
+
+                try (PreparedStatement st =
+                        con.prepareStatement(
+                                updateAppointmentSql
+                        )) {
+
+
+                    st.setInt(
+                            1,
+                            bill.getAppointmentId()
+                    );
+
+
+                    int appointmentRows =
+                            st.executeUpdate();
+
+
+                    // -----------------------------------------
+                    // Appointment must be updated successfully
+                    // -----------------------------------------
+
+                    if (appointmentRows <= 0) {
+
+                        System.out.println(
+                                "ERROR: BILL CREATED BUT " +
+                                "APPOINTMENT STATUS COULD NOT BE UPDATED."
+                        );
+
+
+                        con.rollback();
+
+                        return false;
+                    }
+                }
+            }
+
+
+            // =================================================
+            // EVERYTHING SUCCESSFUL
+            // =================================================
+
+            con.commit();
+
+            return true;
+
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ERROR ADDING BILL:"
+            );
+
+            e.printStackTrace();
+
+
+            // =================================================
+            // ROLLBACK
+            // =================================================
+
+            if (con != null) {
+
+                try {
+
+                    con.rollback();
+
+                } catch (Exception rollbackException) {
+
+                    System.out.println(
+                            "ERROR ROLLING BACK BILL TRANSACTION:"
+                    );
+
+                    rollbackException.printStackTrace();
+                }
+            }
+
+        } finally {
+
+            // =================================================
+            // CLOSE CONNECTION
+            // =================================================
+
+            if (con != null) {
+
+                try {
+
+                    con.setAutoCommit(true);
+
+                    con.close();
+
+                } catch (Exception closeException) {
+
+                    System.out.println(
+                            "ERROR CLOSING BILL CONNECTION:"
+                    );
+
+                    closeException.printStackTrace();
+                }
+            }
+        }
+
+
+        return false;
+    }
 
 
     // =========================================================
@@ -127,13 +289,17 @@ public class BillDAO {
 
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql);
-            ResultSet rs = st.executeQuery()
+            PreparedStatement st =
+                    con.prepareStatement(sql);
+            ResultSet rs =
+                    st.executeQuery()
         ) {
 
             if (rs.next()) {
 
-                return rs.getInt("next_id");
+                return rs.getInt(
+                        "next_id"
+                );
             }
 
         } catch (Exception e) {
@@ -155,16 +321,21 @@ public class BillDAO {
 
     public List<Bill> getAllBills() {
 
-        List<Bill> bills = new ArrayList<>();
+        List<Bill> bills =
+                new ArrayList<>();
+
 
         String sql =
                 "SELECT * FROM bills " +
                 "ORDER BY bill_id DESC";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql);
-            ResultSet rs = st.executeQuery()
+            PreparedStatement st =
+                    con.prepareStatement(sql);
+            ResultSet rs =
+                    st.executeQuery()
         ) {
 
             while (rs.next()) {
@@ -197,16 +368,24 @@ public class BillDAO {
                 "SELECT * FROM bills " +
                 "WHERE bill_id = ?";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql)
         ) {
 
-            st.setInt(1, billId);
+            st.setInt(
+                    1,
+                    billId
+            );
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 if (rs.next()) {
+
                     return mapResultSetToBill(rs);
                 }
             }
@@ -228,22 +407,31 @@ public class BillDAO {
     // GET BILL BY APPOINTMENT
     // =========================================================
 
-    public Bill getBillByAppointmentId(int appointmentId) {
+    public Bill getBillByAppointmentId(
+            int appointmentId) {
 
         String sql =
                 "SELECT * FROM bills " +
                 "WHERE appointment_id = ?";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql)
         ) {
 
-            st.setInt(1, appointmentId);
+            st.setInt(
+                    1,
+                    appointmentId
+            );
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 if (rs.next()) {
+
                     return mapResultSetToBill(rs);
                 }
             }
@@ -265,21 +453,29 @@ public class BillDAO {
     // CHECK APPOINTMENT ALREADY BILLED
     // =========================================================
 
-    public boolean appointmentAlreadyBilled(int appointmentId) {
+    public boolean appointmentAlreadyBilled(
+            int appointmentId) {
 
         String sql =
                 "SELECT bill_id " +
                 "FROM bills " +
                 "WHERE appointment_id = ?";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql)
         ) {
 
-            st.setInt(1, appointmentId);
+            st.setInt(
+                    1,
+                    appointmentId
+            );
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 return rs.next();
             }
@@ -301,23 +497,32 @@ public class BillDAO {
     // CHECK BILL NUMBER
     // =========================================================
 
-    public boolean billNumberExists(String billNumber) {
+    public boolean billNumberExists(
+            String billNumber) {
 
         String sql =
                 "SELECT COUNT(*) " +
                 "FROM bills " +
                 "WHERE bill_number = ?";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql)
         ) {
 
-            st.setString(1, billNumber);
+            st.setString(
+                    1,
+                    billNumber
+            );
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 if (rs.next()) {
+
                     return rs.getInt(1) > 0;
                 }
             }
@@ -343,58 +548,98 @@ public class BillDAO {
             String keyword,
             String billType) {
 
-        List<Bill> bills = new ArrayList<>();
+        List<Bill> bills =
+                new ArrayList<>();
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT b.* " +
-                "FROM bills b " +
-                "LEFT JOIN patients p " +
-                "ON b.patient_id = p.patient_id " +
-                "LEFT JOIN appointments a " +
-                "ON b.appointment_id = a.appointment_id " +
-                "WHERE (" +
-                "b.bill_number LIKE ? " +
-                "OR p.patient_code LIKE ? " +
-                "OR p.name LIKE ? " +
-                "OR a.appointment_number LIKE ?" +
-                ")"
-        );
+
+        StringBuilder sql =
+                new StringBuilder(
+
+                        "SELECT b.* " +
+                        "FROM bills b " +
+
+                        "LEFT JOIN patients p " +
+                        "ON b.patient_id = p.patient_id " +
+
+                        "LEFT JOIN appointments a " +
+                        "ON b.appointment_id = a.appointment_id " +
+
+                        "WHERE (" +
+
+                        "b.bill_number LIKE ? " +
+                        "OR p.patient_code LIKE ? " +
+                        "OR p.name LIKE ? " +
+                        "OR a.appointment_number LIKE ?" +
+
+                        ")"
+                );
+
 
         if (billType != null
                 && !billType.trim().isEmpty()
-                && !"ALL".equalsIgnoreCase(billType)) {
+                && !"ALL".equalsIgnoreCase(
+                        billType
+                )) {
 
             sql.append(
                     " AND b.bill_type = ?"
             );
         }
 
+
         sql.append(
                 " ORDER BY b.bill_id DESC"
         );
 
+
         try (
             Connection con = DBConnection.getConnection();
             PreparedStatement st =
-                    con.prepareStatement(sql.toString())
+                    con.prepareStatement(
+                            sql.toString()
+                    )
         ) {
 
             String value =
                     "%" + keyword + "%";
 
-            st.setString(1, value);
-            st.setString(2, value);
-            st.setString(3, value);
-            st.setString(4, value);
+
+            st.setString(
+                    1,
+                    value
+            );
+
+            st.setString(
+                    2,
+                    value
+            );
+
+            st.setString(
+                    3,
+                    value
+            );
+
+            st.setString(
+                    4,
+                    value
+            );
+
 
             if (billType != null
                     && !billType.trim().isEmpty()
-                    && !"ALL".equalsIgnoreCase(billType)) {
+                    && !"ALL".equalsIgnoreCase(
+                            billType
+                    )) {
 
-                st.setString(5, billType);
+                st.setString(
+                        5,
+                        billType
+                );
             }
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 while (rs.next()) {
 
@@ -424,21 +669,30 @@ public class BillDAO {
     public List<Bill> getBillsByPatient(
             int patientId) {
 
-        List<Bill> bills = new ArrayList<>();
+        List<Bill> bills =
+                new ArrayList<>();
+
 
         String sql =
                 "SELECT * FROM bills " +
                 "WHERE patient_id = ? " +
                 "ORDER BY bill_id DESC";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql)
         ) {
 
-            st.setInt(1, patientId);
+            st.setInt(
+                    1,
+                    patientId
+            );
 
-            try (ResultSet rs = st.executeQuery()) {
+
+            try (ResultSet rs =
+                    st.executeQuery()) {
 
                 while (rs.next()) {
 
@@ -470,13 +724,17 @@ public class BillDAO {
         String sql =
                 "SELECT COUNT(*) FROM bills";
 
+
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql);
-            ResultSet rs = st.executeQuery()
+            PreparedStatement st =
+                    con.prepareStatement(sql);
+            ResultSet rs =
+                    st.executeQuery()
         ) {
 
             if (rs.next()) {
+
                 return rs.getInt(1);
             }
 
@@ -494,138 +752,157 @@ public class BillDAO {
 
 
     // =========================================================
-    // MAP RESULT SET
+    // MAP RESULT SET TO BILL
     // =========================================================
 
- // =========================================================
- // MAP RESULT SET TO BILL
- // =========================================================
+    private Bill mapResultSetToBill(
+            ResultSet rs) throws Exception {
 
- private Bill mapResultSetToBill(
-         ResultSet rs) throws Exception {
-
-     Bill bill = new Bill();
-
-     // -----------------------------------------------------
-     // BILL ID
-     // -----------------------------------------------------
-
-     bill.setBillId(
-             rs.getInt("bill_id")
-     );
+        Bill bill =
+                new Bill();
 
 
-     // -----------------------------------------------------
-     // BILL NUMBER
-     // -----------------------------------------------------
+        // -----------------------------------------------------
+        // BILL ID
+        // -----------------------------------------------------
 
-     bill.setBillNumber(
-             rs.getString("bill_number")
-     );
-
-
-     // -----------------------------------------------------
-     // APPOINTMENT ID
-     // Can be NULL for WALK_IN bills
-     // -----------------------------------------------------
-
-     int appointmentId =
-             rs.getInt("appointment_id");
-
-     if (rs.wasNull()) {
-
-         bill.setAppointmentId(null);
-
-     } else {
-
-         bill.setAppointmentId(
-                 appointmentId
-         );
-     }
+        bill.setBillId(
+                rs.getInt("bill_id")
+        );
 
 
-     // -----------------------------------------------------
-     // PATIENT ID
-     // -----------------------------------------------------
+        // -----------------------------------------------------
+        // BILL NUMBER
+        // -----------------------------------------------------
 
-     bill.setPatientId(
-             rs.getInt("patient_id")
-     );
-
-
-     // -----------------------------------------------------
-     // TREATMENT ID
-     // IMPORTANT FIX
-     // -----------------------------------------------------
-
-     int treatmentId =
-             rs.getInt("treatment_id");
-
-     if (rs.wasNull()) {
-
-         bill.setTreatmentId(null);
-
-     } else {
-
-         bill.setTreatmentId(
-                 treatmentId
-         );
-     }
+        bill.setBillNumber(
+                rs.getString("bill_number")
+        );
 
 
-     // -----------------------------------------------------
-     // BILL TYPE
-     // -----------------------------------------------------
+        // -----------------------------------------------------
+        // APPOINTMENT ID
+        // Can be NULL for WALK_IN bills
+        // -----------------------------------------------------
 
-     bill.setBillType(
-             rs.getString("bill_type")
-     );
-
-
-     // -----------------------------------------------------
-     // CONSULTATION FEE
-     // -----------------------------------------------------
-
-     bill.setConsultationFee(
-             rs.getDouble("consultation_fee")
-     );
+        int appointmentId =
+                rs.getInt(
+                        "appointment_id"
+                );
 
 
-     // -----------------------------------------------------
-     // TREATMENT FEE
-     // -----------------------------------------------------
+        if (rs.wasNull()) {
 
-     bill.setTreatmentFee(
-             rs.getDouble("treatment_fee")
-     );
+            bill.setAppointmentId(
+                    null
+            );
 
+        } else {
 
-     // -----------------------------------------------------
-     // TOTAL AMOUNT
-     // -----------------------------------------------------
-
-     bill.setTotalAmount(
-             rs.getDouble("total_amount")
-     );
+            bill.setAppointmentId(
+                    appointmentId
+            );
+        }
 
 
-     // -----------------------------------------------------
-     // CREATED BY
-     // -----------------------------------------------------
+        // -----------------------------------------------------
+        // PATIENT ID
+        // -----------------------------------------------------
 
-     bill.setCreatedBy(
-             rs.getInt("created_by")
-     );
-
-
-     // -----------------------------------------------------
-     // CREATED AT
-     // -----------------------------------------------------
-
-     bill.setCreatedAt(
-             rs.getTimestamp("created_at")
-     );
+        bill.setPatientId(
+                rs.getInt("patient_id")
+        );
 
 
-     return bill;
-}}
+        // -----------------------------------------------------
+        // TREATMENT ID
+        // Can be NULL
+        // -----------------------------------------------------
+
+        int treatmentId =
+                rs.getInt(
+                        "treatment_id"
+                );
+
+
+        if (rs.wasNull()) {
+
+            bill.setTreatmentId(
+                    null
+            );
+
+        } else {
+
+            bill.setTreatmentId(
+                    treatmentId
+            );
+        }
+
+
+        // -----------------------------------------------------
+        // BILL TYPE
+        // -----------------------------------------------------
+
+        bill.setBillType(
+                rs.getString("bill_type")
+        );
+
+
+        // -----------------------------------------------------
+        // CONSULTATION FEE
+        // -----------------------------------------------------
+
+        bill.setConsultationFee(
+                rs.getDouble(
+                        "consultation_fee"
+                )
+        );
+
+
+        // -----------------------------------------------------
+        // TREATMENT FEE
+        // -----------------------------------------------------
+
+        bill.setTreatmentFee(
+                rs.getDouble(
+                        "treatment_fee"
+                )
+        );
+
+
+        // -----------------------------------------------------
+        // TOTAL AMOUNT
+        // -----------------------------------------------------
+
+        bill.setTotalAmount(
+                rs.getDouble(
+                        "total_amount"
+                )
+        );
+
+
+        // -----------------------------------------------------
+        // CREATED BY
+        // -----------------------------------------------------
+
+        bill.setCreatedBy(
+                rs.getInt(
+                        "created_by"
+                )
+        );
+
+
+        // -----------------------------------------------------
+        // CREATED AT
+        // -----------------------------------------------------
+
+        bill.setCreatedAt(
+                rs.getTimestamp(
+                        "created_at"
+                )
+        );
+
+
+        return bill;
+    }
+}

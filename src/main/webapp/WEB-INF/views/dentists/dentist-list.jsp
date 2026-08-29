@@ -591,24 +591,33 @@
 
                                     <div class="flex justify-end gap-1.5">
 
-
-                                        <a
-                                            href="<%= request.getContextPath() %>/dentists/view?id=<%= dentist.getDentistId() %>"
-                                            class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
-                                        >
-                                            View
-                                        </a>
-
-
-                                        <a
-                                            href="<%= request.getContextPath() %>/dentists/edit?id=<%= dentist.getDentistId() %>"
-                                            class="rounded-md bg-blue-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-blue-600 transition hover:bg-blue-100"
-                                        >
-                                            Edit
-                                        </a>
+    <!-- VIEW -->
+    <a
+        href="<%= request.getContextPath() %>/dentists/view?id=<%= dentist.getDentistId() %>"
+        class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+    >
+        View
+    </a>
 
 
-                                    </div>
+    <!-- EDIT -->
+    <a
+        href="<%= request.getContextPath() %>/dentists/edit?id=<%= dentist.getDentistId() %>"
+        class="rounded-md bg-blue-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-blue-600 transition hover:bg-blue-100"
+    >
+        Edit
+    </a>
+
+
+    <!-- SCHEDULE -->
+    <a
+        href="<%= request.getContextPath() %>/dentists/schedule?id=<%= dentist.getDentistId() %>"
+        class="rounded-md bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:bg-blue-50 hover:text-blue-600"
+    >
+        Schedule
+    </a>
+
+</div>
 
 
                                 </td>

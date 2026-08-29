@@ -107,13 +107,15 @@ public class AuthenticationFilter implements Filter {
         // ADMIN AREA
         // =====================================================
 
-        if (path.startsWith("/admin")) {
+        if (path.startsWith("/admin")
+                || path.equals("/reports")) {
 
-            if (!"ADMIN".equals(loggedUser.getRole())) {
+            if (!"ADMIN".equalsIgnoreCase(loggedUser.getRole())) {
 
                 httpResponse.sendError(
                         HttpServletResponse.SC_FORBIDDEN,
-                        "Access denied.");
+                        "Access denied."
+                );
 
                 return;
             }

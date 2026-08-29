@@ -1,17 +1,23 @@
 package com.sunrise.controller;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sunrise.dao.AppointmentDAO;
 import com.sunrise.dao.DentistDAO;
+import com.sunrise.dao.DentistScheduleDAO;
 import com.sunrise.dao.PatientDAO;
 import com.sunrise.dao.TreatmentDAO;
+
 import com.sunrise.model.Appointment;
 import com.sunrise.model.Dentist;
+import com.sunrise.model.DentistSchedule;
 import com.sunrise.model.Patient;
 import com.sunrise.model.Treatment;
 import com.sunrise.model.User;
@@ -23,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+
 @WebServlet("/appointments/*")
 public class AppointmentController extends HttpServlet {
 
@@ -32,14 +39,28 @@ public class AppointmentController extends HttpServlet {
     private PatientDAO patientDAO;
     private DentistDAO dentistDAO;
     private TreatmentDAO treatmentDAO;
+    private DentistScheduleDAO dentistScheduleDAO;
+
 
     @Override
     public void init() {
-        appointmentDAO = new AppointmentDAO();
-        patientDAO = new PatientDAO();
-        dentistDAO = new DentistDAO();
-        treatmentDAO = new TreatmentDAO();
+
+        appointmentDAO =
+                new AppointmentDAO();
+
+        patientDAO =
+                new PatientDAO();
+
+        dentistDAO =
+                new DentistDAO();
+
+        treatmentDAO =
+                new TreatmentDAO();
+
+        dentistScheduleDAO =
+                new DentistScheduleDAO();
     }
+
 
     // =========================================================
     // GET
@@ -51,23 +72,49 @@ public class AppointmentController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String path = request.getPathInfo();
+        String path =
+                request.getPathInfo();
+
 
         if (path == null || path.equals("/")) {
 
-            listAppointments(request, response);
+            listAppointments(
+                    request,
+                    response
+            );
+
 
         } else if (path.equals("/add")) {
 
-            showAddForm(request, response);
+            showAddForm(
+                    request,
+                    response
+            );
+
 
         } else if (path.equals("/view")) {
 
-            viewAppointment(request, response);
+            viewAppointment(
+                    request,
+                    response
+            );
+
 
         } else if (path.equals("/edit")) {
 
-            showEditForm(request, response);
+            showEditForm(
+                    request,
+                    response
+            );
+
+
+        } else if (path.equals("/slots")) {
+
+            getAvailableSlots(
+                    request,
+                    response
+            );
+
 
         } else {
 
@@ -76,6 +123,7 @@ public class AppointmentController extends HttpServlet {
             );
         }
     }
+
 
     // =========================================================
     // POST
@@ -89,15 +137,25 @@ public class AppointmentController extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String path = request.getPathInfo();
+        String path =
+                request.getPathInfo();
+
 
         if ("/add".equals(path)) {
 
-            addAppointment(request, response);
+            addAppointment(
+                    request,
+                    response
+            );
+
 
         } else if ("/edit".equals(path)) {
 
-            updateAppointment(request, response);
+            updateAppointment(
+                    request,
+                    response
+            );
+
 
         } else {
 
@@ -107,8 +165,338 @@ public class AppointmentController extends HttpServlet {
         }
     }
 
+
     // =========================================================
-    // LIST / SEARCH
+    // AVAILABLE TIME SLOTS
+    // =========================================================
+
+    private void getAvailableSlots(
+            HttpServletRequest request,
+            HttpServletResponse response)
+            throws IOException {
+
+        response.setContentType(
+                "application/json"
+        );
+
+        response.setCharacterEncoding(
+                "UTF-8"
+        );
+
+
+        String dentistText =
+                request.getParameter("dentistId");
+
+        String dateText =
+                request.getParameter("appointmentDate");
+
+        String appointmentText =
+                request.getParameter("appointmentId");
+
+
+        int dentistId;
+        int appointmentId = 0;
+
+
+        try {
+
+            dentistId =
+                    Integer.parseInt(dentistText);
+
+            if (appointmentText != null
+                    && !appointmentText.trim().isEmpty()) {
+
+                appointmentId =
+                        Integer.parseInt(
+                                appointmentText
+                        );
+            }
+
+        } catch (Exception e) {
+
+            writeJson(
+                    response,
+                    false,
+                    "Invalid dentist."
+            );
+
+            return;
+        }
+
+
+        LocalDate appointmentDate;
+
+
+        try {
+
+            appointmentDate =
+                    LocalDate.parse(dateText);
+
+        } catch (Exception e) {
+
+            writeJson(
+                    response,
+                    false,
+                    "Please select a valid date."
+            );
+
+            return;
+        }
+
+
+        if (appointmentDate.isBefore(
+                LocalDate.now())) {
+
+            writeJson(
+                    response,
+                    false,
+                    "Please select today or a future date."
+            );
+
+            return;
+        }
+
+
+        // =====================================================
+        // GET DAY OF WEEK
+        // =====================================================
+
+        DayOfWeek dayOfWeek =
+                appointmentDate.getDayOfWeek();
+
+
+        String dayName =
+                dayOfWeek.name();
+
+
+        // =====================================================
+        // GET DENTIST SCHEDULE
+        // =====================================================
+
+        List<DentistSchedule> schedules =
+                dentistScheduleDAO
+                    .getSchedulesByDentistAndDay(
+                        dentistId,
+                        dayName
+                    );
+
+
+        if (schedules == null
+                || schedules.isEmpty()) {
+
+            writeJson(
+                    response,
+                    true,
+                    "No working hours are configured for this dentist on "
+                    + capitalize(dayName)
+                    + ". Please select another date."
+            );
+
+            return;
+        }
+
+
+        // =====================================================
+        // GET BOOKED TIMES
+        // =====================================================
+
+        List<LocalTime> bookedTimes =
+                appointmentDAO.getBookedTimes(
+                        dentistId,
+                        appointmentDate,
+                        appointmentId
+                );
+
+
+        List<String> slots =
+                new ArrayList<>();
+
+
+        DateTimeFormatter displayFormatter =
+                DateTimeFormatter.ofPattern(
+                        "hh:mm a"
+                );
+
+
+        // =====================================================
+        // GENERATE SLOTS
+        // =====================================================
+
+        for (DentistSchedule schedule : schedules) {
+
+            LocalTime current =
+                    schedule.getStartTime();
+
+            LocalTime end =
+                    schedule.getEndTime();
+
+            int duration =
+                    schedule.getSlotDuration();
+
+
+            if (duration <= 0) {
+
+                duration = 30;
+            }
+
+
+            while (
+                !current.plusMinutes(duration)
+                    .isAfter(end)
+            ) {
+
+                LocalTime slotEnd =
+                        current.plusMinutes(duration);
+
+
+                /*
+                 * We use the START time as the
+                 * appointment time.
+                 */
+
+                if (!bookedTimes.contains(current)) {
+
+                    String timeValue =
+                            current.toString();
+
+
+                    String displayTime =
+                            current.format(
+                                    displayFormatter
+                            );
+
+
+                    slots.add(
+                            "{"
+                            + "\"value\":\""
+                            + escapeJson(timeValue)
+                            + "\","
+                            + "\"label\":\""
+                            + escapeJson(displayTime)
+                            + "\""
+                            + "}"
+                    );
+                }
+
+
+                current =
+                        slotEnd;
+            }
+        }
+
+
+        if (slots.isEmpty()) {
+
+            writeJson(
+                    response,
+                    true,
+                    "All available times are already booked for this date. Please select another date."
+            );
+
+            return;
+        }
+
+
+        StringBuilder json =
+                new StringBuilder();
+
+
+        json.append("{");
+
+        json.append("\"available\":true,");
+
+        json.append("\"message\":\"\",");
+
+        json.append("\"slots\":[");
+
+
+        for (int i = 0;
+             i < slots.size();
+             i++) {
+
+            if (i > 0) {
+
+                json.append(",");
+            }
+
+            json.append(
+                    slots.get(i)
+            );
+        }
+
+
+        json.append("]");
+
+        json.append("}");
+
+
+        response.getWriter()
+                .write(
+                        json.toString()
+                );
+    }
+
+
+    // =========================================================
+    // JSON RESPONSE
+    // =========================================================
+
+    private void writeJson(
+            HttpServletResponse response,
+            boolean available,
+            String message)
+            throws IOException {
+
+        String json =
+                "{"
+                + "\"available\":"
+                + available
+                + ","
+                + "\"message\":\""
+                + escapeJson(message)
+                + "\","
+                + "\"slots\":[]"
+                + "}";
+
+
+        response.getWriter()
+                .write(json);
+    }
+
+
+    private String escapeJson(
+            String value) {
+
+        if (value == null) {
+
+            return "";
+        }
+
+        return value
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\r", "")
+                .replace("\n", "\\n");
+    }
+
+
+    private String capitalize(
+            String value) {
+
+        if (value == null
+                || value.isEmpty()) {
+
+            return value;
+        }
+
+        return value.substring(0, 1)
+                + value.substring(1)
+                    .toLowerCase();
+    }
+
+
+    // =========================================================
+    // LIST
     // =========================================================
 
     private void listAppointments(
@@ -116,22 +504,31 @@ public class AppointmentController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String keyword = request.getParameter("keyword");
+        String keyword =
+                request.getParameter("keyword");
 
         List<Appointment> appointments;
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
 
-            keyword = keyword.trim();
+        if (keyword != null
+                && !keyword.trim().isEmpty()) {
+
+            keyword =
+                    keyword.trim();
 
             appointments =
-                    appointmentDAO.searchAppointments(keyword);
+                    appointmentDAO
+                        .searchAppointments(
+                            keyword
+                        );
 
         } else {
 
             appointments =
-                    appointmentDAO.getAllAppointments();
+                    appointmentDAO
+                        .getAllAppointments();
         }
+
 
         request.setAttribute(
                 "appointments",
@@ -143,13 +540,18 @@ public class AppointmentController extends HttpServlet {
                 keyword
         );
 
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/appointments/appointment-list.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 
+
     // =========================================================
-    // SHOW ADD FORM
+    // SHOW ADD
     // =========================================================
 
     private void showAddForm(
@@ -159,26 +561,35 @@ public class AppointmentController extends HttpServlet {
 
         loadFormData(request);
 
+
         String generatedAppointmentNumber =
-                appointmentDAO.generateNextAppointmentNumber();
+                appointmentDAO
+                    .generateNextAppointmentNumber();
+
 
         request.setAttribute(
                 "generatedAppointmentNumber",
                 generatedAppointmentNumber
         );
 
+
         request.setAttribute(
                 "formMode",
                 "add"
         );
 
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/appointments/appointment-form.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 
+
     // =========================================================
-    // ADD APPOINTMENT
+    // ADD
     // =========================================================
 
     private void addAppointment(
@@ -187,38 +598,84 @@ public class AppointmentController extends HttpServlet {
             throws ServletException, IOException {
 
         String appointmentNumber =
-                clean(request.getParameter("appointmentNumber"));
+                clean(
+                    request.getParameter(
+                        "appointmentNumber"
+                    )
+                );
+
 
         String patientIdText =
-                request.getParameter("patientId");
+                request.getParameter(
+                        "patientId"
+                );
+
 
         String dentistIdText =
-                request.getParameter("dentistId");
+                request.getParameter(
+                        "dentistId"
+                );
+
 
         String treatmentIdText =
-                request.getParameter("treatmentId");
+                request.getParameter(
+                        "treatmentId"
+                );
+
 
         String dateText =
-                clean(request.getParameter("appointmentDate"));
+                clean(
+                    request.getParameter(
+                        "appointmentDate"
+                    )
+                );
+
 
         String timeText =
-                clean(request.getParameter("appointmentTime"));
+                clean(
+                    request.getParameter(
+                        "appointmentTime"
+                    )
+                );
+
 
         String status =
-                clean(request.getParameter("status"));
+                clean(
+                    request.getParameter(
+                        "status"
+                    )
+                );
+
 
         String notes =
-                clean(request.getParameter("notes"));
+                clean(
+                    request.getParameter(
+                        "notes"
+                    )
+                );
+
 
         int patientId;
         int dentistId;
         int treatmentId;
 
+
         try {
 
-            patientId = Integer.parseInt(patientIdText);
-            dentistId = Integer.parseInt(dentistIdText);
-            treatmentId = Integer.parseInt(treatmentIdText);
+            patientId =
+                    Integer.parseInt(
+                            patientIdText
+                    );
+
+            dentistId =
+                    Integer.parseInt(
+                            dentistIdText
+                    );
+
+            treatmentId =
+                    Integer.parseInt(
+                            treatmentIdText
+                    );
 
         } catch (Exception e) {
 
@@ -231,27 +688,34 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
+
         LocalDate appointmentDate;
         LocalTime appointmentTime;
+
 
         try {
 
             appointmentDate =
-                    LocalDate.parse(dateText);
+                    LocalDate.parse(
+                            dateText
+                    );
 
             appointmentTime =
-                    LocalTime.parse(timeText);
+                    LocalTime.parse(
+                            timeText
+                    );
 
         } catch (DateTimeParseException e) {
 
             showAddError(
                     request,
                     response,
-                    "Please enter a valid appointment date and time."
+                    "Please select a valid appointment date and time."
             );
 
             return;
         }
+
 
         String validationError =
                 validateAppointment(
@@ -265,6 +729,7 @@ public class AppointmentController extends HttpServlet {
                         notes
                 );
 
+
         if (validationError != null) {
 
             showAddError(
@@ -276,12 +741,31 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
+
         // =====================================================
-        // CHECK PATIENT
+        // VERIFY SELECTED TIME IS IN DENTIST SCHEDULE
         // =====================================================
 
+        if (!isWithinDentistSchedule(
+                dentistId,
+                appointmentDate,
+                appointmentTime)) {
+
+            showAddError(
+                    request,
+                    response,
+                    "The selected time is not available in this dentist's schedule."
+            );
+
+            return;
+        }
+
+
         Patient patient =
-                patientDAO.getPatientById(patientId);
+                patientDAO.getPatientById(
+                        patientId
+                );
+
 
         if (patient == null) {
 
@@ -294,12 +778,12 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
-        // =====================================================
-        // CHECK DENTIST
-        // =====================================================
 
         Dentist dentist =
-                dentistDAO.getDentistById(dentistId);
+                dentistDAO.getDentistById(
+                        dentistId
+                );
+
 
         if (dentist == null) {
 
@@ -312,6 +796,7 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
+
         if (!dentist.isActive()) {
 
             showAddError(
@@ -323,12 +808,12 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
-        // =====================================================
-        // CHECK TREATMENT
-        // =====================================================
 
         Treatment treatment =
-                treatmentDAO.getTreatmentById(treatmentId);
+                treatmentDAO.getTreatmentById(
+                        treatmentId
+                );
+
 
         if (treatment == null) {
 
@@ -341,6 +826,7 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
+
         if (!treatment.isActive()) {
 
             showAddError(
@@ -352,42 +838,28 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
-        // =====================================================
-        // CHECK DENTIST DOUBLE BOOKING
-        // =====================================================
 
-        boolean dentistAvailable =
-                appointmentDAO.isDentistAvailable(
-                        dentistId,
-                        appointmentDate,
-                        appointmentTime,
-                        0
-                );
-
-        if (!dentistAvailable) {
+        if (!appointmentDAO.isDentistAvailable(
+                dentistId,
+                appointmentDate,
+                appointmentTime,
+                0)) {
 
             showAddError(
                     request,
                     response,
-                    "This dentist already has an appointment at the selected date and time."
+                    "This time has just been booked. Please select another time."
             );
 
             return;
         }
 
-        // =====================================================
-        // CHECK PATIENT DOUBLE BOOKING
-        // =====================================================
 
-        boolean patientAvailable =
-                appointmentDAO.isPatientAvailable(
-                        patientId,
-                        appointmentDate,
-                        appointmentTime,
-                        0
-                );
-
-        if (!patientAvailable) {
+        if (!appointmentDAO.isPatientAvailable(
+                patientId,
+                appointmentDate,
+                appointmentTime,
+                0)) {
 
             showAddError(
                     request,
@@ -398,9 +870,6 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
-        // =====================================================
-        // CHECK APPOINTMENT NUMBER
-        // =====================================================
 
         if (appointmentDAO.appointmentNumberExists(
                 appointmentNumber,
@@ -415,40 +884,42 @@ public class AppointmentController extends HttpServlet {
             return;
         }
 
-        // =====================================================
-        // LOGGED USER
-        // =====================================================
 
         HttpSession session =
                 request.getSession(false);
 
+
         if (session == null) {
 
             response.sendRedirect(
-                    request.getContextPath() + "/login"
+                    request.getContextPath()
+                    + "/login"
             );
 
             return;
         }
 
+
         User loggedUser =
-                (User) session.getAttribute("loggedUser");
+                (User) session.getAttribute(
+                        "loggedUser"
+                );
+
 
         if (loggedUser == null) {
 
             response.sendRedirect(
-                    request.getContextPath() + "/login"
+                    request.getContextPath()
+                    + "/login"
             );
 
             return;
         }
 
+
         int createdBy =
                 loggedUser.getUserId();
 
-        // =====================================================
-        // CREATE APPOINTMENT
-        // =====================================================
 
         Appointment appointment =
                 new Appointment(
@@ -463,10 +934,12 @@ public class AppointmentController extends HttpServlet {
                         createdBy
                 );
 
+
         boolean success =
                 appointmentDAO.addAppointment(
                         appointment
                 );
+
 
         if (success) {
 
@@ -485,6 +958,72 @@ public class AppointmentController extends HttpServlet {
         }
     }
 
+
+    // =========================================================
+    // CHECK TIME AGAINST DENTIST SCHEDULE
+    // =========================================================
+
+    private boolean isWithinDentistSchedule(
+            int dentistId,
+            LocalDate date,
+            LocalTime selectedTime) {
+
+        String day =
+                date.getDayOfWeek()
+                    .name();
+
+
+        List<DentistSchedule> schedules =
+                dentistScheduleDAO
+                    .getSchedulesByDentistAndDay(
+                        dentistId,
+                        day
+                    );
+
+
+        for (DentistSchedule schedule
+                : schedules) {
+
+            LocalTime current =
+                    schedule.getStartTime();
+
+            LocalTime end =
+                    schedule.getEndTime();
+
+            int duration =
+                    schedule.getSlotDuration();
+
+
+            if (duration <= 0) {
+
+                duration = 30;
+            }
+
+
+            while (
+                !current.plusMinutes(duration)
+                    .isAfter(end)
+            ) {
+
+                if (current.equals(
+                        selectedTime)) {
+
+                    return true;
+                }
+
+
+                current =
+                        current.plusMinutes(
+                                duration
+                        );
+            }
+        }
+
+
+        return false;
+    }
+
+
     // =========================================================
     // VIEW
     // =========================================================
@@ -498,13 +1037,18 @@ public class AppointmentController extends HttpServlet {
 
             int appointmentId =
                     Integer.parseInt(
-                            request.getParameter("id")
+                            request.getParameter(
+                                    "id"
+                            )
                     );
 
+
             Appointment appointment =
-                    appointmentDAO.getAppointmentById(
-                            appointmentId
-                    );
+                    appointmentDAO
+                        .getAppointmentById(
+                                appointmentId
+                        );
+
 
             if (appointment == null) {
 
@@ -516,44 +1060,44 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             request.setAttribute(
                     "appointment",
                     appointment
             );
 
-            Patient patient =
-                    patientDAO.getPatientById(
-                            appointment.getPatientId()
-                    );
-
-            Dentist dentist =
-                    dentistDAO.getDentistById(
-                            appointment.getDentistId()
-                    );
-
-            Treatment treatment =
-                    treatmentDAO.getTreatmentById(
-                            appointment.getTreatmentId()
-                    );
 
             request.setAttribute(
                     "patient",
-                    patient
+                    patientDAO.getPatientById(
+                            appointment.getPatientId()
+                    )
             );
+
 
             request.setAttribute(
                     "dentist",
-                    dentist
+                    dentistDAO.getDentistById(
+                            appointment.getDentistId()
+                    )
             );
+
 
             request.setAttribute(
                     "treatment",
-                    treatment
+                    treatmentDAO.getTreatmentById(
+                            appointment.getTreatmentId()
+                    )
             );
+
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/appointments/appointment-details.jsp"
-            ).forward(request, response);
+            ).forward(
+                    request,
+                    response
+            );
+
 
         } catch (NumberFormatException e) {
 
@@ -564,8 +1108,9 @@ public class AppointmentController extends HttpServlet {
         }
     }
 
+
     // =========================================================
-    // SHOW EDIT FORM
+    // EDIT FORM
     // =========================================================
 
     private void showEditForm(
@@ -577,13 +1122,18 @@ public class AppointmentController extends HttpServlet {
 
             int appointmentId =
                     Integer.parseInt(
-                            request.getParameter("id")
+                            request.getParameter(
+                                    "id"
+                            )
                     );
 
+
             Appointment appointment =
-                    appointmentDAO.getAppointmentById(
-                            appointmentId
-                    );
+                    appointmentDAO
+                        .getAppointmentById(
+                                appointmentId
+                        );
+
 
             if (appointment == null) {
 
@@ -595,21 +1145,29 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             loadFormData(request);
+
 
             request.setAttribute(
                     "appointment",
                     appointment
             );
 
+
             request.setAttribute(
                     "formMode",
                     "edit"
             );
 
+
             request.getRequestDispatcher(
                     "/WEB-INF/views/appointments/appointment-form.jsp"
-            ).forward(request, response);
+            ).forward(
+                    request,
+                    response
+            );
+
 
         } catch (NumberFormatException e) {
 
@@ -619,6 +1177,7 @@ public class AppointmentController extends HttpServlet {
             );
         }
     }
+
 
     // =========================================================
     // UPDATE
@@ -633,48 +1192,74 @@ public class AppointmentController extends HttpServlet {
 
             int appointmentId =
                     Integer.parseInt(
-                            request.getParameter("appointmentId")
+                            request.getParameter(
+                                    "appointmentId"
+                            )
                     );
+
 
             int patientId =
                     Integer.parseInt(
-                            request.getParameter("patientId")
+                            request.getParameter(
+                                    "patientId"
+                            )
                     );
+
 
             int dentistId =
                     Integer.parseInt(
-                            request.getParameter("dentistId")
+                            request.getParameter(
+                                    "dentistId"
+                            )
                     );
+
 
             int treatmentId =
                     Integer.parseInt(
-                            request.getParameter("treatmentId")
+                            request.getParameter(
+                                    "treatmentId"
+                            )
                     );
+
 
             LocalDate appointmentDate =
                     LocalDate.parse(
-                            request.getParameter("appointmentDate")
+                            request.getParameter(
+                                    "appointmentDate"
+                            )
                     );
+
 
             LocalTime appointmentTime =
                     LocalTime.parse(
-                            request.getParameter("appointmentTime")
+                            request.getParameter(
+                                    "appointmentTime"
+                            )
                     );
+
 
             String status =
                     clean(
-                            request.getParameter("status")
+                        request.getParameter(
+                            "status"
+                        )
                     );
+
 
             String notes =
                     clean(
-                            request.getParameter("notes")
+                        request.getParameter(
+                            "notes"
+                        )
                     );
 
+
             Appointment appointment =
-                    appointmentDAO.getAppointmentById(
-                            appointmentId
-                    );
+                    appointmentDAO
+                        .getAppointmentById(
+                                appointmentId
+                        );
+
 
             if (appointment == null) {
 
@@ -685,6 +1270,7 @@ public class AppointmentController extends HttpServlet {
 
                 return;
             }
+
 
             String validationError =
                     validateAppointment(
@@ -698,6 +1284,7 @@ public class AppointmentController extends HttpServlet {
                             notes
                     );
 
+
             if (validationError != null) {
 
                 showEditError(
@@ -710,8 +1297,28 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
+            if (!isWithinDentistSchedule(
+                    dentistId,
+                    appointmentDate,
+                    appointmentTime)) {
+
+                showEditError(
+                        request,
+                        response,
+                        appointment,
+                        "The selected time is not available in this dentist's schedule."
+                );
+
+                return;
+            }
+
+
             Patient patient =
-                    patientDAO.getPatientById(patientId);
+                    patientDAO.getPatientById(
+                            patientId
+                    );
+
 
             if (patient == null) {
 
@@ -725,8 +1332,12 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             Dentist dentist =
-                    dentistDAO.getDentistById(dentistId);
+                    dentistDAO.getDentistById(
+                            dentistId
+                    );
+
 
             if (dentist == null) {
 
@@ -740,6 +1351,7 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             if (!dentist.isActive()) {
 
                 showEditError(
@@ -752,10 +1364,12 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             Treatment treatment =
                     treatmentDAO.getTreatmentById(
                             treatmentId
                     );
+
 
             if (treatment == null) {
 
@@ -769,6 +1383,7 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             if (!treatment.isActive()) {
 
                 showEditError(
@@ -780,6 +1395,7 @@ public class AppointmentController extends HttpServlet {
 
                 return;
             }
+
 
             if (!appointmentDAO.isDentistAvailable(
                     dentistId,
@@ -797,6 +1413,7 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
+
             if (!appointmentDAO.isPatientAvailable(
                     patientId,
                     appointmentDate,
@@ -813,18 +1430,42 @@ public class AppointmentController extends HttpServlet {
                 return;
             }
 
-            appointment.setPatientId(patientId);
-            appointment.setDentistId(dentistId);
-            appointment.setTreatmentId(treatmentId);
-            appointment.setAppointmentDate(appointmentDate);
-            appointment.setAppointmentTime(appointmentTime);
-            appointment.setStatus(status);
-            appointment.setNotes(notes);
+
+            appointment.setPatientId(
+                    patientId
+            );
+
+            appointment.setDentistId(
+                    dentistId
+            );
+
+            appointment.setTreatmentId(
+                    treatmentId
+            );
+
+            appointment.setAppointmentDate(
+                    appointmentDate
+            );
+
+            appointment.setAppointmentTime(
+                    appointmentTime
+            );
+
+            appointment.setStatus(
+                    status
+            );
+
+            appointment.setNotes(
+                    notes
+            );
+
 
             boolean success =
-                    appointmentDAO.updateAppointment(
-                            appointment
-                    );
+                    appointmentDAO
+                        .updateAppointment(
+                                appointment
+                        );
+
 
             if (success) {
 
@@ -845,6 +1486,7 @@ public class AppointmentController extends HttpServlet {
                 );
             }
 
+
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -856,6 +1498,7 @@ public class AppointmentController extends HttpServlet {
         }
     }
 
+
     // =========================================================
     // LOAD FORM DATA
     // =========================================================
@@ -863,30 +1506,22 @@ public class AppointmentController extends HttpServlet {
     private void loadFormData(
             HttpServletRequest request) {
 
-        List<Patient> patients =
-                patientDAO.getAllPatients();
-
-        List<Dentist> dentists =
-                dentistDAO.getActiveDentists();
-
-        List<Treatment> treatments =
-                treatmentDAO.getActiveTreatments();
-
         request.setAttribute(
                 "patients",
-                patients
+                patientDAO.getAllPatients()
         );
 
         request.setAttribute(
                 "dentists",
-                dentists
+                dentistDAO.getActiveDentists()
         );
 
         request.setAttribute(
                 "treatments",
-                treatments
+                treatmentDAO.getActiveTreatments()
         );
     }
+
 
     // =========================================================
     // VALIDATION
@@ -908,45 +1543,56 @@ public class AppointmentController extends HttpServlet {
             return "Appointment number is required.";
         }
 
+
         if (appointmentNumber.length() > 30) {
 
             return "Appointment number cannot exceed 30 characters.";
         }
+
 
         if (patientId <= 0) {
 
             return "Please select a patient.";
         }
 
+
         if (dentistId <= 0) {
 
             return "Please select a dentist.";
         }
+
 
         if (treatmentId <= 0) {
 
             return "Please select a treatment.";
         }
 
+
         if (appointmentDate == null) {
 
             return "Appointment date is required.";
         }
+
 
         if (appointmentTime == null) {
 
             return "Appointment time is required.";
         }
 
-        if (appointmentDate.isBefore(LocalDate.now())) {
+
+        if (appointmentDate.isBefore(
+                LocalDate.now())) {
 
             return "Appointment date cannot be in the past.";
         }
 
-        if (status == null || status.isEmpty()) {
+
+        if (status == null
+                || status.isEmpty()) {
 
             return "Appointment status is required.";
         }
+
 
         if (!status.equals("SCHEDULED")
                 && !status.equals("COMPLETED")
@@ -957,13 +1603,17 @@ public class AppointmentController extends HttpServlet {
             return "Invalid appointment status.";
         }
 
-        if (notes != null && notes.length() > 500) {
+
+        if (notes != null
+                && notes.length() > 500) {
 
             return "Notes cannot exceed 500 characters.";
         }
 
+
         return null;
     }
+
 
     // =========================================================
     // CLEAN
@@ -972,11 +1622,13 @@ public class AppointmentController extends HttpServlet {
     private String clean(String value) {
 
         if (value == null) {
+
             return "";
         }
 
         return value.trim();
     }
+
 
     // =========================================================
     // ADD ERROR
@@ -990,32 +1642,34 @@ public class AppointmentController extends HttpServlet {
 
         loadFormData(request);
 
-        /*
-         * Generate a number again if the form is returned
-         * because of a validation error.
-         */
-        String generatedAppointmentNumber =
-                appointmentDAO.generateNextAppointmentNumber();
 
         request.setAttribute(
                 "generatedAppointmentNumber",
-                generatedAppointmentNumber
+                appointmentDAO
+                    .generateNextAppointmentNumber()
         );
+
 
         request.setAttribute(
                 "formMode",
                 "add"
         );
 
+
         request.setAttribute(
                 "error",
                 error
         );
 
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/appointments/appointment-form.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
+
 
     // =========================================================
     // EDIT ERROR
@@ -1030,23 +1684,30 @@ public class AppointmentController extends HttpServlet {
 
         loadFormData(request);
 
+
         request.setAttribute(
                 "appointment",
                 appointment
         );
+
 
         request.setAttribute(
                 "formMode",
                 "edit"
         );
 
+
         request.setAttribute(
                 "error",
                 error
         );
 
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/appointments/appointment-form.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 }
