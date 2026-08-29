@@ -37,16 +37,20 @@ public class BillingController extends HttpServlet {
 
 
     // =========================================================
-    // INITIALIZE
+    // INIT
     // =========================================================
 
     @Override
     public void init() {
 
         billDAO = new BillDAO();
+
         appointmentDAO = new AppointmentDAO();
+
         patientDAO = new PatientDAO();
+
         dentistDAO = new DentistDAO();
+
         treatmentDAO = new TreatmentDAO();
     }
 
@@ -63,23 +67,32 @@ public class BillingController extends HttpServlet {
 
         String path = request.getPathInfo();
 
-        if (path == null || path.equals("/")) {
+
+        if (path == null || "/".equals(path)) {
 
             listBills(request, response);
 
-        } else if (path.equals("/add")) {
+        }
+
+        else if ("/add".equals(path)) {
 
             showAddForm(request, response);
 
-        } else if (path.equals("/view")) {
+        }
+
+        else if ("/view".equals(path)) {
 
             viewBill(request, response);
 
-        } else if (path.equals("/print")) {
+        }
+
+        else if ("/print".equals(path)) {
 
             printBill(request, response);
 
-        } else {
+        }
+
+        else {
 
             response.sendError(
                     HttpServletResponse.SC_NOT_FOUND
@@ -102,11 +115,14 @@ public class BillingController extends HttpServlet {
 
         String path = request.getPathInfo();
 
+
         if ("/add".equals(path)) {
 
             addBill(request, response);
 
-        } else {
+        }
+
+        else {
 
             response.sendError(
                     HttpServletResponse.SC_NOT_FOUND
@@ -125,23 +141,39 @@ public class BillingController extends HttpServlet {
             throws ServletException, IOException {
 
         String keyword =
-                request.getParameter("keyword");
+                clean(request.getParameter("keyword"));
+
+        String billType =
+                clean(request.getParameter("billType"));
+
 
         List<Bill> bills;
 
-        if (keyword != null
-                && !keyword.trim().isEmpty()) {
 
-            keyword = keyword.trim();
+        if (!keyword.isEmpty()) {
 
-            bills =
-                    billDAO.searchBills(keyword);
+            bills = billDAO.searchBills(
+                    keyword,
+                    billType
+            );
 
-        } else {
-
-            bills =
-                    billDAO.getAllBills();
         }
+
+        else if (!billType.isEmpty()
+                && !"ALL".equalsIgnoreCase(billType)) {
+
+            bills = billDAO.searchBills(
+                    "",
+                    billType
+            );
+
+        }
+
+        else {
+
+            bills = billDAO.getAllBills();
+        }
+
 
         request.setAttribute(
                 "bills",
@@ -153,9 +185,18 @@ public class BillingController extends HttpServlet {
                 keyword
         );
 
+        request.setAttribute(
+                "billType",
+                billType
+        );
+
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-list.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 
 
@@ -172,14 +213,19 @@ public class BillingController extends HttpServlet {
 
         generateBillNumber(request);
 
+
         request.setAttribute(
                 "formMode",
                 "add"
         );
 
+
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-form.jsp"
-        ).forward(request, response);
+        ).forward(
+                request,
+                response
+        );
     }
 
 
@@ -192,29 +238,22 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
-        String appointmentIdText =
-                clean(
-                        request.getParameter(
-                                "appointmentId"
-                        )
-                );
+
+        String billType =
+                clean(request.getParameter("billType"));
 
 
-        int appointmentId;
+        // =====================================================
+        // VALID BILL TYPE
+        // =====================================================
 
-        try {
-
-            appointmentId =
-                    Integer.parseInt(
-                            appointmentIdText
-                    );
-
-        } catch (NumberFormatException e) {
+        if (!"APPOINTMENT".equals(billType)
+                && !"WALK_IN".equals(billType)) {
 
             showAddError(
                     request,
                     response,
-                    "Please select a valid appointment."
+                    "Please select a valid bill type."
             );
 
             return;
@@ -222,105 +261,12 @@ public class BillingController extends HttpServlet {
 
 
         // =====================================================
-        // CHECK APPOINTMENT
-        // =====================================================
-
-        Appointment appointment =
-                appointmentDAO.getAppointmentById(
-                        appointmentId
-                );
-
-        if (appointment == null) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Selected appointment does not exist."
-            );
-
-            return;
-        }
-
-
-        // =====================================================
-        // CHECK DUPLICATE BILL
-        // =====================================================
-
-        if (billDAO.appointmentAlreadyBilled(
-                appointmentId)) {
-
-            showAddError(
-                    request,
-                    response,
-                    "This appointment has already been billed."
-            );
-
-            return;
-        }
-
-
-        // =====================================================
-        // GET DENTIST
-        // =====================================================
-
-        Dentist dentist =
-                dentistDAO.getDentistById(
-                        appointment.getDentistId()
-                );
-
-        if (dentist == null) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Unable to find the dentist for this appointment."
-            );
-
-            return;
-        }
-
-
-        // =====================================================
-        // GET TREATMENT
-        // =====================================================
-
-        Treatment treatment =
-                treatmentDAO.getTreatmentById(
-                        appointment.getTreatmentId()
-                );
-
-        if (treatment == null) {
-
-            showAddError(
-                    request,
-                    response,
-                    "Unable to find the treatment for this appointment."
-            );
-
-            return;
-        }
-
-
-        // =====================================================
-        // CALCULATE FEES
-        // =====================================================
-
-        double consultationFee =
-                dentist.getConsultationFee();
-
-        double treatmentFee =
-                treatment.getTreatmentFee();
-
-        double totalAmount =
-                consultationFee + treatmentFee;
-
-
-        // =====================================================
-        // GET LOGGED-IN USER
+        // LOGGED USER
         // =====================================================
 
         HttpSession session =
                 request.getSession(false);
+
 
         if (session == null) {
 
@@ -338,6 +284,7 @@ public class BillingController extends HttpServlet {
                         "loggedUser"
                 );
 
+
         if (loggedUser == null) {
 
             response.sendRedirect(
@@ -354,11 +301,372 @@ public class BillingController extends HttpServlet {
 
 
         // =====================================================
-        // GENERATE BILL NUMBER
+        // VARIABLES
+        // =====================================================
+
+        Integer appointmentId = null;
+
+        Integer treatmentId = null;
+
+        int patientId;
+
+        double consultationFee;
+
+        double treatmentFee;
+
+
+        // =====================================================
+        // APPOINTMENT BILL
+        // =====================================================
+
+        if ("APPOINTMENT".equals(billType)) {
+
+
+            String appointmentIdText =
+                    clean(
+                            request.getParameter(
+                                    "appointmentId"
+                            )
+                    );
+
+
+            // -------------------------------------------------
+            // APPOINTMENT ID
+            // -------------------------------------------------
+
+            try {
+
+                appointmentId =
+                        Integer.parseInt(
+                                appointmentIdText
+                        );
+
+            }
+
+            catch (NumberFormatException e) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Please select a valid appointment."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // GET APPOINTMENT
+            // -------------------------------------------------
+
+            Appointment appointment =
+                    appointmentDAO.getAppointmentById(
+                            appointmentId
+                    );
+
+
+            if (appointment == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Selected appointment does not exist."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // CHECK ALREADY BILLED
+            // -------------------------------------------------
+
+            if (billDAO.appointmentAlreadyBilled(
+                    appointmentId)) {
+
+                showAddError(
+                        request,
+                        response,
+                        "This appointment has already been billed."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // PATIENT
+            // -------------------------------------------------
+
+            patientId =
+                    appointment.getPatientId();
+
+
+            Patient patient =
+                    patientDAO.getPatientById(
+                            patientId
+                    );
+
+
+            if (patient == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Unable to find the patient for this appointment."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // TREATMENT
+            // -------------------------------------------------
+
+            treatmentId =
+                    appointment.getTreatmentId();
+
+
+            Treatment treatment =
+                    treatmentDAO.getTreatmentById(
+                            treatmentId
+                    );
+
+
+            if (treatment == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Unable to find the treatment for this appointment."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // DENTIST
+            // -------------------------------------------------
+
+            Dentist dentist =
+                    dentistDAO.getDentistById(
+                            appointment.getDentistId()
+                    );
+
+
+            if (dentist == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Unable to find the dentist for this appointment."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // FEES
+            // -------------------------------------------------
+
+            consultationFee =
+                    dentist.getConsultationFee();
+
+
+            treatmentFee =
+                    treatment.getTreatmentFee();
+        }
+
+
+        // =====================================================
+        // WALK-IN / CUSTOM BILL
+        // =====================================================
+
+        else {
+
+
+            String patientIdText =
+                    clean(
+                            request.getParameter(
+                                    "patientId"
+                            )
+                    );
+
+
+            String treatmentIdText =
+                    clean(
+                            request.getParameter(
+                                    "treatmentId"
+                            )
+                    );
+
+
+            String consultationFeeText =
+                    clean(
+                            request.getParameter(
+                                    "consultationFee"
+                            )
+                    );
+
+
+            // -------------------------------------------------
+            // PATIENT ID
+            // -------------------------------------------------
+
+            try {
+
+                patientId =
+                        Integer.parseInt(
+                                patientIdText
+                        );
+
+            }
+
+            catch (NumberFormatException e) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Please select a valid patient."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // CHECK PATIENT
+            // -------------------------------------------------
+
+            Patient patient =
+                    patientDAO.getPatientById(
+                            patientId
+                    );
+
+
+            if (patient == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Selected patient does not exist."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // TREATMENT ID
+            // -------------------------------------------------
+
+            try {
+
+                treatmentId =
+                        Integer.parseInt(
+                                treatmentIdText
+                        );
+
+            }
+
+            catch (NumberFormatException e) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Please select a valid treatment."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // GET TREATMENT
+            // -------------------------------------------------
+
+            Treatment treatment =
+                    treatmentDAO.getTreatmentById(
+                            treatmentId
+                    );
+
+
+            if (treatment == null) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Selected treatment does not exist."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // CONSULTATION FEE
+            // -------------------------------------------------
+
+            try {
+
+                consultationFee =
+                        Double.parseDouble(
+                                consultationFeeText
+                        );
+
+            }
+
+            catch (NumberFormatException e) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Please enter a valid consultation fee."
+                );
+
+                return;
+            }
+
+
+            if (consultationFee < 0) {
+
+                showAddError(
+                        request,
+                        response,
+                        "Consultation fee cannot be negative."
+                );
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // TREATMENT FEE
+            // -------------------------------------------------
+
+            treatmentFee =
+                    treatment.getTreatmentFee();
+        }
+
+
+        // =====================================================
+        // TOTAL
+        // =====================================================
+
+        double totalAmount =
+                consultationFee + treatmentFee;
+
+
+        // =====================================================
+        // BILL NUMBER
         // =====================================================
 
         int nextBillId =
                 billDAO.getNextBillId();
+
 
         if (nextBillId <= 0) {
 
@@ -390,6 +698,9 @@ public class BillingController extends HttpServlet {
                 new Bill(
                         billNumber,
                         appointmentId,
+                        patientId,
+                        treatmentId,
+                        billType,
                         consultationFee,
                         treatmentFee,
                         totalAmount,
@@ -401,21 +712,57 @@ public class BillingController extends HttpServlet {
                 billDAO.addBill(bill);
 
 
+        // =====================================================
+        // SUCCESS
+        // =====================================================
+
         if (success) {
 
-            Bill savedBill =
-                    billDAO.getBillByAppointmentId(
-                            appointmentId
-                    );
 
-            response.sendRedirect(
-                    request.getContextPath()
-                    + "/bills/view?id="
-                    + savedBill.getBillId()
-                    + "&success=1"
-            );
+            Bill savedBill = null;
 
-        } else {
+
+            if (appointmentId != null) {
+
+                savedBill =
+                        billDAO.getBillByAppointmentId(
+                                appointmentId
+                        );
+            }
+
+
+            else {
+
+                savedBill =
+                        findBillByNumber(
+                                billNumber
+                        );
+            }
+
+
+            if (savedBill != null) {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/bills/view?id="
+                        + savedBill.getBillId()
+                        + "&success=1"
+                );
+
+            }
+
+            else {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/bills?success=1"
+                );
+            }
+
+        }
+
+
+        else {
 
             showAddError(
                     request,
@@ -423,6 +770,42 @@ public class BillingController extends HttpServlet {
                     "Unable to create bill."
             );
         }
+    }
+
+
+    // =========================================================
+    // FIND BILL BY NUMBER
+    // =========================================================
+
+    private Bill findBillByNumber(
+            String billNumber) {
+
+
+        if (billNumber == null
+                || billNumber.isEmpty()) {
+
+            return null;
+        }
+
+
+        List<Bill> bills =
+                billDAO.searchBills(
+                        billNumber,
+                        "ALL"
+                );
+
+
+        for (Bill bill : bills) {
+
+            if (billNumber.equals(
+                    bill.getBillNumber())) {
+
+                return bill;
+            }
+        }
+
+
+        return null;
     }
 
 
@@ -435,11 +818,14 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+
         try {
 
             int billId =
                     Integer.parseInt(
-                            request.getParameter("id")
+                            request.getParameter(
+                                    "id"
+                            )
                     );
 
 
@@ -474,7 +860,9 @@ public class BillingController extends HttpServlet {
             );
 
 
-        } catch (NumberFormatException e) {
+        }
+
+        catch (NumberFormatException e) {
 
             response.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,
@@ -493,11 +881,14 @@ public class BillingController extends HttpServlet {
             HttpServletResponse response)
             throws ServletException, IOException {
 
+
         try {
 
             int billId =
                     Integer.parseInt(
-                            request.getParameter("id")
+                            request.getParameter(
+                                    "id"
+                            )
                     );
 
 
@@ -532,7 +923,9 @@ public class BillingController extends HttpServlet {
             );
 
 
-        } catch (NumberFormatException e) {
+        }
+
+        catch (NumberFormatException e) {
 
             response.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,
@@ -550,59 +943,92 @@ public class BillingController extends HttpServlet {
             HttpServletRequest request,
             Bill bill) {
 
-        Appointment appointment =
-                appointmentDAO.getAppointmentById(
-                        bill.getAppointmentId()
+
+        // -----------------------------------------------------
+        // PATIENT
+        // -----------------------------------------------------
+
+        Patient patient =
+                patientDAO.getPatientById(
+                        bill.getPatientId()
                 );
 
 
-        Patient patient = null;
-        Dentist dentist = null;
+        // -----------------------------------------------------
+        // TREATMENT
+        // -----------------------------------------------------
+
         Treatment treatment = null;
 
 
-        if (appointment != null) {
-
-            patient =
-                    patientDAO.getPatientById(
-                            appointment.getPatientId()
-                    );
-
-            dentist =
-                    dentistDAO.getDentistById(
-                            appointment.getDentistId()
-                    );
+        if (bill.getTreatmentId() != null) {
 
             treatment =
                     treatmentDAO.getTreatmentById(
-                            appointment.getTreatmentId()
+                            bill.getTreatmentId()
                     );
         }
 
+
+        // -----------------------------------------------------
+        // APPOINTMENT
+        // -----------------------------------------------------
+
+        Appointment appointment = null;
+
+        Dentist dentist = null;
+
+
+        if (bill.getAppointmentId() != null) {
+
+
+            appointment =
+                    appointmentDAO.getAppointmentById(
+                            bill.getAppointmentId()
+                    );
+
+
+            if (appointment != null) {
+
+                dentist =
+                        dentistDAO.getDentistById(
+                                appointment.getDentistId()
+                        );
+            }
+        }
+
+
+        // -----------------------------------------------------
+        // SEND TO JSP
+        // -----------------------------------------------------
 
         request.setAttribute(
                 "bill",
                 bill
         );
 
-        request.setAttribute(
-                "appointment",
-                appointment
-        );
 
         request.setAttribute(
                 "patient",
                 patient
         );
 
-        request.setAttribute(
-                "dentist",
-                dentist
-        );
 
         request.setAttribute(
                 "treatment",
                 treatment
+        );
+
+
+        request.setAttribute(
+                "appointment",
+                appointment
+        );
+
+
+        request.setAttribute(
+                "dentist",
+                dentist
         );
     }
 
@@ -614,27 +1040,78 @@ public class BillingController extends HttpServlet {
     private void loadBillFormData(
             HttpServletRequest request) {
 
+
         List<Appointment> appointments =
                 appointmentDAO.getAllAppointments();
+
+
+        List<Patient> patients =
+                patientDAO.getAllPatients();
+
+
+        List<Treatment> treatments =
+                treatmentDAO.getAllTreatments();
+
+
+        List<Dentist> dentists =
+                dentistDAO.getAllDentists();
+
+
+        // -----------------------------------------------------
+        // APPOINTMENTS
+        // -----------------------------------------------------
 
         request.setAttribute(
                 "appointments",
                 appointments
         );
+
+
+        // -----------------------------------------------------
+        // PATIENTS
+        // -----------------------------------------------------
+
+        request.setAttribute(
+                "patients",
+                patients
+        );
+
+
+        // -----------------------------------------------------
+        // TREATMENTS
+        // -----------------------------------------------------
+
+        request.setAttribute(
+                "treatments",
+                treatments
+        );
+
+
+        // -----------------------------------------------------
+        // DENTISTS
+        // -----------------------------------------------------
+
+        request.setAttribute(
+                "dentists",
+                dentists
+        );
     }
 
 
     // =========================================================
-    // GENERATE DISPLAY BILL NUMBER
+    // GENERATE BILL NUMBER
     // =========================================================
 
     private void generateBillNumber(
             HttpServletRequest request) {
 
+
         int nextBillId =
                 billDAO.getNextBillId();
 
+
         if (nextBillId > 0) {
+
 
             String billNumber =
                     "BILL-"
@@ -644,6 +1121,7 @@ public class BillingController extends HttpServlet {
                             "%04d",
                             nextBillId
                     );
+
 
             request.setAttribute(
                     "generatedBillNumber",
@@ -663,19 +1141,23 @@ public class BillingController extends HttpServlet {
             String error)
             throws ServletException, IOException {
 
+
         loadBillFormData(request);
 
         generateBillNumber(request);
+
 
         request.setAttribute(
                 "formMode",
                 "add"
         );
 
+
         request.setAttribute(
                 "error",
                 error
         );
+
 
         request.getRequestDispatcher(
                 "/WEB-INF/views/bills/bill-form.jsp"

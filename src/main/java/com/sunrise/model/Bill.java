@@ -5,32 +5,26 @@ import java.sql.Timestamp;
 public class Bill {
 
     private int billId;
+    private Integer treatmentId;
     private String billNumber;
-    private int appointmentId;
-
+    private Integer appointmentId;
+    private int patientId;
+    private String billType;
     private double consultationFee;
     private double treatmentFee;
     private double totalAmount;
-
     private int createdBy;
     private Timestamp createdAt;
-
-
-    // =========================================================
-    // DEFAULT CONSTRUCTOR
-    // =========================================================
 
     public Bill() {
     }
 
-
-    // =========================================================
-    // CONSTRUCTOR FOR CREATING BILL
-    // =========================================================
-
     public Bill(
             String billNumber,
-            int appointmentId,
+            Integer appointmentId,
+            int patientId,
+            Integer treatmentId,
+            String billType,
             double consultationFee,
             double treatmentFee,
             double totalAmount,
@@ -38,41 +32,14 @@ public class Bill {
 
         this.billNumber = billNumber;
         this.appointmentId = appointmentId;
+        this.patientId = patientId;
+        this.treatmentId = treatmentId;
+        this.billType = billType;
         this.consultationFee = consultationFee;
         this.treatmentFee = treatmentFee;
         this.totalAmount = totalAmount;
         this.createdBy = createdBy;
     }
-
-
-    // =========================================================
-    // FULL CONSTRUCTOR
-    // =========================================================
-
-    public Bill(
-            int billId,
-            String billNumber,
-            int appointmentId,
-            double consultationFee,
-            double treatmentFee,
-            double totalAmount,
-            int createdBy,
-            Timestamp createdAt) {
-
-        this.billId = billId;
-        this.billNumber = billNumber;
-        this.appointmentId = appointmentId;
-        this.consultationFee = consultationFee;
-        this.treatmentFee = treatmentFee;
-        this.totalAmount = totalAmount;
-        this.createdBy = createdBy;
-        this.createdAt = createdAt;
-    }
-
-
-    // =========================================================
-    // GETTERS AND SETTERS
-    // =========================================================
 
     public int getBillId() {
         return billId;
@@ -81,7 +48,13 @@ public class Bill {
     public void setBillId(int billId) {
         this.billId = billId;
     }
+    public Integer getTreatmentId() {
+        return treatmentId;
+    }
 
+    public void setTreatmentId(Integer treatmentId) {
+        this.treatmentId = treatmentId;
+    }
 
     public String getBillNumber() {
         return billNumber;
@@ -91,15 +64,29 @@ public class Bill {
         this.billNumber = billNumber;
     }
 
-
-    public int getAppointmentId() {
+    public Integer getAppointmentId() {
         return appointmentId;
     }
 
-    public void setAppointmentId(int appointmentId) {
+    public void setAppointmentId(Integer appointmentId) {
         this.appointmentId = appointmentId;
     }
 
+    public int getPatientId() {
+        return patientId;
+    }
+
+    public void setPatientId(int patientId) {
+        this.patientId = patientId;
+    }
+
+    public String getBillType() {
+        return billType;
+    }
+
+    public void setBillType(String billType) {
+        this.billType = billType;
+    }
 
     public double getConsultationFee() {
         return consultationFee;
@@ -109,7 +96,6 @@ public class Bill {
         this.consultationFee = consultationFee;
     }
 
-
     public double getTreatmentFee() {
         return treatmentFee;
     }
@@ -117,7 +103,6 @@ public class Bill {
     public void setTreatmentFee(double treatmentFee) {
         this.treatmentFee = treatmentFee;
     }
-
 
     public double getTotalAmount() {
         return totalAmount;
@@ -127,7 +112,6 @@ public class Bill {
         this.totalAmount = totalAmount;
     }
 
-
     public int getCreatedBy() {
         return createdBy;
     }
@@ -135,7 +119,6 @@ public class Bill {
     public void setCreatedBy(int createdBy) {
         this.createdBy = createdBy;
     }
-
 
     public Timestamp getCreatedAt() {
         return createdAt;

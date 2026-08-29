@@ -52,50 +52,28 @@ public class LoginController extends HttpServlet {
 
         if (user != null) {
 
-            HttpSession session =
-                    request.getSession();
+            HttpSession session = request.getSession();
 
-            session.setAttribute(
-                    "loggedUser",
-                    user
-            );
+            session.setAttribute("loggedUser", user);
 
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+            if ("ADMIN".equals(user.getRole())) {
 
                 response.sendRedirect(
                         request.getContextPath()
-                        + "/admin/dashboard"
-                );
-
-            } else if (
-                    "RECEPTIONIST"
-                    .equalsIgnoreCase(user.getRole())) {
-
-                response.sendRedirect(
-                        request.getContextPath()
-                        + "/dashboard"
-                );
+                        + "/admin/dashboard");
 
             } else {
 
-                session.invalidate();
-
-                request.setAttribute(
-                        "error",
-                        "Invalid user role."
-                );
-
-                request.getRequestDispatcher(
-                        "/WEB-INF/views/auth/login.jsp")
-                        .forward(request, response);
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/dashboard");
             }
 
         } else {
 
             request.setAttribute(
                     "error",
-                    "Invalid username or password."
-            );
+                    "Invalid username or password.");
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/auth/login.jsp")

@@ -19,9 +19,9 @@ public class BillDAO {
 
         String sql =
                 "INSERT INTO bills " +
-                "(bill_number, appointment_id, consultation_fee, " +
-                "treatment_fee, total_amount, created_by) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+                "(bill_number, appointment_id, patient_id, bill_type, " +
+                "consultation_fee, treatment_fee, total_amount, created_by) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
             Connection con = DBConnection.getConnection();
@@ -29,11 +29,24 @@ public class BillDAO {
         ) {
 
             st.setString(1, bill.getBillNumber());
-            st.setInt(2, bill.getAppointmentId());
-            st.setDouble(3, bill.getConsultationFee());
-            st.setDouble(4, bill.getTreatmentFee());
-            st.setDouble(5, bill.getTotalAmount());
-            st.setInt(6, bill.getCreatedBy());
+
+            if (bill.getAppointmentId() == null) {
+                st.setNull(2, java.sql.Types.INTEGER);
+            } else {
+                st.setInt(2, bill.getAppointmentId());
+            }
+
+            st.setInt(3, bill.getPatientId());
+
+            st.setString(4, bill.getBillType());
+
+            st.setDouble(5, bill.getConsultationFee());
+
+            st.setDouble(6, bill.getTreatmentFee());
+
+            st.setDouble(7, bill.getTotalAmount());
+
+            st.setInt(8, bill.getCreatedBy());
 
             return st.executeUpdate() > 0;
 
@@ -54,10 +67,8 @@ public class BillDAO {
     public int getNextBillId() {
 
         String sql =
-                "SELECT AUTO_INCREMENT " +
-                "FROM INFORMATION_SCHEMA.TABLES " +
-                "WHERE TABLE_SCHEMA = DATABASE() " +
-                "AND TABLE_NAME = 'bills'";
+                "SELECT COALESCE(MAX(bill_id), 0) + 1 AS next_id " +
+                "FROM bills";
 
         try (
             Connection con = DBConnection.getConnection();
@@ -67,7 +78,7 @@ public class BillDAO {
 
             if (rs.next()) {
 
-                return rs.getInt("AUTO_INCREMENT");
+                return rs.getInt("next_id");
             }
 
         } catch (Exception e) {
@@ -141,7 +152,6 @@ public class BillDAO {
             try (ResultSet rs = st.executeQuery()) {
 
                 if (rs.next()) {
-
                     return mapResultSetToBill(rs);
                 }
             }
@@ -163,8 +173,7 @@ public class BillDAO {
     // GET BILL BY APPOINTMENT
     // =========================================================
 
-    public Bill getBillByAppointmentId(
-            int appointmentId) {
+    public Bill getBillByAppointmentId(int appointmentId) {
 
         String sql =
                 "SELECT * FROM bills " +
@@ -180,7 +189,6 @@ public class BillDAO {
             try (ResultSet rs = st.executeQuery()) {
 
                 if (rs.next()) {
-
                     return mapResultSetToBill(rs);
                 }
             }
@@ -199,11 +207,46 @@ public class BillDAO {
 
 
     // =========================================================
+    // CHECK APPOINTMENT ALREADY BILLED
+    // =========================================================
+
+    public boolean appointmentAlreadyBilled(int appointmentId) {
+
+        String sql =
+                "SELECT bill_id " +
+                "FROM bills " +
+                "WHERE appointment_id = ?";
+
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement st = con.prepareStatement(sql)
+        ) {
+
+            st.setInt(1, appointmentId);
+
+            try (ResultSet rs = st.executeQuery()) {
+
+                return rs.next();
+            }
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "ERROR CHECKING APPOINTMENT BILL:"
+            );
+
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    // =========================================================
     // CHECK BILL NUMBER
     // =========================================================
 
-    public boolean billNumberExists(
-            String billNumber) {
+    public boolean billNumberExists(String billNumber) {
 
         String sql =
                 "SELECT COUNT(*) " +
@@ -220,7 +263,6 @@ public class BillDAO {
             try (ResultSet rs = st.executeQuery()) {
 
                 if (rs.next()) {
-
                     return rs.getInt(1) > 0;
                 }
             }
@@ -239,70 +281,47 @@ public class BillDAO {
 
 
     // =========================================================
-    // CHECK APPOINTMENT ALREADY BILLED
-    // =========================================================
-
-    public boolean appointmentAlreadyBilled(
-            int appointmentId) {
-
-        String sql =
-                "SELECT COUNT(*) " +
-                "FROM bills " +
-                "WHERE appointment_id = ?";
-
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
-
-            st.setInt(1, appointmentId);
-
-            try (ResultSet rs = st.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return rs.getInt(1) > 0;
-                }
-            }
-
-        } catch (Exception e) {
-
-            System.out.println(
-                    "ERROR CHECKING APPOINTMENT BILL:"
-            );
-
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-
-    // =========================================================
     // SEARCH BILLS
     // =========================================================
 
     public List<Bill> searchBills(
-            String keyword) {
+            String keyword,
+            String billType) {
 
         List<Bill> bills = new ArrayList<>();
 
-        String sql =
+        StringBuilder sql = new StringBuilder(
                 "SELECT b.* " +
                 "FROM bills b " +
-                "INNER JOIN appointments a " +
+                "LEFT JOIN patients p " +
+                "ON b.patient_id = p.patient_id " +
+                "LEFT JOIN appointments a " +
                 "ON b.appointment_id = a.appointment_id " +
-                "INNER JOIN patients p " +
-                "ON a.patient_id = p.patient_id " +
-                "WHERE b.bill_number LIKE ? " +
-                "OR a.appointment_number LIKE ? " +
+                "WHERE (" +
+                "b.bill_number LIKE ? " +
                 "OR p.patient_code LIKE ? " +
                 "OR p.name LIKE ? " +
-                "ORDER BY b.bill_id DESC";
+                "OR a.appointment_number LIKE ?" +
+                ")"
+        );
+
+        if (billType != null
+                && !billType.trim().isEmpty()
+                && !"ALL".equalsIgnoreCase(billType)) {
+
+            sql.append(
+                    " AND b.bill_type = ?"
+            );
+        }
+
+        sql.append(
+                " ORDER BY b.bill_id DESC"
+        );
 
         try (
             Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
+            PreparedStatement st =
+                    con.prepareStatement(sql.toString())
         ) {
 
             String value =
@@ -312,6 +331,13 @@ public class BillDAO {
             st.setString(2, value);
             st.setString(3, value);
             st.setString(4, value);
+
+            if (billType != null
+                    && !billType.trim().isEmpty()
+                    && !"ALL".equalsIgnoreCase(billType)) {
+
+                st.setString(5, billType);
+            }
 
             try (ResultSet rs = st.executeQuery()) {
 
@@ -346,12 +372,9 @@ public class BillDAO {
         List<Bill> bills = new ArrayList<>();
 
         String sql =
-                "SELECT b.* " +
-                "FROM bills b " +
-                "INNER JOIN appointments a " +
-                "ON b.appointment_id = a.appointment_id " +
-                "WHERE a.patient_id = ? " +
-                "ORDER BY b.bill_id DESC";
+                "SELECT * FROM bills " +
+                "WHERE patient_id = ? " +
+                "ORDER BY bill_id DESC";
 
         try (
             Connection con = DBConnection.getConnection();
@@ -399,7 +422,6 @@ public class BillDAO {
         ) {
 
             if (rs.next()) {
-
                 return rs.getInt(1);
             }
 
@@ -417,7 +439,7 @@ public class BillDAO {
 
 
     // =========================================================
-    // MAP RESULT SET TO BILL
+    // MAP RESULT SET
     // =========================================================
 
     private Bill mapResultSetToBill(
@@ -433,8 +455,28 @@ public class BillDAO {
                 rs.getString("bill_number")
         );
 
-        bill.setAppointmentId(
-                rs.getInt("appointment_id")
+
+        int appointmentId =
+                rs.getInt("appointment_id");
+
+        if (rs.wasNull()) {
+
+            bill.setAppointmentId(null);
+
+        } else {
+
+            bill.setAppointmentId(
+                    appointmentId
+            );
+        }
+
+
+        bill.setPatientId(
+                rs.getInt("patient_id")
+        );
+
+        bill.setBillType(
+                rs.getString("bill_type")
         );
 
         bill.setConsultationFee(

@@ -1,507 +1,496 @@
-<%@ page language="java"
-    contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 
 <%@ page import="com.sunrise.model.Bill" %>
-<%@ page import="com.sunrise.model.Appointment" %>
 <%@ page import="com.sunrise.model.Patient" %>
-<%@ page import="com.sunrise.model.Dentist" %>
 <%@ page import="com.sunrise.model.Treatment" %>
+<%@ page import="com.sunrise.model.Appointment" %>
+<%@ page import="com.sunrise.model.Dentist" %>
 
 <%
     Bill bill =
         (Bill) request.getAttribute("bill");
 
-    Appointment appointment =
-        (Appointment) request.getAttribute("appointment");
-
     Patient patient =
         (Patient) request.getAttribute("patient");
 
-    Dentist dentist =
-        (Dentist) request.getAttribute("dentist");
-
     Treatment treatment =
         (Treatment) request.getAttribute("treatment");
+
+    Appointment appointment =
+        (Appointment) request.getAttribute("appointment");
+
+    Dentist dentist =
+        (Dentist) request.getAttribute("dentist");
 %>
 
 <!DOCTYPE html>
-
-<html lang="en">
+<html>
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>
-        Receipt - <%= bill.getBillNumber() %>
-    </title>
-
-
-    <!-- Tailwind -->
-
-    <script src="https://cdn.tailwindcss.com"></script>
-
-
-    <!-- Tailwind Config -->
-
-    <script>
-
-        tailwind.config = {
-
-            theme: {
-
-                extend: {
-
-                    fontFamily: {
-
-                        manrope: [
-                            'Manrope',
-                            'sans-serif'
-                        ],
-
-                        inter: [
-                            'Inter',
-                            'sans-serif'
-                        ]
-
-                    }
-
-                }
-
-            }
-
-        }
-
-    </script>
-
-
-    <!-- Fonts -->
-
-    <link rel="preconnect"
-          href="https://fonts.googleapis.com">
-
-    <link rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
+    <title><%= bill.getBillNumber() %></title>
 
     <style>
 
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            padding: 40px;
+
+            font-family: Arial, sans-serif;
+
+            background: #f5f7fb;
+
+            color: #172033;
+        }
+
+        .receipt {
+
+            max-width: 760px;
+
+            margin: auto;
+
+            background: white;
+
+            padding: 45px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 4px 20px rgba(0,0,0,0.06);
+        }
+
+        .header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            padding-bottom: 25px;
+        }
+
+        .brand {
+
+            font-size: 24px;
+
+            font-weight: bold;
+        }
+
+        .subtitle {
+
+            margin-top: 5px;
+
+            color: #64748b;
+
+            font-size: 12px;
+        }
+
+        .bill-number {
+
+            text-align: right;
+        }
+
+        .label {
+
+            font-size: 11px;
+
+            color: #94a3b8;
+
+            text-transform: uppercase;
+        }
+
+        .value {
+
+            margin-top: 5px;
+
+            font-size: 14px;
+
+            font-weight: bold;
+        }
+
+        .section {
+
+            margin-top: 30px;
+        }
+
+        .section-title {
+
+            margin-bottom: 12px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        .info-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 12px;
+        }
+
+        .info {
+
+            background: #f8fafc;
+
+            padding: 14px;
+
+            border-radius: 8px;
+        }
+
+        .table {
+
+            width: 100%;
+
+            margin-top: 20px;
+
+            border-collapse: collapse;
+        }
+
+        .table th {
+
+            text-align: left;
+
+            background: #f8fafc;
+
+            padding: 12px;
+
+            font-size: 12px;
+
+            color: #64748b;
+        }
+
+        .table td {
+
+            padding: 14px 12px;
+
+            border-bottom: 1px solid #e5e7eb;
+
+            font-size: 13px;
+        }
+
+        .amount {
+
+            text-align: right;
+        }
+
+        .total {
+
+            margin-top: 20px;
+
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 50px;
+
+            font-size: 18px;
+
+            font-weight: bold;
+        }
+
+        .footer {
+
+            margin-top: 40px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid #e5e7eb;
+
+            text-align: center;
+
+            color: #94a3b8;
+
+            font-size: 11px;
+        }
+
+        .print-button {
+
+            display: block;
+
+            margin: 20px auto;
+
+            padding: 12px 20px;
+
+            background: #2563eb;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+        }
+
         @media print {
 
-            .no-print {
-                display: none !important;
-            }
-
             body {
-                background: white !important;
+
+                padding: 0;
+
+                background: white;
             }
 
             .receipt {
-                box-shadow: none !important;
-                border: none !important;
-                margin: 0 !important;
-                width: 100% !important;
-                max-width: none !important;
+
+                box-shadow: none;
+
+                max-width: none;
+
+                border-radius: 0;
             }
 
+            .print-button {
+
+                display: none;
+            }
         }
 
     </style>
 
 </head>
 
+<body>
 
-<body class="min-h-screen bg-[#F5F7FB] font-manrope text-[#172033]">
+    <button class="print-button"
+            onclick="window.print()">
+
+        Print Bill
+
+    </button>
 
 
-    <!-- RECEIPT -->
-
-    <div class="receipt mx-auto my-8 w-full max-w-[720px] rounded-xl border border-slate-200 bg-white px-10 py-9 shadow-[0_10px_35px_rgba(15,23,42,0.06)]">
+    <div class="receipt">
 
 
         <!-- HEADER -->
 
-        <div class="border-b border-slate-200 pb-7">
+        <div class="header">
 
+            <div>
 
-            <div class="flex items-start justify-between">
-
-
-                <!-- CLINIC -->
-
-                <div class="flex items-center gap-3">
-
-
-                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2563EB]">
-
-                        <svg
-                            class="h-5 w-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
-
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 3v18M3 12h18"
-                            />
-
-                        </svg>
-
-                    </div>
-
-
-                    <div>
-
-                        <h1 class="text-base font-extrabold tracking-[-0.3px]">
-                            Sunrise Dental Clinic
-                        </h1>
-
-                        <p class="mt-0.5 font-inter text-[9px] text-slate-400">
-                            Dental Care &amp; Treatment
-                        </p>
-
-                    </div>
-
-
+                <div class="brand">
+                    Sunrise Dental
                 </div>
 
-
-
-                <!-- RECEIPT LABEL -->
-
-                <div class="text-right">
-
-
-                    <p class="font-inter text-[9px] font-semibold uppercase tracking-[0.15em] text-slate-400">
-                        Patient Receipt
-                    </p>
-
-
-                    <p class="mt-1 text-lg font-extrabold text-[#2563EB]">
-                        <%= bill.getBillNumber() %>
-                    </p>
-
-
+                <div class="subtitle">
+                    Clinic Management System
                 </div>
-
 
             </div>
 
+
+            <div class="bill-number">
+
+                <div class="label">
+                    Bill Number
+                </div>
+
+                <div class="value">
+                    <%= bill.getBillNumber() %>
+                </div>
+
+            </div>
 
         </div>
 
 
+        <!-- PATIENT -->
 
-        <!-- PATIENT + APPOINTMENT -->
+        <div class="section">
 
-        <div class="grid grid-cols-2 gap-8 border-b border-slate-200 py-6">
-
-
-            <!-- PATIENT -->
-
-            <div>
+            <div class="section-title">
+                Patient Information
+            </div>
 
 
-                <p class="mb-3 font-inter text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Patient Information
-                </p>
+            <div class="info-grid">
 
+                <div class="info">
 
-                <div class="space-y-2.5">
-
-
-                    <div>
-
-                        <p class="font-inter text-[8px] text-slate-400">
-                            Patient Code
-                        </p>
-
-                        <p class="mt-0.5 text-[11px] font-bold">
-
-                            <%= patient != null
-                                ? patient.getPatientCode()
-                                : "N/A" %>
-
-                        </p>
-
+                    <div class="label">
+                        Patient
                     </div>
 
+                    <div class="value">
 
-                    <div>
-
-                        <p class="font-inter text-[8px] text-slate-400">
-                            Patient Name
-                        </p>
-
-                        <p class="mt-0.5 text-[11px] font-bold">
-
-                            <%= patient != null
-                                ? patient.getName()
-                                : "N/A" %>
-
-                        </p>
+                        <%= patient != null
+                            ? patient.getName()
+                            : "Patient #" + bill.getPatientId() %>
 
                     </div>
-
 
                 </div>
 
 
-            </div>
+                <div class="info">
 
-
-
-            <!-- APPOINTMENT -->
-
-            <div>
-
-
-                <p class="mb-3 font-inter text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Appointment Information
-                </p>
-
-
-                <div class="space-y-2.5">
-
-
-                    <div>
-
-                        <p class="font-inter text-[8px] text-slate-400">
-                            Appointment No.
-                        </p>
-
-                        <p class="mt-0.5 text-[11px] font-bold">
-
-                            <%= appointment != null
-                                ? appointment.getAppointmentNumber()
-                                : "N/A" %>
-
-                        </p>
-
+                    <div class="label">
+                        Bill Type
                     </div>
 
+                    <div class="value">
 
-                    <div>
-
-                        <p class="font-inter text-[8px] text-slate-400">
-                            Date &amp; Time
-                        </p>
-
-                        <p class="mt-0.5 text-[11px] font-bold">
-
-                            <%= appointment != null
-                                ? appointment.getAppointmentDate()
-                                : "N/A" %>
-
-                            <% if (appointment != null) { %>
-
-                                ·
-
-                                <%= appointment.getAppointmentTime() %>
-
-                            <% } %>
-
-                        </p>
+                        <%= "WALK_IN".equals(
+                                bill.getBillType())
+                            ? "Walk-in / Custom"
+                            : "Appointment" %>
 
                     </div>
-
 
                 </div>
 
-
             </div>
-
 
         </div>
 
 
+        <!-- APPOINTMENT -->
 
-        <!-- DENTIST / TREATMENT -->
+        <% if (appointment != null) { %>
 
-        <div class="grid grid-cols-2 gap-8 border-b border-slate-200 py-6">
+        <div class="section">
 
-
-            <div>
-
-
-                <p class="font-inter text-[8px] font-semibold uppercase tracking-wide text-slate-400">
-                    Dentist
-                </p>
-
-
-                <p class="mt-1 text-[11px] font-bold">
-
-                    <%= dentist != null
-                        ? dentist.getDentistName()
-                        : "N/A" %>
-
-                </p>
-
-
-                <% if (dentist != null
-                        && dentist.getSpecialization() != null) { %>
-
-
-                    <p class="mt-0.5 font-inter text-[9px] text-slate-400">
-
-                        <%= dentist.getSpecialization() %>
-
-                    </p>
-
-
-                <% } %>
-
-
+            <div class="section-title">
+                Appointment Information
             </div>
 
 
+            <div class="info-grid">
 
-            <div>
+                <div class="info">
+
+                    <div class="label">
+                        Appointment
+                    </div>
+
+                    <div class="value">
+                        <%= appointment.getAppointmentNumber() %>
+                    </div>
+
+                </div>
 
 
-                <p class="font-inter text-[8px] font-semibold uppercase tracking-wide text-slate-400">
-                    Treatment
-                </p>
+                <div class="info">
 
+<div class="info">
 
-                <p class="mt-1 text-[11px] font-bold">
+    <p class="text-xs text-slate-400">
+        Dentist
+    </p>
 
-                    <%= treatment != null
-                        ? treatment.getTreatmentName()
-                        : "N/A" %>
+    <p class="mt-1 text-sm font-semibold text-slate-800">
 
-                </p>
+        <%= dentist != null
+            ? dentist.getDentistName()
+            : "Not available" %>
 
+    </p>
+
+</div>
 
             </div>
-
 
         </div>
 
+        <% } %>
 
 
-        <!-- CHARGES -->
+        <!-- BILL ITEMS -->
 
-        <div class="py-6">
+        <div class="section">
 
-
-            <p class="mb-4 font-inter text-[9px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                Charges
-            </p>
-
-
-
-            <!-- CONSULTATION -->
-
-            <div class="flex items-center justify-between border-b border-slate-100 py-3">
-
-
-                <div>
-
-                    <p class="text-[11px] font-semibold">
-                        Consultation Fee
-                    </p>
-
-                    <p class="mt-0.5 font-inter text-[9px] text-slate-400">
-                        Dental consultation
-                    </p>
-
-                </div>
-
-
-                <p class="font-inter text-[11px] font-semibold">
-
-                    LKR
-                    <%= String.format(
-                        "%.2f",
-                        bill.getConsultationFee()
-                    ) %>
-
-                </p>
-
-
+            <div class="section-title">
+                Bill Summary
             </div>
 
 
+            <table class="table">
 
-            <!-- TREATMENT -->
+                <thead>
 
-            <div class="flex items-center justify-between border-b border-slate-100 py-3">
+                    <tr>
 
+                        <th>
+                            Description
+                        </th>
 
-                <div>
+                        <th class="amount">
+                            Amount
+                        </th>
 
-                    <p class="text-[11px] font-semibold">
-                        Treatment Fee
-                    </p>
+                    </tr>
 
-                    <p class="mt-0.5 font-inter text-[9px] text-slate-400">
-
-                        <%= treatment != null
-                            ? treatment.getTreatmentName()
-                            : "Dental treatment" %>
-
-                    </p>
-
-                </div>
+                </thead>
 
 
-                <p class="font-inter text-[11px] font-semibold">
+                <tbody>
 
-                    LKR
-                    <%= String.format(
-                        "%.2f",
-                        bill.getTreatmentFee()
-                    ) %>
+                    <tr>
 
-                </p>
+                        <td>
+                            Consultation Fee
+                        </td>
 
+                        <td class="amount">
 
-            </div>
+                            LKR
+                            <%= String.format(
+                                "%.2f",
+                                bill.getConsultationFee()
+                            ) %>
 
+                        </td>
 
-        </div>
-
-
-
-        <!-- TOTAL -->
-
-        <div class="rounded-xl bg-[#111827] px-6 py-5 text-white">
+                    </tr>
 
 
-            <div class="flex items-center justify-between">
+                    <tr>
+
+                        <td>
+
+                            <%= treatment != null
+                                ? treatment.getTreatmentName()
+                                : "Treatment" %>
+
+                        </td>
+
+                        <td class="amount">
+
+                            LKR
+                            <%= String.format(
+                                "%.2f",
+                                bill.getTreatmentFee()
+                            ) %>
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
 
 
-                <div>
+            <div class="total">
 
+                <span>
+                    Total
+                </span>
 
-                    <p class="text-sm font-extrabold">
-                        Total Amount
-                    </p>
-
-
-                    <p class="mt-0.5 font-inter text-[9px] text-slate-400">
-                        Amount payable
-                    </p>
-
-
-                </div>
-
-
-                <p class="text-xl font-extrabold">
+                <span>
 
                     LKR
                     <%= String.format(
@@ -509,95 +498,27 @@
                         bill.getTotalAmount()
                     ) %>
 
-                </p>
-
+                </span>
 
             </div>
 
-
         </div>
-
 
 
         <!-- FOOTER -->
 
-        <div class="mt-8 text-center">
+        <div class="footer">
 
+            Thank you for choosing Sunrise Dental.
 
-            <p class="text-[11px] font-bold">
-                Thank you for choosing Sunrise Dental Clinic.
-            </p>
+            <br>
 
-
-            <p class="mt-1 font-inter text-[9px] text-slate-400">
-                We appreciate your trust in our care.
-            </p>
-
-
-            <p class="mt-4 font-inter text-[8px] text-slate-400">
-
-                Generated on:
-                <%= bill.getCreatedAt() %>
-
-            </p>
-
-
-        </div>
-
-
-
-        <!-- ACTIONS -->
-
-        <div class="no-print mt-7 flex justify-center gap-2">
-
-
-            <button
-                onclick="window.print()"
-                class="flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[10px] font-semibold text-white transition hover:bg-[#1D4ED8]"
-            >
-
-                <svg
-                    class="h-3.5 w-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                    viewBox="0 0 24 24"
-                >
-
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"
-                    />
-
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 14h12v8H6z"
-                    />
-
-                </svg>
-
-                Print Receipt
-
-            </button>
-
-
-            <button
-                onclick="window.close()"
-                class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-inter text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
-            >
-
-                Close
-
-            </button>
-
+            This is a computer-generated bill.
 
         </div>
 
 
     </div>
-
 
 </body>
 
