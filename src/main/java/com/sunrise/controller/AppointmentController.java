@@ -29,6 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.sunrise.service.EmailService;
+
 
 @WebServlet("/appointments/*")
 public class AppointmentController extends HttpServlet {
@@ -943,6 +945,21 @@ public class AppointmentController extends HttpServlet {
 
         if (success) {
 
+            // =====================================================
+            // SEND APPOINTMENT EMAILS
+            // Patient + Dentist
+            //
+            // Email failure does NOT cancel the appointment.
+            // =====================================================
+
+            EmailService.sendAppointmentCreatedEmails(
+                    appointment,
+                    patient,
+                    dentist,
+                    treatment
+            );
+
+
             response.sendRedirect(
                     request.getContextPath()
                     + "/appointments?success=1"
@@ -1259,6 +1276,9 @@ public class AppointmentController extends HttpServlet {
                         .getAppointmentById(
                                 appointmentId
                         );
+            
+            String oldStatus =
+                    appointment.getStatus();
 
 
             if (appointment == null) {
@@ -1468,6 +1488,28 @@ public class AppointmentController extends HttpServlet {
 
 
             if (success) {
+
+                // =====================================================
+                // SEND CANCELLATION EMAILS
+                //
+                // Only when appointment changes INTO CANCELLED.
+                // =====================================================
+
+                if ("CANCELLED".equalsIgnoreCase(
+                        status
+                )
+                        && !"CANCELLED".equalsIgnoreCase(
+                                oldStatus
+                        )) {
+
+                    EmailService.sendAppointmentCancelledEmails(
+                            appointment,
+                            patient,
+                            dentist,
+                            treatment
+                    );
+                }
+
 
                 response.sendRedirect(
                         request.getContextPath()
