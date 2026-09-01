@@ -25,8 +25,8 @@ public class UserDAO {
                 "AND active = 1";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setString(1, username);
@@ -50,6 +50,34 @@ public class UserDAO {
 
 
     // =========================================================
+    // MARK FIRST LOGIN AS COMPLETED
+    // =========================================================
+
+    public boolean markFirstLoginCompleted(int userId) {
+
+        String sql =
+                "UPDATE users SET first_login = FALSE WHERE user_id = ?";
+
+        try (
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, userId);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (ClassNotFoundException | SQLException e) {
+
+            System.out.println("ERROR UPDATING FIRST LOGIN:");
+            e.printStackTrace();
+
+            return false;
+        }
+    }
+
+
+    // =========================================================
     // ADD RECEPTIONIST
     // =========================================================
 
@@ -58,12 +86,12 @@ public class UserDAO {
         String sql =
                 "INSERT INTO users " +
                 "(full_name, email, phone, address, position, " +
-                "username, password_hash, role, active) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, 'RECEPTIONIST', 1)";
+                "username, password_hash, role, active, first_login) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, 'RECEPTIONIST', 1, 1)";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setString(1, user.getFullName());
@@ -78,7 +106,10 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println("ERROR ADDING RECEPTIONIST:");
+            System.out.println(
+                    "ERROR ADDING RECEPTIONIST:"
+            );
+
             e.printStackTrace();
         }
 
@@ -100,18 +131,24 @@ public class UserDAO {
                 "ORDER BY user_id DESC";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
         ) {
 
             while (rs.next()) {
-                receptionists.add(mapUser(rs));
+
+                receptionists.add(
+                        mapUser(rs)
+                );
             }
 
         } catch (Exception e) {
 
-            System.out.println("ERROR LOADING RECEPTIONISTS:");
+            System.out.println(
+                    "ERROR LOADING RECEPTIONISTS:"
+            );
+
             e.printStackTrace();
         }
 
@@ -130,8 +167,8 @@ public class UserDAO {
                 "WHERE user_id = ?";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setInt(1, userId);
@@ -139,13 +176,17 @@ public class UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
+
                     return mapUser(rs);
                 }
             }
 
         } catch (Exception e) {
 
-            System.out.println("ERROR FINDING USER:");
+            System.out.println(
+                    "ERROR FINDING USER:"
+            );
+
             e.printStackTrace();
         }
 
@@ -170,8 +211,8 @@ public class UserDAO {
                 "AND role = 'RECEPTIONIST'";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setString(1, user.getFullName());
@@ -185,7 +226,10 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println("ERROR UPDATING RECEPTIONIST:");
+            System.out.println(
+                    "ERROR UPDATING RECEPTIONIST:"
+            );
+
             e.printStackTrace();
         }
 
@@ -197,7 +241,9 @@ public class UserDAO {
     // ACTIVATE / DEACTIVATE
     // =========================================================
 
-    public boolean updateStatus(int userId, boolean active) {
+    public boolean updateStatus(
+            int userId,
+            boolean active) {
 
         String sql =
                 "UPDATE users SET active = ? " +
@@ -205,8 +251,8 @@ public class UserDAO {
                 "AND role = 'RECEPTIONIST'";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setBoolean(1, active);
@@ -216,7 +262,10 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println("ERROR UPDATING STATUS:");
+            System.out.println(
+                    "ERROR UPDATING STATUS:"
+            );
+
             e.printStackTrace();
         }
 
@@ -235,19 +284,23 @@ public class UserDAO {
                 "WHERE username = ?";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql)
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
             ps.setString(1, username);
 
             try (ResultSet rs = ps.executeQuery()) {
+
                 return rs.next();
             }
 
         } catch (Exception e) {
 
-            System.out.println("ERROR CHECKING USERNAME:");
+            System.out.println(
+                    "ERROR CHECKING USERNAME:"
+            );
+
             e.printStackTrace();
         }
 
@@ -267,18 +320,22 @@ public class UserDAO {
                 "AND active = 1";
 
         try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery()
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
         ) {
 
             if (rs.next()) {
+
                 return rs.getInt(1);
             }
 
         } catch (Exception e) {
 
-            System.out.println("ERROR GETTING RECEPTIONIST COUNT:");
+            System.out.println(
+                    "ERROR GETTING RECEPTIONIST COUNT:"
+            );
+
             e.printStackTrace();
         }
 
@@ -290,20 +347,55 @@ public class UserDAO {
     // MAP USER
     // =========================================================
 
-    private User mapUser(ResultSet rs) throws SQLException {
+    private User mapUser(ResultSet rs)
+            throws SQLException {
 
         User user = new User();
 
-        user.setUserId(rs.getInt("user_id"));
-        user.setFullName(rs.getString("full_name"));
-        user.setEmail(rs.getString("email"));
-        user.setPhone(rs.getString("phone"));
-        user.setAddress(rs.getString("address"));
-        user.setPosition(rs.getString("position"));
-        user.setUsername(rs.getString("username"));
-        user.setPasswordHash(rs.getString("password_hash"));
-        user.setRole(rs.getString("role"));
-        user.setActive(rs.getBoolean("active"));
+        user.setUserId(
+                rs.getInt("user_id")
+        );
+
+        user.setFullName(
+                rs.getString("full_name")
+        );
+
+        user.setEmail(
+                rs.getString("email")
+        );
+
+        user.setPhone(
+                rs.getString("phone")
+        );
+
+        user.setAddress(
+                rs.getString("address")
+        );
+
+        user.setPosition(
+                rs.getString("position")
+        );
+
+        user.setUsername(
+                rs.getString("username")
+        );
+
+        user.setPasswordHash(
+                rs.getString("password_hash")
+        );
+
+        user.setRole(
+                rs.getString("role")
+        );
+
+        user.setActive(
+                rs.getBoolean("active")
+        );
+
+        // NEW USER GUIDE
+        user.setFirstLogin(
+                rs.getBoolean("first_login")
+        );
 
         return user;
     }

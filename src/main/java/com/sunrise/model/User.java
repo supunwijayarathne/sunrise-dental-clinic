@@ -12,6 +12,15 @@ public class User {
     private String passwordHash;
     private String role;
     private boolean active;
+    private boolean firstLogin;
+    
+    public void setFirstLogin(boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
+    
+    public boolean isFirstLogin() {
+        return firstLogin;
+    }
 
     public User() {
     }

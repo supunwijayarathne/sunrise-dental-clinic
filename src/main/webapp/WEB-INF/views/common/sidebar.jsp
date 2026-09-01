@@ -101,6 +101,10 @@
             currentPage.startsWith(
                     "/reports"
             );
+    boolean helpActive =
+            currentPage.startsWith(
+                    "/help"
+            );
 
 
     boolean employeesActive =
@@ -501,6 +505,51 @@
         </nav>
 
     </div>
+    
+    <!-- =================================================
+     HELP
+================================================== -->
+
+<a
+    href="<%= contextPath %>/help"
+    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
+    <%= helpActive
+        ? "text-white"
+        : "text-slate-400 hover:bg-[#1f2937] hover:text-white" %>"
+    style="<%= helpActive
+        ? "background-color: #2563EB;"
+        : "" %>"
+>
+
+    <svg
+        class="h-[17px] w-[17px] shrink-0"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        viewBox="0 0 24 24">
+
+        <circle
+            cx="12"
+            cy="12"
+            r="9">
+        </circle>
+
+        <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5">
+        </path>
+
+        <path
+            stroke-linecap="round"
+            d="M12 16.5h.01">
+        </path>
+
+    </svg>
+
+    Help
+
+</a>
 
 
 
@@ -542,6 +591,8 @@
 
 
     </div>
+    
+    <jsp:include page="/WEB-INF/views/common/cookie-banner.jsp" />
 
 
 </aside>

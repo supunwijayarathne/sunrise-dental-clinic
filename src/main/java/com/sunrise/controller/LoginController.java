@@ -7,6 +7,7 @@ import com.sunrise.model.User;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,6 +25,10 @@ public class LoginController extends HttpServlet {
         userDAO = new UserDAO();
     }
 
+    // =========================================================
+    // SHOW LOGIN PAGE
+    // =========================================================
+
     @Override
     protected void doGet(
             HttpServletRequest request,
@@ -34,6 +39,10 @@ public class LoginController extends HttpServlet {
                 "/WEB-INF/views/auth/login.jsp")
                 .forward(request, response);
     }
+
+    // =========================================================
+    // LOGIN
+    // =========================================================
 
     @Override
     protected void doPost(
@@ -47,16 +56,39 @@ public class LoginController extends HttpServlet {
         String password =
                 request.getParameter("password");
 
+        // Check login credentials
         User user =
                 userDAO.login(username, password);
 
         if (user != null) {
 
-            HttpSession session = request.getSession();
+            // Create session
+            HttpSession session =
+                    request.getSession();
 
+            // IMPORTANT:
+            // Use the same name throughout the application
             session.setAttribute("loggedUser", user);
 
-            if ("ADMIN".equals(user.getRole())) {
+            // =================================================
+            // NEW USER CHECK
+            // =================================================
+
+            if (user.isFirstLogin()) {
+
+                response.sendRedirect(
+                        request.getContextPath()
+                        + "/help");
+
+                return;
+            }
+
+            // =================================================
+            // NORMAL LOGIN
+            // =================================================
+
+            if ("ADMIN".equalsIgnoreCase(
+                    user.getRole())) {
 
                 response.sendRedirect(
                         request.getContextPath()
@@ -73,7 +105,8 @@ public class LoginController extends HttpServlet {
 
             request.setAttribute(
                     "error",
-                    "Invalid username or password.");
+                    "Invalid username or password."
+            );
 
             request.getRequestDispatcher(
                     "/WEB-INF/views/auth/login.jsp")
