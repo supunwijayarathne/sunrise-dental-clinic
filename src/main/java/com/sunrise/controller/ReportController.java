@@ -11,6 +11,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/reports")
 public class ReportController extends HttpServlet {
@@ -29,6 +30,20 @@ public class ReportController extends HttpServlet {
             HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+    	
+    	HttpSession session = request.getSession(false);
+
+        if (session == null ||
+            !"Admin".equalsIgnoreCase(
+                String.valueOf(session.getAttribute("role")))) {
+
+            response.sendError(
+                HttpServletResponse.SC_FORBIDDEN,
+                "Access denied"
+            );
+
+            return;
+        }
 
         // =====================================================
         // REVENUE
