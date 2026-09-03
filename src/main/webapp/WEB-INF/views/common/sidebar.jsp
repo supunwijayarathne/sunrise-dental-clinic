@@ -554,12 +554,83 @@
 
 
     <!-- =====================================================
-         LOGOUT
+         PROFILE + LOGOUT
     ====================================================== -->
 
     <div
         class="mt-auto border-t border-white/[0.06] pt-4">
 
+        <% if (loggedUser != null) { %>
+
+            <%
+                String profileName = loggedUser.getFullName();
+
+                if (profileName == null || profileName.trim().isEmpty()) {
+                    profileName = loggedUser.getUsername();
+                }
+
+                String[] nameParts = profileName.trim().split("\\s+");
+                String initials = "";
+
+                if (nameParts.length > 0 && !nameParts[0].isEmpty()) {
+                    initials += nameParts[0].substring(0, 1).toUpperCase();
+                }
+
+                if (nameParts.length > 1 && !nameParts[nameParts.length - 1].isEmpty()) {
+                    initials += nameParts[nameParts.length - 1].substring(0, 1).toUpperCase();
+                }
+
+                if (initials.isEmpty()) {
+                    initials = "U";
+                }
+
+                String displayRole = loggedUser.getRole();
+
+                if (displayRole == null || displayRole.trim().isEmpty()) {
+                    displayRole = "User";
+                } else if ("ADMIN".equalsIgnoreCase(displayRole.trim())) {
+                    displayRole = "Administrator";
+                } else if ("RECEPTIONIST".equalsIgnoreCase(displayRole.trim())) {
+                    displayRole = "Receptionist";
+                }
+            %>
+
+            <!-- PROFILE -->
+
+            <div
+                class="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-3">
+
+                <div
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#111827] text-[11px] font-bold text-white">
+
+                    <%= initials %>
+
+                </div>
+
+                <div class="min-w-0 flex-1">
+
+                    <p
+                        class="truncate font-manrope text-[12px] font-semibold text-white">
+
+                        <%= profileName %>
+
+                    </p>
+
+                    <p
+                        class="mt-0.5 truncate font-manrope text-[10px] font-medium text-slate-500">
+
+                        <%= displayRole %>
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+
+        <!-- LOGOUT -->
 
         <a
             href="<%= contextPath %>/logout"

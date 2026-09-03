@@ -87,8 +87,11 @@ public class LoginController extends HttpServlet {
             // NORMAL LOGIN
             // =================================================
 
-            if ("ADMIN".equalsIgnoreCase(
-                    user.getRole())) {
+            String role = user.getRole() == null
+                    ? ""
+                    : user.getRole().trim();
+
+            if ("ADMIN".equalsIgnoreCase(role)) {
 
                 response.sendRedirect(
                         request.getContextPath()

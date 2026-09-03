@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.sunrise.model.User;
 
 @WebServlet("/reports")
 public class ReportController extends HttpServlet {
@@ -33,17 +34,30 @@ public class ReportController extends HttpServlet {
     	
     	HttpSession session = request.getSession(false);
 
-        if (session == null ||
-            !"Admin".equalsIgnoreCase(
-                String.valueOf(session.getAttribute("role")))) {
+    	if (session == null) {
 
-            response.sendError(
-                HttpServletResponse.SC_FORBIDDEN,
-                "Access denied"
-            );
+    	    response.sendError(
+    	        HttpServletResponse.SC_FORBIDDEN,
+    	        "Access denied"
+    	    );
 
-            return;
-        }
+    	    return;
+    	}
+
+    	User loggedUser =
+    	        (User) session.getAttribute("loggedUser");
+
+    	if (loggedUser == null ||
+    	    !"ADMIN".equalsIgnoreCase(
+    	        loggedUser.getRole())) {
+
+    	    response.sendError(
+    	        HttpServletResponse.SC_FORBIDDEN,
+    	        "Access denied"
+    	    );
+
+    	    return;
+    	}
 
         // =====================================================
         // REVENUE

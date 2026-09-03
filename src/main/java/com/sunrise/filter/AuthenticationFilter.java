@@ -110,7 +110,10 @@ public class AuthenticationFilter implements Filter {
         if (path.startsWith("/admin")
                 || path.equals("/reports")) {
 
-            if (!"ADMIN".equalsIgnoreCase(loggedUser.getRole())) {
+            if (!"ADMIN".equalsIgnoreCase(
+                    loggedUser.getRole() == null
+                    ? ""
+                    : loggedUser.getRole().trim())) {
 
                 httpResponse.sendError(
                         HttpServletResponse.SC_FORBIDDEN,
