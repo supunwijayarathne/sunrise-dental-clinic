@@ -3,14 +3,32 @@
 <%@ page import="com.sunrise.model.User" %>
 
 <%
-    User employee =
-            (User) request.getAttribute("employee");
+    User user = (User) request.getAttribute("user");
 
-    String error =
-            (String) request.getAttribute("error");
+    String error = (String) request.getAttribute("error");
 
-    String contextPath =
-            request.getContextPath();
+    String contextPath = request.getContextPath();
+
+    if (user == null) {
+        response.sendRedirect(contextPath + "/admin/users");
+        return;
+    }
+
+    String currentRole = user.getRole();
+
+    if (currentRole == null || currentRole.trim().isEmpty()) {
+        currentRole = "RECEPTIONIST";
+    }
+
+    currentRole = currentRole.toUpperCase();
+
+    String roleDisplay;
+
+    if ("ADMIN".equalsIgnoreCase(currentRole)) {
+        roleDisplay = "Administrator";
+    } else {
+        roleDisplay = "Receptionist";
+    }
 %>
 
 <!DOCTYPE html>
@@ -24,7 +42,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Edit Receptionist - Sunrise Dental</title>
+    <title>Edit User - Sunrise Dental</title>
 
 
     <!-- Tailwind CSS -->
@@ -92,10 +110,10 @@
             <div class="mb-4 flex items-center gap-2 font-inter text-[11px] font-medium text-slate-400">
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
                     class="transition hover:text-blue-600">
 
-                    Employees
+                    Users
 
                 </a>
 
@@ -105,7 +123,7 @@
 
                 <span class="text-slate-500">
 
-                    Edit Receptionist
+                    Edit User
 
                 </span>
 
@@ -120,21 +138,21 @@
 
                     <p class="mb-1 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-600">
 
-                        Employee Management
+                        User Management
 
                     </p>
 
 
                     <h1 class="font-manrope text-2xl font-extrabold tracking-tight text-[#172033]">
 
-                        Edit Receptionist
+                        Edit User
 
                     </h1>
 
 
                     <p class="mt-1.5 font-inter text-xs text-slate-500">
 
-                        Update the employee's personal information.
+                        Update the user's personal information and system role.
 
                     </p>
 
@@ -145,7 +163,7 @@
                 <!-- Back -->
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
 
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-inter text-[11px] font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
 
@@ -170,7 +188,7 @@
                     </svg>
 
 
-                    Back to Employees
+                    Back to Users
 
                 </a>
 
@@ -221,7 +239,7 @@
 
                     <p class="font-inter text-xs font-semibold text-red-700">
 
-                        Unable to update employee
+                        Unable to update user
 
                     </p>
 
@@ -247,7 +265,7 @@
 
         <form
             method="post"
-            action="<%= contextPath %>/admin/edit-employee">
+            action="<%= contextPath %>/admin/edit-user">
 
 
             <!-- Hidden ID -->
@@ -255,7 +273,7 @@
             <input
                 type="hidden"
                 name="userId"
-                value="<%= employee.getUserId() %>">
+                value="<%= user.getUserId() %>">
 
 
 
@@ -316,7 +334,7 @@
 
                             <p class="mt-0.5 font-inter text-[10px] text-slate-400">
 
-                                Update the receptionist's basic information.
+                                Update the user's basic information.
 
                             </p>
 
@@ -357,8 +375,8 @@
                                     id="fullName"
                                     name="fullName"
 
-                                    value="<%= employee.getFullName() != null
-                                            ? employee.getFullName()
+                                    value="<%= user.getFullName() != null
+                                            ? user.getFullName()
                                             : "" %>"
 
                                     required
@@ -387,12 +405,69 @@
                                     id="position"
                                     name="position"
 
-                                    value="<%= employee.getPosition() != null &&
-                                             !employee.getPosition().isEmpty()
-                                                ? employee.getPosition()
-                                                : "Receptionist" %>"
+                                    value="<%= user.getPosition() != null &&
+                                             !user.getPosition().trim().isEmpty()
+                                                ? user.getPosition()
+                                                : "Staff" %>"
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+                            </div>
+
+
+
+                            <!-- System Role -->
+
+                            <div>
+
+                                <label
+                                    for="role"
+                                    class="mb-2 block font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+
+                                    System Role
+
+                                    <span class="text-red-500">*</span>
+
+                                </label>
+
+
+                                <select
+                                    id="role"
+                                    name="role"
+                                    required
+
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+
+                                    <option
+                                        value="RECEPTIONIST"
+                                        <%= "RECEPTIONIST".equalsIgnoreCase(currentRole)
+                                                ? "selected"
+                                                : "" %>>
+
+                                        Receptionist
+
+                                    </option>
+
+
+                                    <option
+                                        value="ADMIN"
+                                        <%= "ADMIN".equalsIgnoreCase(currentRole)
+                                                ? "selected"
+                                                : "" %>>
+
+                                        Administrator
+
+                                    </option>
+
+
+                                </select>
+
+                                <p class="mt-1.5 font-inter text-[10px] text-slate-400">
+
+                                    Controls the user's system permissions.
+
+                                </p>
 
                             </div>
 
@@ -416,8 +491,8 @@
                                     id="email"
                                     name="email"
 
-                                    value="<%= employee.getEmail() != null
-                                            ? employee.getEmail()
+                                    value="<%= user.getEmail() != null
+                                            ? user.getEmail()
                                             : "" %>"
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -444,8 +519,8 @@
                                     id="phone"
                                     name="phone"
 
-                                    value="<%= employee.getPhone() != null
-                                            ? employee.getPhone()
+                                    value="<%= user.getPhone() != null
+                                            ? user.getPhone()
                                             : "" %>"
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -472,8 +547,8 @@
                                     name="address"
                                     rows="3"
 
-                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"><%= employee.getAddress() != null
-                                            ? employee.getAddress()
+                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"><%= user.getAddress() != null
+                                            ? user.getAddress()
                                             : "" %></textarea>
 
                             </div>
@@ -571,7 +646,7 @@
 
                                 <p class="font-inter text-xs font-medium text-slate-600">
 
-                                    @<%= employee.getUsername() %>
+                                    @<%= user.getUsername() %>
 
                                 </p>
 
@@ -589,36 +664,53 @@
 
 
 
-                        <!-- Role -->
+                        <!-- =================================================
+                             CURRENT ROLE
+                             ================================================= -->
 
                         <div class="mb-5">
 
 
                             <p class="mb-2 font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-500">
 
-                                System Role
+                                Current System Role
 
                             </p>
 
 
-                            <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5">
+                            <div
+                                id="currentRoleBox"
+                                class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5">
 
 
-                                <span class="font-inter text-xs font-medium text-slate-600">
+                                <span
+                                    id="currentRoleDisplay"
+                                    class="font-inter text-xs font-medium text-slate-600">
 
-                                    Receptionist
+                                    <%= roleDisplay %>
 
                                 </span>
 
 
-                                <span class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-blue-600">
+                                <span
+                                    id="currentRoleBadge"
+                                    class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-blue-600">
 
-                                    RECEPTIONIST
+                                    <%= currentRole %>
 
                                 </span>
 
 
                             </div>
+
+
+                            <p
+                                id="roleChangeDescription"
+                                class="mt-1.5 font-inter text-[10px] text-slate-400">
+
+                                The selected role controls the user's system permissions.
+
+                            </p>
 
 
                         </div>
@@ -637,7 +729,7 @@
                             </p>
 
 
-                            <% if (employee.isActive()) { %>
+                            <% if (user.isActive()) { %>
 
                                 <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-2.5">
 
@@ -650,7 +742,6 @@
                                         Active
 
                                     </span>
-
 
                                 </div>
 
@@ -667,7 +758,6 @@
                                         Inactive
 
                                     </span>
-
 
                                 </div>
 
@@ -694,7 +784,7 @@
 
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
 
                     class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-inter text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50">
 
@@ -738,6 +828,68 @@
     </main>
 
 </div>
+
+
+
+<!-- =========================================================
+     ROLE DISPLAY SCRIPT
+     ========================================================= -->
+
+<script>
+
+    const roleSelect = document.getElementById("role");
+
+    const currentRoleDisplay =
+        document.getElementById("currentRoleDisplay");
+
+    const currentRoleBadge =
+        document.getElementById("currentRoleBadge");
+
+    const roleChangeDescription =
+        document.getElementById("roleChangeDescription");
+
+
+    function updateRoleDisplay() {
+
+        const role = roleSelect.value;
+
+
+        if (role === "ADMIN") {
+
+            currentRoleDisplay.textContent =
+                "Administrator";
+
+            currentRoleBadge.textContent =
+                "ADMIN";
+
+            roleChangeDescription.textContent =
+                "Administrator access to system management and reports.";
+
+        } else {
+
+            currentRoleDisplay.textContent =
+                "Receptionist";
+
+            currentRoleBadge.textContent =
+                "RECEPTIONIST";
+
+            roleChangeDescription.textContent =
+                "Receptionist access for clinic operational tasks.";
+
+        }
+
+    }
+
+
+    roleSelect.addEventListener(
+        "change",
+        updateRoleDisplay
+    );
+
+
+    updateRoleDisplay();
+
+</script>
 
 
 </body>

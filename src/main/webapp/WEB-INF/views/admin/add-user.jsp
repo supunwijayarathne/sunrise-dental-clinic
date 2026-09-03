@@ -1,9 +1,23 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 
 <%
+    String contextPath = request.getContextPath();
+
     String error = (String) request.getAttribute("error");
 
-    String contextPath = request.getContextPath();
+    String selectedRole = request.getParameter("role");
+
+    if (selectedRole == null || selectedRole.trim().isEmpty()) {
+        selectedRole = "RECEPTIONIST";
+    }
+
+    selectedRole = selectedRole.toUpperCase();
+
+    String selectedRoleDisplay =
+            "ADMIN".equals(selectedRole)
+            ? "Administrator"
+            : "Receptionist";
 %>
 
 <!DOCTYPE html>
@@ -16,12 +30,10 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Add Receptionist - Sunrise Dental</title>
+    <title>Add User - Sunrise Dental Clinic</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Fonts -->
     <link rel="preconnect"
           href="https://fonts.googleapis.com">
 
@@ -34,7 +46,7 @@
 
     <style>
 
-        .font-manrope {
+        body {
             font-family: 'Manrope', sans-serif;
         }
 
@@ -42,9 +54,8 @@
             font-family: 'Inter', sans-serif;
         }
 
-        input::placeholder,
-        textarea::placeholder {
-            color: #94a3b8;
+        .font-manrope {
+            font-family: 'Manrope', sans-serif;
         }
 
         input:focus,
@@ -90,19 +101,17 @@
             <div class="mb-4 flex items-center gap-2 font-inter text-[11px] font-medium text-slate-400">
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
                     class="transition hover:text-blue-600">
 
-                    Employees
+                    Users
 
                 </a>
 
-                <span>
-                    /
-                </span>
+                <span>/</span>
 
                 <span class="text-slate-500">
-                    Add Receptionist
+                    Add User
                 </span>
 
             </div>
@@ -116,13 +125,13 @@
 
                     <h1 class="font-manrope text-2xl font-extrabold tracking-tight text-[#172033]">
 
-                        Add Receptionist
+                        Add User
 
                     </h1>
 
                     <p class="mt-1.5 font-inter text-xs text-slate-500">
 
-                        Create a new receptionist account for the clinic.
+                        Create a new user account for the clinic.
 
                     </p>
 
@@ -132,7 +141,7 @@
                 <!-- Back button -->
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
 
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-inter text-[11px] font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
 
@@ -155,7 +164,7 @@
 
                     </svg>
 
-                    Back to Employees
+                    Back to Users
 
                 </a>
 
@@ -203,7 +212,7 @@
 
                     <p class="font-inter text-xs font-semibold text-red-700">
 
-                        Unable to create employee
+                        Unable to create user
 
                     </p>
 
@@ -227,7 +236,7 @@
 
         <form
             method="post"
-            action="<%= contextPath %>/admin/add-employee">
+            action="<%= contextPath %>/admin/add-user">
 
 
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
@@ -284,7 +293,7 @@
 
                             <p class="mt-0.5 font-inter text-[10px] text-slate-400">
 
-                                Basic information about the receptionist.
+                                Basic information about the user.
 
                             </p>
 
@@ -312,9 +321,7 @@
 
                                     Full Name
 
-                                    <span class="text-red-500">
-                                        *
-                                    </span>
+                                    <span class="text-red-500">*</span>
 
                                 </label>
 
@@ -323,6 +330,9 @@
                                     id="fullName"
                                     name="fullName"
                                     placeholder="Enter full name"
+                                    value="<%= request.getParameter("fullName") != null
+                                            ? request.getParameter("fullName")
+                                            : "" %>"
                                     required
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -343,18 +353,71 @@
 
                                 </label>
 
-                                <div class="relative">
+                                <input
+                                    type="text"
+                                    id="position"
+                                    name="position"
+                                    value="<%= request.getParameter("position") != null
+                                            ? request.getParameter("position")
+                                            : "Staff" %>"
 
-                                    <input
-                                        type="text"
-                                        id="position"
-                                        name="position"
-                                        value="Receptionist"
-                                        readonly
+                                    class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-inter text-xs font-medium text-slate-500">
 
-                                        class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-inter text-xs font-medium text-slate-500">
+                            </div>
 
-                                </div>
+
+
+                            <!-- System Role -->
+
+                            <div>
+
+                                <label
+                                    for="role"
+                                    class="mb-2 block font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+
+                                    System Role
+
+                                    <span class="text-red-500">*</span>
+
+                                </label>
+
+                                <select
+                                    id="role"
+                                    name="role"
+                                    required
+
+                                    class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
+
+
+                                    <option
+                                        value="RECEPTIONIST"
+                                        <%= "RECEPTIONIST".equals(selectedRole)
+                                                ? "selected"
+                                                : "" %>>
+
+                                        Receptionist
+
+                                    </option>
+
+
+                                    <option
+                                        value="ADMIN"
+                                        <%= "ADMIN".equals(selectedRole)
+                                                ? "selected"
+                                                : "" %>>
+
+                                        Administrator
+
+                                    </option>
+
+
+                                </select>
+
+                                <p class="mt-1.5 font-inter text-[10px] text-slate-400">
+
+                                    Controls the user's system permissions.
+
+                                </p>
 
                             </div>
 
@@ -377,6 +440,9 @@
                                     id="email"
                                     name="email"
                                     placeholder="example@email.com"
+                                    value="<%= request.getParameter("email") != null
+                                            ? request.getParameter("email")
+                                            : "" %>"
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -401,6 +467,9 @@
                                     id="phone"
                                     name="phone"
                                     placeholder="0771234567"
+                                    value="<%= request.getParameter("phone") != null
+                                            ? request.getParameter("phone")
+                                            : "" %>"
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -424,9 +493,11 @@
                                     id="address"
                                     name="address"
                                     rows="3"
-                                    placeholder="Enter employee address"
+                                    placeholder="Enter user address"
 
-                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
+                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"><%= request.getParameter("address") != null
+                                            ? request.getParameter("address")
+                                            : "" %></textarea>
 
                             </div>
 
@@ -512,9 +583,7 @@
 
                                 Username
 
-                                <span class="text-red-500">
-                                    *
-                                </span>
+                                <span class="text-red-500">*</span>
 
                             </label>
 
@@ -523,6 +592,9 @@
                                 id="username"
                                 name="username"
                                 placeholder="Enter username"
+                                value="<%= request.getParameter("username") != null
+                                        ? request.getParameter("username")
+                                        : "" %>"
                                 required
 
                                 class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -547,9 +619,7 @@
 
                                 Password
 
-                                <span class="text-red-500">
-                                    *
-                                </span>
+                                <span class="text-red-500">*</span>
 
                             </label>
 
@@ -573,32 +643,38 @@
 
 
 
-                        <!-- Role -->
+                        <!-- =================================================
+                             ROLE SUMMARY
+                             ================================================= -->
 
                         <div class="mt-6 border-t border-slate-100 pt-5">
 
-                            <div class="flex items-center justify-between">
+                            <div class="flex items-center justify-between gap-3">
 
                                 <div>
 
                                     <p class="font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-500">
 
-                                        System Role
+                                        Selected Role
 
                                     </p>
 
-                                    <p class="mt-1 font-inter text-[10px] text-slate-400">
+                                    <p
+                                        id="roleDescription"
+                                        class="mt-1 font-inter text-[10px] text-slate-400">
 
-                                        Access level for this account.
+                                        Receptionist access
 
                                     </p>
 
                                 </div>
 
 
-                                <span class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[10px] font-semibold text-blue-600">
+                                <span
+                                    id="roleBadge"
+                                    class="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[10px] font-semibold text-blue-600">
 
-                                    RECEPTIONIST
+                                    <%= selectedRoleDisplay %>
 
                                 </span>
 
@@ -624,7 +700,7 @@
 
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
 
                     class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-inter text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50">
 
@@ -653,7 +729,7 @@
 
                     </svg>
 
-                    Create Receptionist
+                    Create User
 
                 </button>
 
@@ -666,6 +742,49 @@
     </main>
 
 </div>
+
+
+
+<!-- =========================================================
+     ROLE DISPLAY SCRIPT
+     ========================================================= -->
+
+<script>
+
+    const roleSelect = document.getElementById("role");
+    const roleBadge = document.getElementById("roleBadge");
+    const roleDescription = document.getElementById("roleDescription");
+
+    function updateRoleDisplay() {
+
+        const role = roleSelect.value;
+
+        if (role === "ADMIN") {
+
+            roleBadge.textContent = "Administrator";
+
+            roleDescription.textContent =
+                "Administrator access to system management and reports.";
+
+        } else {
+
+            roleBadge.textContent = "Receptionist";
+
+            roleDescription.textContent =
+                "Receptionist access for clinic operational tasks.";
+
+        }
+
+    }
+
+
+    roleSelect.addEventListener("change", updateRoleDisplay);
+
+
+    // Set correct display when page loads
+    updateRoleDisplay();
+
+</script>
 
 
 </body>

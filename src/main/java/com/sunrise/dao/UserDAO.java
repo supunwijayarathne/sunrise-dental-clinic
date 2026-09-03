@@ -81,19 +81,18 @@ public class UserDAO {
     // ADD RECEPTIONIST
     // =========================================================
 
-    public boolean addReceptionist(User user) {
+    public boolean addUser(User user) {
 
         String sql =
                 "INSERT INTO users " +
                 "(full_name, email, phone, address, position, " +
                 "username, password_hash, role, active, first_login) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, 'RECEPTIONIST', 1, 1)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)
         ) {
-
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
@@ -101,57 +100,57 @@ public class UserDAO {
             ps.setString(5, user.getPosition());
             ps.setString(6, user.getUsername());
             ps.setString(7, user.getPasswordHash());
-
+            ps.setString(8, user.getRole());
+            ps.setBoolean(9, user.isActive());
+            ps.setBoolean(10, user.isFirstLogin());
             return ps.executeUpdate() > 0;
-
         } catch (Exception e) {
-
-            System.out.println(
-                    "ERROR ADDING RECEPTIONIST:"
-            );
-
+            System.out.println("ERROR ADDING USER:");
             e.printStackTrace();
         }
-
         return false;
     }
 
+    public boolean addReceptionist(User user) {
+        user.setRole("RECEPTIONIST");
+        return addUser(user);
+    }
 
     // =========================================================
-    // GET ALL RECEPTIONISTS
+    // GET ALL USERS
     // =========================================================
 
-    public List<User> getAllReceptionists() {
-
-        List<User> receptionists = new ArrayList<>();
-
-        String sql =
-                "SELECT * FROM users " +
-                "WHERE role = 'RECEPTIONIST' " +
-                "ORDER BY user_id DESC";
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM users ORDER BY user_id DESC";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()
         ) {
-
-            while (rs.next()) {
-
-                receptionists.add(
-                        mapUser(rs)
-                );
-            }
-
+            while (rs.next()) users.add(mapUser(rs));
         } catch (Exception e) {
-
-            System.out.println(
-                    "ERROR LOADING RECEPTIONISTS:"
-            );
-
+            System.out.println("ERROR LOADING USERS:");
             e.printStackTrace();
         }
+        return users;
+    }
 
+    public List<User> getAllReceptionists() {
+        List<User> receptionists = new ArrayList<>();
+        String sql = "SELECT * FROM users WHERE role = 'RECEPTIONIST' ORDER BY user_id DESC";
+
+        try (
+                Connection con = DBConnection.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+        ) {
+            while (rs.next()) receptionists.add(mapUser(rs));
+        } catch (Exception e) {
+            System.out.println("ERROR LOADING RECEPTIONISTS:");
+            e.printStackTrace();
+        }
         return receptionists;
     }
 
@@ -195,45 +194,38 @@ public class UserDAO {
 
 
     // =========================================================
-    // UPDATE RECEPTIONIST
+    // UPDATE USER
     // =========================================================
 
-    public boolean updateReceptionist(User user) {
+    public boolean updateUser(User user) {
 
         String sql =
-                "UPDATE users SET " +
-                "full_name = ?, " +
-                "email = ?, " +
-                "phone = ?, " +
-                "address = ?, " +
-                "position = ? " +
-                "WHERE user_id = ? " +
-                "AND role = 'RECEPTIONIST'";
+                "UPDATE users SET full_name = ?, email = ?, " +
+                "phone = ?, address = ?, position = ?, role = ? " +
+                "WHERE user_id = ?";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)
         ) {
-
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
             ps.setString(4, user.getAddress());
             ps.setString(5, user.getPosition());
-            ps.setInt(6, user.getUserId());
-
+            ps.setString(6, user.getRole());
+            ps.setInt(7, user.getUserId());
             return ps.executeUpdate() > 0;
-
         } catch (Exception e) {
-
-            System.out.println(
-                    "ERROR UPDATING RECEPTIONIST:"
-            );
-
+            System.out.println("ERROR UPDATING USER:");
             e.printStackTrace();
         }
-
         return false;
+    }
+
+    public boolean updateReceptionist(User user) {
+        user.setRole("RECEPTIONIST");
+        return updateUser(user);
     }
 
 
@@ -247,8 +239,7 @@ public class UserDAO {
 
         String sql =
                 "UPDATE users SET active = ? " +
-                "WHERE user_id = ? " +
-                "AND role = 'RECEPTIONIST'";
+                "WHERE user_id = ?";
 
         try (
                 Connection con = DBConnection.getConnection();

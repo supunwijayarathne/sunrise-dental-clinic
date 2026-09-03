@@ -103,10 +103,13 @@
                 <p class="mt-1.5 font-inter text-xs text-slate-500">
 
                     Welcome back,
+
                     <span class="font-semibold text-slate-700">
+
                         <%= loggedUser != null
                                 ? loggedUser.getFullName()
                                 : "Administrator" %>
+
                     </span>
 
                 </p>
@@ -158,7 +161,7 @@
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
 
-            <!-- ACTIVE RECEPTIONISTS -->
+            <!-- ACTIVE USERS -->
 
             <div class="rounded-xl border border-slate-200 bg-white p-5">
 
@@ -169,14 +172,14 @@
 
                         <p class="font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-400">
 
-                            Active Receptionists
+                            Active Users
 
                         </p>
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            ${receptionistCount}
+                            ${userCount}
 
                         </p>
 
@@ -241,8 +244,10 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-    ${stats.todayAppointments}
-</p>
+
+                            ${stats.todayAppointments}
+
+                        </p>
 
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
@@ -301,8 +306,10 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-    ${stats.todayBills}
-</p>
+
+                            ${stats.todayBills}
+
+                        </p>
 
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
@@ -359,8 +366,11 @@
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
-    Rs. ${stats.todayRevenue}
-</p>
+
+                            Rs. ${stats.todayRevenue}
+
+                        </p>
+
 
                         <p class="mt-1 font-inter text-[10px] text-slate-400">
 
@@ -413,7 +423,7 @@
 
 
             <!-- =================================================
-                 EMPLOYEE MANAGEMENT
+                 USER MANAGEMENT
                  ================================================= -->
 
             <div class="rounded-xl border border-slate-200 bg-white lg:col-span-2">
@@ -457,13 +467,13 @@
 
                             <h2 class="font-manrope text-sm font-bold text-[#172033]">
 
-                                Employee Management
+                                User Management
 
                             </h2>
 
                             <p class="mt-0.5 font-inter text-[10px] text-slate-400">
 
-                                Manage clinic staff and system access.
+                                Manage clinic users and system access.
 
                             </p>
 
@@ -473,7 +483,7 @@
 
 
                     <a
-                        href="<%= contextPath %>/admin/employees"
+                        href="<%= contextPath %>/admin/users"
 
                         class="font-inter text-[10px] font-semibold text-blue-600 transition hover:text-blue-700">
 
@@ -499,21 +509,21 @@
 
                                 <p class="font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-400">
 
-                                    Receptionist Accounts
+                                    User Accounts
 
                                 </p>
 
 
                                 <p class="mt-1.5 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                    ${receptionistCount}
+                                    ${userCount}
 
                                 </p>
 
 
                                 <p class="mt-1 font-inter text-[10px] text-slate-400">
 
-                                    Active receptionist accounts in the system.
+                                    Active user accounts in the system.
 
                                 </p>
 
@@ -521,7 +531,7 @@
 
 
                             <a
-                                href="<%= contextPath %>/admin/add-employee"
+                                href="<%= contextPath %>/admin/add-user"
 
                                 class="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 font-inter text-[11px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]">
 
@@ -538,7 +548,7 @@
 
                                 </svg>
 
-                                Add Receptionist
+                                Add User
 
                             </a>
 
@@ -581,10 +591,10 @@
                 <div class="p-4">
 
 
-                    <!-- Employees -->
+                    <!-- Users -->
 
                     <a
-                        href="<%= contextPath %>/admin/employees"
+                        href="<%= contextPath %>/admin/users"
 
                         class="group flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-slate-50">
 
@@ -608,6 +618,11 @@
                                     cy="7"
                                     r="4"/>
 
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M19 8v6M22 11h-6"/>
+
                             </svg>
 
                         </div>
@@ -617,13 +632,13 @@
 
                             <p class="font-inter text-[11px] font-semibold text-slate-700">
 
-                                Manage Employees
+                                Manage Users
 
                             </p>
 
                             <p class="font-inter text-[9px] text-slate-400">
 
-                                View and manage staff
+                                View and manage system users
 
                             </p>
 

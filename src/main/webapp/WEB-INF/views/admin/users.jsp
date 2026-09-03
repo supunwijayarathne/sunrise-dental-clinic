@@ -4,8 +4,8 @@
 <%@ page import="com.sunrise.model.User" %>
 
 <%
-    List<User> employees =
-            (List<User>) request.getAttribute("employees");
+    List<User> users =
+            (List<User>) request.getAttribute("users");
 
     String success =
             request.getParameter("success");
@@ -18,20 +18,20 @@
     // SUMMARY COUNTS
     // =========================================================
 
-    int totalEmployees = 0;
-    int activeEmployees = 0;
-    int inactiveEmployees = 0;
+    int totalUsers = 0;
+    int activeUsers = 0;
+    int inactiveUsers = 0;
 
-    if (employees != null) {
+    if (users != null) {
 
-        totalEmployees = employees.size();
+        totalUsers = users.size();
 
-        for (User employee : employees) {
+        for (User user : users) {
 
-            if (employee.isActive()) {
-                activeEmployees++;
+            if (user.isActive()) {
+                activeUsers++;
             } else {
-                inactiveEmployees++;
+                inactiveUsers++;
             }
         }
     }
@@ -49,7 +49,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Employee Management - Sunrise Dental</title>
+    <title>User Management - Sunrise Dental</title>
 
 
     <!-- Tailwind CSS -->
@@ -124,14 +124,14 @@
 
                 <h1 class="font-manrope text-2xl font-extrabold tracking-tight text-[#172033]">
 
-                    Employee Management
+                    User Management
 
                 </h1>
 
 
                 <p class="mt-1.5 font-inter text-xs text-slate-500">
 
-                    Manage receptionist accounts and system access.
+                    Manage system users, roles, and access.
 
                 </p>
 
@@ -139,10 +139,10 @@
 
 
 
-            <!-- Add Receptionist -->
+            <!-- Add User -->
 
             <a
-                href="<%= contextPath %>/admin/add-employee"
+                href="<%= contextPath %>/admin/add-user"
 
                 class="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 font-inter text-[11px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]">
 
@@ -161,7 +161,7 @@
                 </svg>
 
 
-                Add Receptionist
+                Add User
 
             </a>
 
@@ -202,7 +202,7 @@
 
                     <p class="font-inter text-xs font-semibold text-emerald-700">
 
-                        Receptionist account created successfully.
+                        User account created successfully.
 
                     </p>
 
@@ -243,7 +243,7 @@
 
                     <p class="font-inter text-xs font-semibold text-emerald-700">
 
-                        Receptionist details updated successfully.
+                        User details updated successfully.
 
                     </p>
 
@@ -275,14 +275,14 @@
 
                         <p class="font-inter text-[10px] font-semibold uppercase tracking-wide text-slate-400">
 
-                            Total Receptionists
+                            Total Users
 
                         </p>
 
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            <%= totalEmployees %>
+                            <%= totalUsers %>
 
                         </p>
 
@@ -350,7 +350,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            <%= activeEmployees %>
+                            <%= activeUsers %>
 
                         </p>
 
@@ -409,7 +409,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            <%= inactiveEmployees %>
+                            <%= inactiveUsers %>
 
                         </p>
 
@@ -488,7 +488,7 @@
 
                 <div class="font-inter text-[10px] text-slate-400">
 
-                    <%= totalEmployees %> employee<%= totalEmployees == 1 ? "" : "s" %>
+                    <%= totalUsers %> user<%= totalUsers == 1 ? "" : "s" %>
 
                 </div>
 
@@ -499,7 +499,7 @@
 
             <!-- Table -->
 
-            <% if (employees != null && !employees.isEmpty()) { %>
+            <% if (users != null && !users.isEmpty()) { %>
 
 
                 <div class="overflow-x-auto">
@@ -515,14 +515,14 @@
 
                             <th class="px-5 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
 
-                                Employee ID
+                                User ID
 
                             </th>
 
 
                             <th class="px-5 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
 
-                                Employee
+                                User
 
                             </th>
 
@@ -566,7 +566,7 @@
 
                         <%
 
-                            for (User employee : employees) {
+                            for (User user : users) {
 
                         %>
 
@@ -574,7 +574,7 @@
                         <tr class="border-b border-slate-100 last:border-0 transition hover:bg-slate-50/50">
 
 
-                            <!-- Employee ID -->
+                            <!-- User ID -->
 
                             <td class="px-5 py-4">
 
@@ -583,7 +583,7 @@
 
                                     EMP<%= String.format(
                                             "%03d",
-                                            employee.getUserId()) %>
+                                            user.getUserId()) %>
 
                                 </span>
 
@@ -592,7 +592,7 @@
 
 
 
-                            <!-- Employee -->
+                            <!-- User -->
 
                             <td class="px-5 py-4">
 
@@ -602,8 +602,8 @@
 
                                     <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 font-manrope text-[11px] font-bold text-blue-600">
 
-                                        <%= employee.getFullName() != null
-                                                ? employee.getFullName()
+                                        <%= user.getFullName() != null
+                                                ? user.getFullName()
                                                     .substring(0, 1)
                                                     .toUpperCase()
                                                 : "R" %>
@@ -615,14 +615,14 @@
 
                                         <p class="font-inter text-[11px] font-semibold text-[#172033]">
 
-                                            <%= employee.getFullName() %>
+                                            <%= user.getFullName() %>
 
                                         </p>
 
 
                                         <p class="mt-0.5 font-inter text-[9px] text-slate-400">
 
-                                            @<%= employee.getUsername() %>
+                                            @<%= user.getUsername() %>
 
                                         </p>
 
@@ -643,9 +643,9 @@
 
                                 <span class="font-inter text-[11px] font-medium text-slate-600">
 
-                                    <%= employee.getPosition() != null
-                                            && !employee.getPosition().isEmpty()
-                                                ? employee.getPosition()
+                                    <%= user.getPosition() != null
+                                            && !user.getPosition().isEmpty()
+                                                ? user.getPosition()
                                                 : "Receptionist" %>
 
                                 </span>
@@ -662,9 +662,9 @@
 
                                 <p class="font-inter text-[10px] font-medium text-slate-600">
 
-                                    <%= employee.getEmail() != null
-                                            && !employee.getEmail().isEmpty()
-                                                ? employee.getEmail()
+                                    <%= user.getEmail() != null
+                                            && !user.getEmail().isEmpty()
+                                                ? user.getEmail()
                                                 : "No email" %>
 
                                 </p>
@@ -672,9 +672,9 @@
 
                                 <p class="mt-1 font-inter text-[9px] text-slate-400">
 
-                                    <%= employee.getPhone() != null
-                                            && !employee.getPhone().isEmpty()
-                                                ? employee.getPhone()
+                                    <%= user.getPhone() != null
+                                            && !user.getPhone().isEmpty()
+                                                ? user.getPhone()
                                                 : "No phone" %>
 
                                 </p>
@@ -689,7 +689,7 @@
                             <td class="px-5 py-4">
 
 
-                                <% if (employee.isActive()) { %>
+                                <% if (user.isActive()) { %>
 
 
                                     <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-emerald-600">
@@ -731,7 +731,7 @@
                                     <!-- View -->
 
                                     <a
-                                        href="<%= contextPath %>/admin/employees?action=view&id=<%= employee.getUserId() %>"
+                                        href="<%= contextPath %>/admin/users?action=view&id=<%= user.getUserId() %>"
 
                                         class="rounded-lg bg-blue-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-blue-600 transition hover:bg-blue-100">
 
@@ -744,7 +744,7 @@
                                     <!-- Edit -->
 
                                     <a
-                                        href="<%= contextPath %>/admin/edit-employee?id=<%= employee.getUserId() %>"
+                                        href="<%= contextPath %>/admin/edit-user?id=<%= user.getUserId() %>"
 
                                         class="rounded-lg bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:bg-slate-200">
 
@@ -758,17 +758,17 @@
 
                                     <form
                                         method="post"
-                                        action="<%= contextPath %>/admin/employee-status"
+                                        action="<%= contextPath %>/admin/user-status"
                                         class="m-0">
 
 
                                         <input
                                             type="hidden"
                                             name="id"
-                                            value="<%= employee.getUserId() %>">
+                                            value="<%= user.getUserId() %>">
 
 
-                                        <% if (employee.isActive()) { %>
+                                        <% if (user.isActive()) { %>
 
 
                                             <input
@@ -890,7 +890,7 @@
 
 
                     <a
-                        href="<%= contextPath %>/admin/add-employee"
+                        href="<%= contextPath %>/admin/add-user"
 
                         class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 font-inter text-[10px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]">
 
@@ -909,7 +909,7 @@
                         </svg>
 
 
-                        Add Receptionist
+                        Add User
 
                     </a>
 

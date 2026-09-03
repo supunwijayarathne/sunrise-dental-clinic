@@ -107,15 +107,15 @@
             );
 
 
-    boolean employeesActive =
+    boolean usersActive =
             currentPage.startsWith(
-                    "/admin/employees"
+                    "/admin/users"
             ) ||
             currentPage.startsWith(
-                    "/admin/add-employee"
+                    "/admin/add-user"
             ) ||
             currentPage.startsWith(
-                    "/admin/edit-employee"
+                    "/admin/edit-user"
             );
 
 %>
@@ -129,24 +129,45 @@
          BRAND
     ====================================================== -->
 
-    <div class="mb-8 px-3">
+    <!-- =====================================================
+     BRAND
+====================================================== -->
 
-        <h1
-            class="font-manrope text-lg font-extrabold tracking-tight text-white">
+<div class="mb-8 px-3">
 
-            Sunrise Dental
+    <!-- Logo + Brand Name -->
 
-        </h1>
+    <div class="flex items-center gap-3">
 
+        <img
+            src="<%= contextPath %>/assets/images/sunrise-logo.png"
+            alt="Sunrise Dental Logo"
+            class="h-9 w-9 object-contain"
+        />
 
-        <p
-            class="mt-1 font-inter text-[10px] font-medium text-slate-500">
+        <div class="min-w-0">
 
-            Clinic Management System
+            <h1
+                class="font-manrope text-[16px] font-extrabold
+                       tracking-tight text-white leading-tight">
 
-        </p>
+                Sunrise Dental
+
+            </h1>
+
+            <p
+                class="mt-0.5 font-inter text-[9px] font-medium
+                       text-slate-500">
+
+                Clinic Management System
+
+            </p>
+
+        </div>
 
     </div>
+
+</div>
 
 
 
@@ -420,18 +441,18 @@
 
 
             <!-- =================================================
-                 EMPLOYEES
+                 USERS
             ================================================== -->
 
             <% if (isAdmin) { %>
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
                     class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
-                    <%= employeesActive
+                    <%= usersActive
                         ? "text-white"
                         : "text-slate-400 hover:bg-[#1f2937] hover:text-white" %>"
-                    style="<%= employeesActive
+                    style="<%= usersActive
                         ? "background-color: #2563EB;"
                         : "" %>"
                 >
@@ -450,7 +471,7 @@
 
                     </svg>
 
-                    Employees
+                    Users
 
                 </a>
 

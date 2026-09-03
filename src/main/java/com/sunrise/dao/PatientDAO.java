@@ -232,9 +232,9 @@ public class PatientDAO {
 
      String sql =
          "SELECT * FROM patients "
-       + "WHERE patient_code LIKE ? "
+       + "WHERE patient_id LIKE ? "
+       + "OR patient_code LIKE ? "
        + "OR name LIKE ? "
-       + "OR contact_number LIKE ? "
        + "ORDER BY patient_id DESC";
 
      try (

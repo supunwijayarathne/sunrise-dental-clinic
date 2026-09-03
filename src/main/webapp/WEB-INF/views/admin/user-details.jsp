@@ -3,11 +3,75 @@
 <%@ page import="com.sunrise.model.User" %>
 
 <%
-    User employee =
-            (User) request.getAttribute("employee");
+    User user = (User) request.getAttribute("user");
 
-    String contextPath =
-            request.getContextPath();
+    String contextPath = request.getContextPath();
+
+    if (user == null) {
+        response.sendRedirect(contextPath + "/admin/users");
+        return;
+    }
+
+    /* =====================================================
+       ROLE
+       ===================================================== */
+
+    String currentRole = user.getRole();
+
+    if (currentRole == null || currentRole.trim().isEmpty()) {
+        currentRole = "RECEPTIONIST";
+    }
+
+    currentRole = currentRole.toUpperCase();
+
+    String roleDisplay;
+
+    if ("ADMIN".equalsIgnoreCase(currentRole)) {
+        roleDisplay = "Administrator";
+    } else {
+        roleDisplay = "Receptionist";
+    }
+
+
+    /* =====================================================
+       POSITION
+       ===================================================== */
+
+    String position = user.getPosition();
+
+    if (position == null || position.trim().isEmpty()) {
+        position = "Staff";
+    }
+
+
+    /* =====================================================
+       INITIALS
+       ===================================================== */
+
+    String initials = "U";
+
+    if (user.getFullName() != null &&
+        !user.getFullName().trim().isEmpty()) {
+
+        String[] nameParts =
+                user.getFullName().trim().split("\\s+");
+
+        if (nameParts.length >= 2) {
+
+            initials =
+                    String.valueOf(nameParts[0].charAt(0)) +
+                    String.valueOf(
+                            nameParts[nameParts.length - 1].charAt(0)
+                    );
+
+        } else {
+
+            initials =
+                    String.valueOf(nameParts[0].charAt(0));
+        }
+
+        initials = initials.toUpperCase();
+    }
 %>
 
 <!DOCTYPE html>
@@ -21,7 +85,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Employee Details - Sunrise Dental</title>
+    <title>User Details - Sunrise Dental</title>
 
 
     <!-- Tailwind CSS -->
@@ -89,10 +153,10 @@
             <div class="mb-4 flex items-center gap-2 font-inter text-[11px] font-medium text-slate-400">
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
                     class="transition hover:text-blue-600">
 
-                    Employees
+                    Users
 
                 </a>
 
@@ -102,7 +166,7 @@
 
                 <span class="text-slate-500">
 
-                    Employee Details
+                    User Details
 
                 </span>
 
@@ -117,21 +181,21 @@
 
                     <p class="mb-1 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-600">
 
-                        Employee Management
+                        User Management
 
                     </p>
 
 
                     <h1 class="font-manrope text-2xl font-extrabold tracking-tight text-[#172033]">
 
-                        Employee Details
+                        User Details
 
                     </h1>
 
 
                     <p class="mt-1.5 font-inter text-xs text-slate-500">
 
-                        View employee information and account details.
+                        View user information and account details.
 
                     </p>
 
@@ -142,7 +206,7 @@
                 <!-- Back -->
 
                 <a
-                    href="<%= contextPath %>/admin/employees"
+                    href="<%= contextPath %>/admin/users"
 
                     class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-inter text-[11px] font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50">
 
@@ -167,7 +231,7 @@
                     </svg>
 
 
-                    Back to Employees
+                    Back to Users
 
                 </a>
 
@@ -179,7 +243,7 @@
 
 
         <!-- =================================================
-             EMPLOYEE SUMMARY
+             USER SUMMARY
              ================================================= -->
 
         <div class="mb-5 rounded-xl border border-slate-200 bg-white">
@@ -188,18 +252,16 @@
             <div class="flex flex-col gap-5 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
 
 
-                <!-- Employee -->
+                <!-- User -->
 
                 <div class="flex items-center gap-4">
 
 
+                    <!-- Initials -->
+
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 font-manrope text-base font-extrabold text-blue-600">
 
-                        <%= employee.getFullName() != null
-                                ? employee.getFullName()
-                                    .substring(0, 1)
-                                    .toUpperCase()
-                                : "R" %>
+                        <%= initials %>
 
                     </div>
 
@@ -208,7 +270,7 @@
 
                         <h2 class="font-manrope text-base font-bold text-[#172033]">
 
-                            <%= employee.getFullName() %>
+                            <%= user.getFullName() %>
 
                         </h2>
 
@@ -216,11 +278,13 @@
                         <div class="mt-1 flex flex-wrap items-center gap-2">
 
 
+                            <!-- User ID -->
+
                             <span class="font-inter text-[10px] text-slate-400">
 
-                                EMP<%= String.format(
+                                USR<%= String.format(
                                         "%03d",
-                                        employee.getUserId()) %>
+                                        user.getUserId()) %>
 
                             </span>
 
@@ -230,15 +294,13 @@
                             </span>
 
 
+                            <!-- Position -->
+
                             <span class="font-inter text-[10px] text-slate-500">
 
-                                <%= employee.getPosition() != null
-                                        && !employee.getPosition().isEmpty()
-                                            ? employee.getPosition()
-                                            : "Receptionist" %>
+                                <%= position %>
 
                             </span>
-
 
                         </div>
 
@@ -250,7 +312,7 @@
 
                 <!-- Status -->
 
-                <% if (employee.isActive()) { %>
+                <% if (user.isActive()) { %>
 
                     <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-emerald-600">
 
@@ -340,7 +402,7 @@
 
                         <p class="mt-0.5 font-inter text-[10px] text-slate-400">
 
-                            Employee contact and profile information.
+                            User contact and profile information.
 
                         </p>
 
@@ -359,23 +421,23 @@
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 
 
-                        <!-- Employee ID -->
+                        <!-- User ID -->
 
                         <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-4">
 
 
                             <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
 
-                                Employee ID
+                                User ID
 
                             </p>
 
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                EMP<%= String.format(
+                                USR<%= String.format(
                                         "%03d",
-                                        employee.getUserId()) %>
+                                        user.getUserId()) %>
 
                             </p>
 
@@ -398,7 +460,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= employee.getFullName() %>
+                                <%= user.getFullName() %>
 
                             </p>
 
@@ -421,10 +483,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= employee.getPosition() != null
-                                        && !employee.getPosition().isEmpty()
-                                            ? employee.getPosition()
-                                            : "Receptionist" %>
+                                <%= position %>
 
                             </p>
 
@@ -447,9 +506,9 @@
 
                             <p class="mt-1.5 break-all font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= employee.getEmail() != null
-                                        && !employee.getEmail().isEmpty()
-                                            ? employee.getEmail()
+                                <%= user.getEmail() != null
+                                        && !user.getEmail().isEmpty()
+                                            ? user.getEmail()
                                             : "Not provided" %>
 
                             </p>
@@ -473,9 +532,9 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= employee.getPhone() != null
-                                        && !employee.getPhone().isEmpty()
-                                            ? employee.getPhone()
+                                <%= user.getPhone() != null
+                                        && !user.getPhone().isEmpty()
+                                            ? user.getPhone()
                                             : "Not provided" %>
 
                             </p>
@@ -499,9 +558,9 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold leading-5 text-[#172033]">
 
-                                <%= employee.getAddress() != null
-                                        && !employee.getAddress().isEmpty()
-                                            ? employee.getAddress()
+                                <%= user.getAddress() != null
+                                        && !user.getAddress().isEmpty()
+                                            ? user.getAddress()
                                             : "Not provided" %>
 
                             </p>
@@ -602,7 +661,7 @@
 
                             <p class="font-inter text-xs font-semibold text-slate-700">
 
-                                @<%= employee.getUsername() %>
+                                @<%= user.getUsername() %>
 
                             </p>
 
@@ -613,7 +672,9 @@
 
 
 
-                    <!-- Role -->
+                    <!-- =================================================
+                         SYSTEM ROLE
+                         ================================================= -->
 
                     <div class="mb-5">
 
@@ -628,21 +689,72 @@
                         <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-3">
 
 
+                            <!-- Dynamic Role Name -->
+
                             <span class="font-inter text-xs font-semibold text-slate-700">
 
-                                Receptionist
+                                <%= roleDisplay %>
 
                             </span>
 
 
+                            <!-- Dynamic Database Role -->
+
                             <span class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-blue-600">
 
-                                RECEPTIONIST
+                                <%= currentRole %>
 
                             </span>
 
 
                         </div>
+
+
+                    </div>
+
+
+
+                    <!-- First Login -->
+
+                    <div class="mb-5">
+
+
+                        <p class="mb-2 font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+
+                            First Login
+
+                        </p>
+
+
+                        <% if (user.isFirstLogin()) { %>
+
+                            <div class="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3.5 py-3">
+
+                                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+
+                                <span class="font-inter text-xs font-semibold text-amber-700">
+
+                                    Pending
+
+                                </span>
+
+                            </div>
+
+                        <% } else { %>
+
+                            <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
+
+                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+
+                                <span class="font-inter text-xs font-semibold text-emerald-700">
+
+                                    Completed
+
+                                </span>
+
+                            </div>
+
+                        <% } %>
 
 
                     </div>
@@ -661,7 +773,7 @@
                         </p>
 
 
-                        <% if (employee.isActive()) { %>
+                        <% if (user.isActive()) { %>
 
                             <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
 
@@ -712,7 +824,7 @@
 
 
             <a
-                href="<%= contextPath %>/admin/employees"
+                href="<%= contextPath %>/admin/users"
 
                 class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-inter text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50">
 
@@ -722,7 +834,7 @@
 
 
             <a
-                href="<%= contextPath %>/admin/edit-employee?id=<%= employee.getUserId() %>"
+                href="<%= contextPath %>/admin/edit-user?id=<%= user.getUserId() %>"
 
                 class="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[11px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]">
 
@@ -747,7 +859,7 @@
                 </svg>
 
 
-                Edit Employee
+                Edit User
 
             </a>
 

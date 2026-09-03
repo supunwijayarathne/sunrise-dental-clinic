@@ -155,7 +155,7 @@ public class DentistDAO {
                 "SELECT * FROM dentists " +
                 "WHERE dentist_name LIKE ? " +
                 "OR specialization LIKE ? " +
-                "OR phone_number LIKE ? " +
+                "OR dentist_id LIKE ? " +
                 "OR email LIKE ? " +
                 "ORDER BY dentist_id DESC";
 

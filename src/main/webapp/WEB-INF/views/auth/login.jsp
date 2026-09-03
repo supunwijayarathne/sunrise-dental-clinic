@@ -79,7 +79,9 @@
 <div class="flex min-h-screen">
 
 
-    <!-- LEFT BRAND PANEL -->
+    <!-- =====================================================
+         LEFT BRAND PANEL
+    ====================================================== -->
 
     <div class="hidden w-[46%] bg-[#111827] lg:flex">
 
@@ -87,41 +89,44 @@
         <div class="flex w-full flex-col justify-between px-14 py-12">
 
 
-            <!-- BRAND -->
+            <!-- =================================================
+                 BRAND
+            ================================================== -->
 
             <div>
 
                 <div class="flex items-center gap-3">
 
 
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB]">
+                    <!-- Sunrise Logo -->
 
-                        <svg
-                            class="h-5 w-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
+                    <div
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style="background-color: rgba(255,255,255,0.10);"
+                    >
 
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 3v18M3 12h18"
-                            />
-
-                        </svg>
+                        <img
+                            src="<%= request.getContextPath() %>/assets/images/sunrise-logo.png"
+                            alt="Sunrise Dental Logo"
+                            class="h-8 w-8 object-contain"
+                        />
 
                     </div>
 
 
+                    <!-- Brand Name -->
+
                     <div>
 
-                        <h1 class="text-base font-extrabold tracking-[-0.3px] text-white">
+                        <h1
+                            class="text-base font-extrabold tracking-[-0.3px] text-white"
+                        >
                             Sunrise Dental
                         </h1>
 
-                        <p class="font-inter text-[9px] font-medium text-slate-500">
+                        <p
+                            class="font-inter text-[9px] font-medium text-slate-500"
+                        >
                             Clinic Management System
                         </p>
 
@@ -134,33 +139,19 @@
 
 
 
-            <!-- CENTER MESSAGE -->
+            <!-- =================================================
+                 CENTER MESSAGE
+            ================================================== -->
 
             <div class="max-w-[430px]">
 
 
-                <div class="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.06]">
-
-                    <svg
-                        class="h-5 w-5 text-blue-400"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.7"
-                        viewBox="0 0 24 24"
-                    >
-
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M3 10.5L12 3l9 7.5M5 9v11h14V9M9 20v-6h6v6"
-                        />
-
-                    </svg>
-
-                </div>
+                <!-- Home Icon REMOVED -->
 
 
-                <h2 class="text-[32px] font-extrabold leading-tight tracking-[-1px] text-white">
+                <h2
+                    class="text-[32px] font-extrabold leading-tight tracking-[-1px] text-white"
+                >
 
                     Everything your clinic needs,
                     <span class="text-blue-400">
@@ -170,7 +161,9 @@
                 </h2>
 
 
-                <p class="mt-4 max-w-[380px] font-inter text-[12px] leading-6 text-slate-400">
+                <p
+                    class="mt-4 max-w-[380px] font-inter text-[12px] leading-6 text-slate-400"
+                >
 
                     Manage patients, appointments, treatments and billing
                     from a simple and organized clinic management system.
@@ -182,11 +175,15 @@
 
 
 
-            <!-- FOOTER -->
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
 
             <div>
 
-                <p class="font-inter text-[9px] text-slate-600">
+                <p
+                    class="font-inter text-[9px] text-slate-600"
+                >
                     Sunrise Dental Clinic
                 </p>
 
@@ -200,15 +197,21 @@
 
 
 
-    <!-- RIGHT LOGIN AREA -->
+    <!-- =====================================================
+         RIGHT LOGIN AREA
+    ====================================================== -->
 
-    <div class="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
+    <div
+        class="flex flex-1 items-center justify-center px-6 py-10 sm:px-10"
+    >
 
 
         <div class="w-full max-w-[400px]">
 
 
-            <!-- MOBILE BRAND -->
+            <!-- =================================================
+                 MOBILE BRAND
+            ================================================== -->
 
             <div class="mb-10 lg:hidden">
 
@@ -216,34 +219,35 @@
                 <div class="flex items-center gap-3">
 
 
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB]">
+                    <!-- Sunrise Logo -->
 
-                        <svg
-                            class="h-5 w-5 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            viewBox="0 0 24 24"
-                        >
+                    <div
+                        class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style="background-color: rgba(37,99,235,0.10);"
+                    >
 
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M12 3v18M3 12h18"
-                            />
-
-                        </svg>
+                        <img
+                            src="<%= request.getContextPath() %>/assets/images/sunrise-logo.png"
+                            alt="Sunrise Dental Logo"
+                            class="h-8 w-8 object-contain"
+                        />
 
                     </div>
 
 
+                    <!-- Brand Name -->
+
                     <div>
 
-                        <h1 class="text-base font-extrabold">
+                        <h1
+                            class="text-base font-extrabold"
+                        >
                             Sunrise Dental
                         </h1>
 
-                        <p class="font-inter text-[9px] text-slate-400">
+                        <p
+                            class="font-inter text-[9px] text-slate-400"
+                        >
                             Clinic Management System
                         </p>
 
@@ -257,27 +261,39 @@
 
 
 
-            <!-- LOGIN CARD -->
+            <!-- =================================================
+                 LOGIN CARD
+            ================================================== -->
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_12px_40px_rgba(15,23,42,0.06)] sm:p-8">
+            <div
+                class="rounded-2xl border border-slate-200 bg-white p-7 shadow-[0_12px_40px_rgba(15,23,42,0.06)] sm:p-8"
+            >
 
 
-                <!-- HEADER -->
+                <!-- =================================================
+                     HEADER
+                ================================================== -->
 
                 <div class="mb-7">
 
 
-                    <p class="mb-2 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-600">
+                    <p
+                        class="mb-2 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-blue-600"
+                    >
                         Staff Portal
                     </p>
 
 
-                    <h2 class="text-[25px] font-extrabold tracking-[-0.7px]">
+                    <h2
+                        class="text-[25px] font-extrabold tracking-[-0.7px]"
+                    >
                         Welcome back
                     </h2>
 
 
-                    <p class="mt-1.5 font-inter text-[11px] leading-5 text-slate-500">
+                    <p
+                        class="mt-1.5 font-inter text-[11px] leading-5 text-slate-500"
+                    >
                         Sign in to access the clinic management system.
                     </p>
 
@@ -286,20 +302,28 @@
 
 
 
-                <!-- ERROR -->
+                <!-- =================================================
+                     ERROR MESSAGE
+                ================================================== -->
 
                 <% if (request.getAttribute("error") != null) { %>
 
 
-                    <div class="mb-5 flex items-start gap-3 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3">
+                    <div
+                        class="mb-5 flex items-start gap-3 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3"
+                    >
 
 
-                        <div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 font-inter text-[10px] font-bold text-red-600">
+                        <div
+                            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 font-inter text-[10px] font-bold text-red-600"
+                        >
                             !
                         </div>
 
 
-                        <p class="font-inter text-[10px] font-medium leading-5 text-red-700">
+                        <p
+                            class="font-inter text-[10px] font-medium leading-5 text-red-700"
+                        >
 
                             <%= request.getAttribute("error") %>
 
@@ -313,7 +337,9 @@
 
 
 
-                <!-- FORM -->
+                <!-- =================================================
+                     LOGIN FORM
+                ================================================== -->
 
                 <form
                     method="post"
@@ -322,7 +348,9 @@
                 >
 
 
-                    <!-- USERNAME -->
+                    <!-- =================================================
+                         USERNAME
+                    ================================================== -->
 
                     <div>
 
@@ -338,7 +366,9 @@
                         <div class="relative">
 
 
-                            <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                            <div
+                                class="pointer-events-none absolute inset-y-0 left-3 flex items-center"
+                            >
 
                                 <svg
                                     class="h-4 w-4 text-slate-400"
@@ -377,7 +407,9 @@
 
 
 
-                    <!-- PASSWORD -->
+                    <!-- =================================================
+                         PASSWORD
+                    ================================================== -->
 
                     <div>
 
@@ -393,7 +425,9 @@
                         <div class="relative">
 
 
-                            <div class="pointer-events-none absolute inset-y-0 left-3 flex items-center">
+                            <div
+                                class="pointer-events-none absolute inset-y-0 left-3 flex items-center"
+                            >
 
                                 <svg
                                     class="h-4 w-4 text-slate-400"
@@ -439,7 +473,9 @@
 
 
 
-                    <!-- LOGIN BUTTON -->
+                    <!-- =================================================
+                         LOGIN BUTTON
+                    ================================================== -->
 
                     <button
                         type="submit"
@@ -470,12 +506,16 @@
                 </form>
 
 
-                <!-- SECURITY NOTE -->
+
+                <!-- =================================================
+                     SECURITY NOTE
+                ================================================== -->
 
                 <div class="mt-6 border-t border-slate-100 pt-5">
 
 
                     <div class="flex items-center justify-center gap-2">
+
 
                         <svg
                             class="h-3.5 w-3.5 text-slate-400"
@@ -501,9 +541,12 @@
                         </svg>
 
 
-                        <p class="font-inter text-[9px] text-slate-400">
+                        <p
+                            class="font-inter text-[9px] text-slate-400"
+                        >
                             Authorized clinic staff only
                         </p>
+
 
                     </div>
 
@@ -515,9 +558,13 @@
 
 
 
-            <!-- COPYRIGHT -->
+            <!-- =================================================
+                 COPYRIGHT
+            ================================================== -->
 
-            <p class="mt-5 text-center font-inter text-[9px] text-slate-400">
+            <p
+                class="mt-5 text-center font-inter text-[9px] text-slate-400"
+            >
                 © Sunrise Dental Clinic
             </p>
 
