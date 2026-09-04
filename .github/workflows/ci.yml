@@ -14,18 +14,22 @@ jobs:
 
     steps:
 
+      # 1. Get the project from GitHub
       - name: Checkout source code
         uses: actions/checkout@v5
 
+      # 2. Install Java 21
       - name: Set up Java 21
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # 3. Verify Java installation
       - name: Check Java version
         run: java -version
 
+      # 4. Download Jakarta Servlet API
       - name: Download Jakarta Servlet API
         run: |
           mkdir -p ci/lib
@@ -33,6 +37,7 @@ jobs:
           curl -L -o ci/lib/jakarta-servlet-api.jar \
             https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.0.0/jakarta.servlet-api-6.0.0.jar
 
+      # 5. Download Jakarta Mail and Activation dependencies
       - name: Download Jakarta Mail dependencies
         run: |
           curl -L -o ci/lib/jakarta.mail-api.jar \
@@ -47,11 +52,13 @@ jobs:
           curl -L -o ci/lib/angus-activation.jar \
             https://repo1.maven.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar
 
+      # 6. Download MySQL Connector/J
       - name: Download MySQL Connector
         run: |
           curl -L -o ci/lib/mysql-connector-j.jar \
             https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.4.0/mysql-connector-j-9.4.0.jar
 
+      # 7. Compile application source code
       - name: Compile Java source
         run: |
           mkdir -p build/classes
@@ -63,11 +70,13 @@ jobs:
             -d build/classes \
             @sources.txt
 
+      # 8. Download JUnit 5
       - name: Download JUnit 5 Console Launcher
         run: |
           curl -L -o ci/lib/junit-platform-console-standalone.jar \
             https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.12.2/junit-platform-console-standalone-1.12.2.jar
 
+      # 9. Compile test classes
       - name: Compile JUnit tests
         run: |
           mkdir -p build/test-classes
@@ -78,3 +87,10 @@ jobs:
             -cp "build/classes:ci/lib/*" \
             -d build/test-classes \
             @test-sources.txt
+
+      # 10. Run service tests
+      - name: Run service tests
+        run: |
+          java -jar ci/lib/junit-platform-console-standalone.jar execute \
+            --class-path "build/classes:build/test-classes:ci/lib/*" \
+            --select-package com.sunrise.test.service
