@@ -615,9 +615,7 @@
 
                             <div
                                 class="col-span-2">
-
-
-                                <label
+<label
                                     class="mb-1.5 block text-[10px] font-bold">
 
                                     Appointment Number
@@ -2450,8 +2448,6 @@ document.addEventListener(
 });
 
 </script>
-
-
 </body>
 
 </html>

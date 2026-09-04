@@ -2,12 +2,7 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="com.sunrise.model.Patient" %>
-
-<%
-    Patient patient =
-        (Patient) request.getAttribute("patient");
-%>
+<% String contextPath = request.getContextPath(); %>
 
 <!DOCTYPE html>
 
@@ -96,7 +91,7 @@
     <main class="ml-[250px] min-h-screen flex-1 px-8 py-7">
 
 
-        <% if (patient == null) { %>
+        <div id="notFoundView" class="hidden">
 
 
             <!-- PATIENT NOT FOUND -->
@@ -146,7 +141,7 @@
 
 
                     <a
-                        href="<%= request.getContextPath() %>/patients"
+                        href="<%= contextPath %>/patients"
                         class="mt-6 inline-flex rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-inter text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
                     >
                         ← Back to Patients
@@ -159,7 +154,10 @@
             </div>
 
 
-        <% } else { %>
+        </div>
+
+
+        <div id="detailsView">
 
 
             <!-- PAGE HEADER -->
@@ -201,7 +199,7 @@
 
                     <p class="mt-0.5 text-xs font-extrabold text-blue-600">
 
-                        <%= patient.getPatientCode() %>
+                        <span id="patientCode">-</span>
 
                     </p>
 
@@ -231,12 +229,7 @@
                         <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-xl font-extrabold text-blue-600">
 
 
-                            <%= patient.getName() != null
-                                && !patient.getName().isBlank()
-                                ? patient.getName()
-                                    .substring(0, 1)
-                                    .toUpperCase()
-                                : "P" %>
+                            <span id="patientInitial">P</span>
 
 
                         </div>
@@ -247,14 +240,14 @@
 
                             <h2 class="text-lg font-extrabold tracking-[-0.4px]">
 
-                                <%= patient.getName() %>
+                                <span id="patientName">-</span>
 
                             </h2>
 
 
                             <p class="mt-1 font-inter text-[10px] text-slate-500">
 
-                                Patient ID #<%= patient.getPatientId() %>
+                                Patient ID #<span id="patientId">-</span>
 
                             </p>
 
@@ -266,7 +259,7 @@
 
                         <span class="rounded-full bg-blue-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-blue-600">
 
-                            <%= patient.getPatientCode() %>
+                            <span id="patientCode">-</span>
 
                         </span>
 
@@ -277,142 +270,7 @@
 
                     <!-- DETAILS -->
 
-                    <div class="grid grid-cols-2">
-
-
-                        <!-- NAME -->
-
-                        <div class="border-b border-r border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Patient Name
-                            </p>
-
-
-                            <p class="mt-2 text-sm font-bold">
-
-                                <%= patient.getName() %>
-
-                            </p>
-
-
-                        </div>
-
-
-
-                        <!-- PATIENT CODE -->
-
-                        <div class="border-b border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Patient Code
-                            </p>
-
-
-                            <p class="mt-2 text-sm font-bold">
-
-                                <%= patient.getPatientCode() %>
-
-                            </p>
-
-
-                        </div>
-
-
-
-                        <!-- PHONE -->
-
-                        <div class="border-b border-r border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Contact Number
-                            </p>
-
-
-                            <p class="mt-2 text-sm font-bold">
-
-                                <%= patient.getContactNumber() %>
-
-                            </p>
-
-
-                        </div>
-
-
-
-                        <!-- EMAIL -->
-
-                        <div class="border-b border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Email Address
-                            </p>
-
-
-                            <p class="mt-2 break-all text-sm font-bold">
-
-
-                                <%= patient.getEmail() == null
-                                    || patient.getEmail().isBlank()
-                                    ? "-"
-                                    : patient.getEmail() %>
-
-
-                            </p>
-
-
-                        </div>
-
-
-
-                        <!-- ADDRESS -->
-
-                        <div class="border-b border-r border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Address
-                            </p>
-
-
-                            <p class="mt-2 text-sm font-bold leading-6">
-
-                                <%= patient.getAddress() %>
-
-                            </p>
-
-
-                        </div>
-
-
-
-                        <!-- REGISTERED DATE -->
-
-                        <div class="border-b border-slate-100 px-7 py-5">
-
-
-                            <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                                Registered Date
-                            </p>
-
-
-                            <p class="mt-2 text-sm font-bold">
-
-                                <%= patient.getCreatedAt() == null
-                                    ? "-"
-                                    : patient.getCreatedAt() %>
-
-                            </p>
-
-
-                        </div>
-
-
-                    </div>
+                    
 
 
                 </div>
@@ -459,7 +317,7 @@
 
                         <p class="mt-1 text-[11px] font-bold">
 
-                            <%= patient.getContactNumber() %>
+                            <span id="patientContact">-</span>
 
                         </p>
 
@@ -512,10 +370,7 @@
                         <p class="mt-1 truncate text-[11px] font-bold">
 
 
-                            <%= patient.getEmail() == null
-                                || patient.getEmail().isBlank()
-                                ? "Not provided"
-                                : patient.getEmail() %>
+                            <span id="patientEmailSummary">Not provided</span>
 
 
                         </p>
@@ -568,10 +423,7 @@
                         <p class="mt-1 text-[11px] font-bold">
 
 
-                            <%= patient.getCreatedAt() == null
-                                ? "N/A"
-                                : patient.getCreatedAt().toString()
-                                    .substring(0, 10) %>
+                            <span id="patientCreatedSummary">N/A</span>
 
 
                         </p>
@@ -590,7 +442,7 @@
 
 
                     <a
-                        href="<%= request.getContextPath() %>/patients"
+                        href="<%= contextPath %>/patients"
                         class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-inter text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
                     >
 
@@ -600,7 +452,7 @@
 
 
                     <a
-                        href="<%= request.getContextPath() %>/patients/edit?id=<%= patient.getPatientId() %>"
+                        id="editPatientLink" href="#"
                         class="flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[10px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]"
                     >
 
@@ -656,7 +508,7 @@
             </div>
 
 
-        <% } %>
+        </div>
 
 
     </main>
@@ -664,6 +516,107 @@
 
 </div>
 
+
+
+<script>
+(function () {
+    "use strict";
+
+    var contextPath = "<%= contextPath %>";
+    var params = new URLSearchParams(window.location.search);
+    var patientId = params.get("id") || params.get("patientId");
+
+    var notFoundView = document.getElementById("notFoundView");
+    var detailsView = document.getElementById("detailsView");
+    var editPatientLink = document.getElementById("editPatientLink");
+
+    function showNotFound() {
+        if (detailsView) {
+            detailsView.classList.add("hidden");
+        }
+        if (notFoundView) {
+            notFoundView.classList.remove("hidden");
+        }
+    }
+
+    function setText(id, value) {
+        var elements = document.querySelectorAll('[id="' + id + '"]');
+        var displayValue = value == null || String(value).trim() === ""
+            ? "-"
+            : String(value);
+
+        for (var i = 0; i < elements.length; i++) {
+            elements[i].textContent = displayValue;
+        }
+    }
+
+    function loadPatient() {
+        if (!patientId || !/^\d+$/.test(patientId)) {
+            showNotFound();
+            return;
+        }
+
+        fetch(contextPath + "/api/patients/" + encodeURIComponent(patientId), {
+            method: "GET",
+            credentials: "same-origin",
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("Patient not found");
+            }
+            return response.json();
+        })
+        .then(function (patient) {
+            if (!patient || !patient.patientId) {
+                throw new Error("Patient not found");
+            }
+
+            if (notFoundView) {
+                notFoundView.classList.add("hidden");
+            }
+            if (detailsView) {
+                detailsView.classList.remove("hidden");
+            }
+
+            var name = patient.name || "-";
+            var email = patient.email && String(patient.email).trim()
+                ? patient.email
+                : "-";
+            var registered = patient.createdAt || "-";
+
+            if (registered !== "-" && String(registered).length >= 10) {
+                registered = String(registered).substring(0, 10);
+            }
+
+            setText("patientCode", patient.patientCode);
+            setText("patientInitial", name !== "-" ? name.substring(0, 1).toUpperCase() : "P");
+            setText("patientName", name);
+            setText("patientId", patient.patientId);
+            setText("patientContact", patient.contactNumber);
+            setText("patientEmail", email);
+            setText("patientEmailSummary", email === "-" ? "Not provided" : email);
+            setText("patientAddress", patient.address);
+            setText("patientCreatedAt", patient.createdAt ? patient.createdAt : "-");
+            setText("patientCreatedSummary", registered === "-" ? "N/A" : registered);
+
+            if (editPatientLink) {
+                editPatientLink.href =
+                    contextPath + "/patients/edit?id=" +
+                    encodeURIComponent(patient.patientId);
+            }
+        })
+        .catch(function (error) {
+            console.error("Could not load patient:", error);
+            showNotFound();
+        });
+    }
+
+    loadPatient();
+})();
+</script>
 
 </body>
 

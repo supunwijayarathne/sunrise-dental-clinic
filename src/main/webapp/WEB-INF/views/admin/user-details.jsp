@@ -1,77 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="com.sunrise.model.User" %>
-
 <%
-    User user = (User) request.getAttribute("user");
-
     String contextPath = request.getContextPath();
-
-    if (user == null) {
-        response.sendRedirect(contextPath + "/admin/users");
-        return;
-    }
-
-    /* =====================================================
-       ROLE
-       ===================================================== */
-
-    String currentRole = user.getRole();
-
-    if (currentRole == null || currentRole.trim().isEmpty()) {
-        currentRole = "RECEPTIONIST";
-    }
-
-    currentRole = currentRole.toUpperCase();
-
-    String roleDisplay;
-
-    if ("ADMIN".equalsIgnoreCase(currentRole)) {
-        roleDisplay = "Administrator";
-    } else {
-        roleDisplay = "Receptionist";
-    }
-
-
-    /* =====================================================
-       POSITION
-       ===================================================== */
-
-    String position = user.getPosition();
-
-    if (position == null || position.trim().isEmpty()) {
-        position = "Staff";
-    }
-
-
-    /* =====================================================
-       INITIALS
-       ===================================================== */
-
-    String initials = "U";
-
-    if (user.getFullName() != null &&
-        !user.getFullName().trim().isEmpty()) {
-
-        String[] nameParts =
-                user.getFullName().trim().split("\\s+");
-
-        if (nameParts.length >= 2) {
-
-            initials =
-                    String.valueOf(nameParts[0].charAt(0)) +
-                    String.valueOf(
-                            nameParts[nameParts.length - 1].charAt(0)
-                    );
-
-        } else {
-
-            initials =
-                    String.valueOf(nameParts[0].charAt(0));
-        }
-
-        initials = initials.toUpperCase();
-    }
+    String userId = request.getParameter("id");
 %>
 
 <!DOCTYPE html>
@@ -261,7 +192,7 @@
 
                     <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 font-manrope text-base font-extrabold text-blue-600">
 
-                        <%= initials %>
+                        <span id="userInitials">U</span>
 
                     </div>
 
@@ -270,7 +201,7 @@
 
                         <h2 class="font-manrope text-base font-bold text-[#172033]">
 
-                            <%= user.getFullName() %>
+                            <span id="userFullNamePersonal">Loading...</span>
 
                         </h2>
 
@@ -282,9 +213,7 @@
 
                             <span class="font-inter text-[10px] text-slate-400">
 
-                                USR<%= String.format(
-                                        "%03d",
-                                        user.getUserId()) %>
+                                USR<span id="userIdHeader">---</span>
 
                             </span>
 
@@ -298,7 +227,7 @@
 
                             <span class="font-inter text-[10px] text-slate-500">
 
-                                <%= position %>
+                                <span id="userPosition">Staff</span>
 
                             </span>
 
@@ -312,27 +241,13 @@
 
                 <!-- Status -->
 
-                <% if (user.isActive()) { %>
+                
+<span id="summaryStatus"
+      class="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-emerald-600">
+    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+    Active
+</span>
 
-                    <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-emerald-600">
-
-                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-
-                        Active
-
-                    </span>
-
-                <% } else { %>
-
-                    <span class="inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-red-600">
-
-                        <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
-
-                        Inactive
-
-                    </span>
-
-                <% } %>
 
 
             </div>
@@ -435,9 +350,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                USR<%= String.format(
-                                        "%03d",
-                                        user.getUserId()) %>
+                                USR<span id="userIdDisplay">---</span>
 
                             </p>
 
@@ -460,7 +373,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= user.getFullName() %>
+                                <span id="userFullName">Loading...</span>
 
                             </p>
 
@@ -483,7 +396,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= position %>
+                                <span id="userPosition">Staff</span>
 
                             </p>
 
@@ -506,10 +419,7 @@
 
                             <p class="mt-1.5 break-all font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= user.getEmail() != null
-                                        && !user.getEmail().isEmpty()
-                                            ? user.getEmail()
-                                            : "Not provided" %>
+                                <span id="userEmail">Not provided</span>
 
                             </p>
 
@@ -532,10 +442,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold text-[#172033]">
 
-                                <%= user.getPhone() != null
-                                        && !user.getPhone().isEmpty()
-                                            ? user.getPhone()
-                                            : "Not provided" %>
+                                <span id="userPhone">Not provided</span>
 
                             </p>
 
@@ -558,10 +465,7 @@
 
                             <p class="mt-1.5 font-inter text-xs font-semibold leading-5 text-[#172033]">
 
-                                <%= user.getAddress() != null
-                                        && !user.getAddress().isEmpty()
-                                            ? user.getAddress()
-                                            : "Not provided" %>
+                                <span id="userAddress">Not provided</span>
 
                             </p>
 
@@ -661,7 +565,7 @@
 
                             <p class="font-inter text-xs font-semibold text-slate-700">
 
-                                @<%= user.getUsername() %>
+                                @<span id="userUsername">Loading...</span>
 
                             </p>
 
@@ -693,7 +597,7 @@
 
                             <span class="font-inter text-xs font-semibold text-slate-700">
 
-                                <%= roleDisplay %>
+                                <span id="roleDisplay">Receptionist</span>
 
                             </span>
 
@@ -702,7 +606,7 @@
 
                             <span class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-blue-600">
 
-                                <%= currentRole %>
+                                <span id="databaseRole">RECEPTIONIST</span>
 
                             </span>
 
@@ -726,35 +630,13 @@
                         </p>
 
 
-                        <% if (user.isFirstLogin()) { %>
+                        
+<div id="firstLoginStatus"
+     class="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3.5 py-3">
+    <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+    <span class="font-inter text-xs font-semibold text-amber-700">Pending</span>
+</div>
 
-                            <div class="flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3.5 py-3">
-
-                                <span class="h-2 w-2 rounded-full bg-amber-500"></span>
-
-                                <span class="font-inter text-xs font-semibold text-amber-700">
-
-                                    Pending
-
-                                </span>
-
-                            </div>
-
-                        <% } else { %>
-
-                            <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
-
-                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-
-                                <span class="font-inter text-xs font-semibold text-emerald-700">
-
-                                    Completed
-
-                                </span>
-
-                            </div>
-
-                        <% } %>
 
 
                     </div>
@@ -773,35 +655,13 @@
                         </p>
 
 
-                        <% if (user.isActive()) { %>
+                        
+<div id="accountStatus"
+     class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
+    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+    <span class="font-inter text-xs font-semibold text-emerald-700">Active</span>
+</div>
 
-                            <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
-
-                                <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-
-                                <span class="font-inter text-xs font-semibold text-emerald-700">
-
-                                    Active
-
-                                </span>
-
-                            </div>
-
-                        <% } else { %>
-
-                            <div class="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3">
-
-                                <span class="h-2 w-2 rounded-full bg-red-500"></span>
-
-                                <span class="font-inter text-xs font-semibold text-red-700">
-
-                                    Inactive
-
-                                </span>
-
-                            </div>
-
-                        <% } %>
 
 
                     </div>
@@ -834,7 +694,7 @@
 
 
             <a
-                href="<%= contextPath %>/admin/edit-user?id=<%= user.getUserId() %>"
+                href="<%= contextPath %>/admin/edit-user?id=<%= userId %>"
 
                 class="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[11px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]">
 
@@ -871,6 +731,669 @@
 
 </div>
 
+
+
+<script>
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+    const requestedUserId =
+        "<%= userId == null ? "" : userId %>" ||
+        new URLSearchParams(
+            window.location.search
+        ).get("userId") ||
+        new URLSearchParams(
+            window.location.search
+        ).get("id") ||
+        "";
+
+
+    /*
+     * =========================================================
+     * API REQUEST
+     * GET /api/users/{id}
+     * =========================================================
+     */
+
+    async function loadUser() {
+
+        if (!requestedUserId) {
+
+            window.location.href =
+                contextPath + "/admin/users";
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    contextPath +
+                    "/api/users/" +
+                    encodeURIComponent(
+                        requestedUserId
+                    ),
+                    {
+                        method: "GET",
+                        credentials: "same-origin",
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (response.status === 401) {
+
+                window.location.href =
+                    contextPath + "/login";
+
+                return;
+
+            }
+
+
+            if (response.status === 403) {
+
+                window.location.href =
+                    contextPath + "/admin/users";
+
+                return;
+
+            }
+
+
+            if (response.status === 404) {
+
+                window.location.href =
+                    contextPath + "/admin/users";
+
+                return;
+
+            }
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Failed to load user."
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const user =
+                data.user || data;
+
+
+            if (!user) {
+
+                window.location.href =
+                    contextPath + "/admin/users";
+
+                return;
+
+            }
+
+
+            renderUser(user);
+
+        }
+        catch (error) {
+
+            console.error(
+                "User details API error:",
+                error
+            );
+
+            window.location.href =
+                contextPath + "/admin/users";
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * SAFE TEXT
+     * =========================================================
+     */
+
+    function valueOrDefault(
+        value,
+        fallback
+    ) {
+
+        if (
+            value === null ||
+            value === undefined ||
+            String(value).trim() === ""
+        ) {
+
+            return fallback;
+
+        }
+
+        return String(value);
+
+    }
+
+
+    /*
+     * =========================================================
+     * INITIALS
+     * =========================================================
+     */
+
+    function getInitials(fullName) {
+
+        const name =
+            valueOrDefault(
+                fullName,
+                "User"
+            ).trim();
+
+
+        const parts =
+            name.split(/\s+/);
+
+
+        if (parts.length >= 2) {
+
+            return (
+                parts[0].charAt(0) +
+                parts[parts.length - 1].charAt(0)
+            ).toUpperCase();
+
+        }
+
+
+        return (
+            parts[0].charAt(0) ||
+            "U"
+        ).toUpperCase();
+
+    }
+
+
+    /*
+     * =========================================================
+     * SUMMARY STATUS
+     * =========================================================
+     */
+
+    function renderSummaryStatus(
+        isActive
+    ) {
+
+        const container =
+            document.getElementById(
+                "summaryStatus"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        if (isActive) {
+
+            container.className =
+                "inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-emerald-600";
+
+
+            container.innerHTML =
+                '<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>' +
+                'Active';
+
+        }
+        else {
+
+            container.className =
+                "inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 font-inter text-[10px] font-semibold text-red-600";
+
+
+            container.innerHTML =
+                '<span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>' +
+                'Inactive';
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * FIRST LOGIN STATUS
+     * =========================================================
+     */
+
+    function renderFirstLogin(
+        firstLogin
+    ) {
+
+        const container =
+            document.getElementById(
+                "firstLoginStatus"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        if (firstLogin) {
+
+            container.className =
+                "flex items-center gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3.5 py-3";
+
+
+            container.innerHTML =
+                '<span class="h-2 w-2 rounded-full bg-amber-500"></span>' +
+                '<span class="font-inter text-xs font-semibold text-amber-700">' +
+                'Pending' +
+                '</span>';
+
+        }
+        else {
+
+            container.className =
+                "flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3";
+
+
+            container.innerHTML =
+                '<span class="h-2 w-2 rounded-full bg-emerald-500"></span>' +
+                '<span class="font-inter text-xs font-semibold text-emerald-700">' +
+                'Completed' +
+                '</span>';
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * ACCOUNT STATUS
+     * =========================================================
+     */
+
+    function renderAccountStatus(
+        isActive
+    ) {
+
+        const container =
+            document.getElementById(
+                "accountStatus"
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        if (isActive) {
+
+            container.className =
+                "flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3";
+
+
+            container.innerHTML =
+                '<span class="h-2 w-2 rounded-full bg-emerald-500"></span>' +
+                '<span class="font-inter text-xs font-semibold text-emerald-700">' +
+                'Active' +
+                '</span>';
+
+        }
+        else {
+
+            container.className =
+                "flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3";
+
+
+            container.innerHTML =
+                '<span class="h-2 w-2 rounded-full bg-red-500"></span>' +
+                '<span class="font-inter text-xs font-semibold text-red-700">' +
+                'Inactive' +
+                '</span>';
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * RENDER USER
+     * =========================================================
+     */
+
+    function renderUser(user) {
+
+        const userId =
+            Number(
+                user.userId || requestedUserId
+            );
+
+
+        const fullName =
+            valueOrDefault(
+                user.fullName,
+                "User"
+            );
+
+
+        const position =
+            valueOrDefault(
+                user.position,
+                "Staff"
+            );
+
+
+        const email =
+            valueOrDefault(
+                user.email,
+                "Not provided"
+            );
+
+
+        const phone =
+            valueOrDefault(
+                user.phone,
+                "Not provided"
+            );
+
+
+        const address =
+            valueOrDefault(
+                user.address,
+                "Not provided"
+            );
+
+
+        const username =
+            valueOrDefault(
+                user.username,
+                ""
+            );
+
+
+        const currentRole =
+            valueOrDefault(
+                user.role,
+                "RECEPTIONIST"
+            ).toUpperCase();
+
+
+        const roleDisplay =
+            currentRole === "ADMIN"
+                ? "Administrator"
+                : "Receptionist";
+
+
+        const isActive =
+            user.active === true;
+
+
+        const firstLogin =
+            user.firstLogin === true;
+
+
+        /*
+         * =====================================================
+         * UPDATE PAGE VALUES
+         * =====================================================
+         */
+
+        document.title =
+            fullName +
+            " - User Details - Sunrise Dental";
+
+
+        const initialsElement =
+            document.getElementById(
+                "userInitials"
+            );
+
+
+        const fullNameElement =
+            document.getElementById(
+                "userFullName"
+            );
+
+
+        const fullNamePersonalElement =
+            document.getElementById(
+                "userFullNamePersonal"
+            );
+
+
+        const userIdElement =
+            document.getElementById(
+                "userIdDisplay"
+            );
+
+
+        const userIdHeaderElement =
+            document.getElementById(
+                "userIdHeader"
+            );
+
+
+        const positionElement =
+            document.getElementById(
+                "userPosition"
+            );
+
+
+        const emailElement =
+            document.getElementById(
+                "userEmail"
+            );
+
+
+        const phoneElement =
+            document.getElementById(
+                "userPhone"
+            );
+
+
+        const addressElement =
+            document.getElementById(
+                "userAddress"
+            );
+
+
+        const usernameElement =
+            document.getElementById(
+                "userUsername"
+            );
+
+
+        const roleDisplayElement =
+            document.getElementById(
+                "roleDisplay"
+            );
+
+
+        const databaseRoleElement =
+            document.getElementById(
+                "databaseRole"
+            );
+
+
+        if (initialsElement) {
+
+            initialsElement.textContent =
+                getInitials(fullName);
+
+        }
+
+
+        if (fullNameElement) {
+
+            fullNameElement.textContent =
+                fullName;
+
+        }
+
+
+        if (fullNamePersonalElement) {
+
+            fullNamePersonalElement.textContent =
+                fullName;
+
+        }
+
+
+        const formattedUserId =
+            String(userId).padStart(
+                3,
+                "0"
+            );
+
+
+        if (userIdElement) {
+
+            userIdElement.textContent =
+                formattedUserId;
+
+        }
+
+
+        if (userIdHeaderElement) {
+
+            userIdHeaderElement.textContent =
+                formattedUserId;
+
+        }
+
+
+        if (positionElement) {
+
+            positionElement.textContent =
+                position;
+
+        }
+
+
+        if (emailElement) {
+
+            emailElement.textContent =
+                email;
+
+        }
+
+
+        if (phoneElement) {
+
+            phoneElement.textContent =
+                phone;
+
+        }
+
+
+        if (addressElement) {
+
+            addressElement.textContent =
+                address;
+
+        }
+
+
+        if (usernameElement) {
+
+            usernameElement.textContent =
+                username;
+
+        }
+
+
+        if (roleDisplayElement) {
+
+            roleDisplayElement.textContent =
+                roleDisplay;
+
+        }
+
+
+        if (databaseRoleElement) {
+
+            databaseRoleElement.textContent =
+                currentRole;
+
+        }
+
+
+        /*
+         * =====================================================
+         * UPDATE STATUS
+         * =====================================================
+         */
+
+        renderSummaryStatus(
+            isActive
+        );
+
+
+        renderFirstLogin(
+            firstLogin
+        );
+
+
+        renderAccountStatus(
+            isActive
+        );
+
+
+        /*
+         * =====================================================
+         * UPDATE EDIT LINK
+         * =====================================================
+         */
+
+        const editLink =
+            document.querySelector(
+                'a[href*="/admin/edit-user"]'
+            );
+
+
+        if (editLink) {
+
+            editLink.href =
+                contextPath +
+                "/admin/edit-user?id=" +
+                encodeURIComponent(
+                    userId
+                );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * START
+     * =========================================================
+     */
+
+    loadUser();
+
+})();
+</script>
 
 </body>
 

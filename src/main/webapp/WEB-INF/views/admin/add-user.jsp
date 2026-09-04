@@ -3,21 +3,6 @@
 
 <%
     String contextPath = request.getContextPath();
-
-    String error = (String) request.getAttribute("error");
-
-    String selectedRole = request.getParameter("role");
-
-    if (selectedRole == null || selectedRole.trim().isEmpty()) {
-        selectedRole = "RECEPTIONIST";
-    }
-
-    selectedRole = selectedRole.toUpperCase();
-
-    String selectedRoleDisplay =
-            "ADMIN".equals(selectedRole)
-            ? "Administrator"
-            : "Receptionist";
 %>
 
 <!DOCTYPE html>
@@ -178,56 +163,53 @@
              ERROR MESSAGE
              ================================================= -->
 
-        <% if (error != null) { %>
+        <div
+            id="errorMessage"
+            class="mb-6 hidden flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
 
-            <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
+            <div class="mt-0.5 shrink-0 text-red-500">
 
-                <div class="mt-0.5 shrink-0 text-red-500">
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24">
 
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24">
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"/>
 
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"/>
+                    <path
+                        stroke-linecap="round"
+                        d="M12 8v4"/>
 
-                        <path
-                            stroke-linecap="round"
-                            d="M12 8v4"/>
+                    <path
+                        stroke-linecap="round"
+                        d="M12 16h.01"/>
 
-                        <path
-                            stroke-linecap="round"
-                            d="M12 16h.01"/>
-
-                    </svg>
-
-                </div>
-
-                <div>
-
-                    <p class="font-inter text-xs font-semibold text-red-700">
-
-                        Unable to create user
-
-                    </p>
-
-                    <p class="mt-0.5 font-inter text-[11px] text-red-600">
-
-                        <%= error %>
-
-                    </p>
-
-                </div>
+                </svg>
 
             </div>
 
-        <% } %>
+            <div>
 
+                <p class="font-inter text-xs font-semibold text-red-700">
+
+                    Unable to create user
+
+                </p>
+
+                <p
+                    id="errorText"
+                    class="mt-0.5 font-inter text-[11px] text-red-600">
+
+                </p>
+
+            </div>
+
+        </div>
 
 
         <!-- =================================================
@@ -235,8 +217,7 @@
              ================================================= -->
 
         <form
-            method="post"
-            action="<%= contextPath %>/admin/add-user">
+            id="addUserForm">
 
 
             <div class="grid grid-cols-1 gap-5 xl:grid-cols-3">
@@ -330,9 +311,7 @@
                                     id="fullName"
                                     name="fullName"
                                     placeholder="Enter full name"
-                                    value="<%= request.getParameter("fullName") != null
-                                            ? request.getParameter("fullName")
-                                            : "" %>"
+                                    value=""
                                     required
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -357,9 +336,7 @@
                                     type="text"
                                     id="position"
                                     name="position"
-                                    value="<%= request.getParameter("position") != null
-                                            ? request.getParameter("position")
-                                            : "Staff" %>"
+                                    value="Staff"
 
                                     class="w-full cursor-not-allowed rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2.5 font-inter text-xs font-medium text-slate-500">
 
@@ -391,9 +368,7 @@
 
                                     <option
                                         value="RECEPTIONIST"
-                                        <%= "RECEPTIONIST".equals(selectedRole)
-                                                ? "selected"
-                                                : "" %>>
+                                        selected>
 
                                         Receptionist
 
@@ -402,9 +377,7 @@
 
                                     <option
                                         value="ADMIN"
-                                        <%= "ADMIN".equals(selectedRole)
-                                                ? "selected"
-                                                : "" %>>
+                                        >
 
                                         Administrator
 
@@ -440,9 +413,7 @@
                                     id="email"
                                     name="email"
                                     placeholder="example@email.com"
-                                    value="<%= request.getParameter("email") != null
-                                            ? request.getParameter("email")
-                                            : "" %>"
+                                    value=""
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -467,9 +438,7 @@
                                     id="phone"
                                     name="phone"
                                     placeholder="0771234567"
-                                    value="<%= request.getParameter("phone") != null
-                                            ? request.getParameter("phone")
-                                            : "" %>"
+                                    value=""
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -495,9 +464,7 @@
                                     rows="3"
                                     placeholder="Enter user address"
 
-                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"><%= request.getParameter("address") != null
-                                            ? request.getParameter("address")
-                                            : "" %></textarea>
+                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
 
                             </div>
 
@@ -592,9 +559,7 @@
                                 id="username"
                                 name="username"
                                 placeholder="Enter username"
-                                value="<%= request.getParameter("username") != null
-                                        ? request.getParameter("username")
-                                        : "" %>"
+                                value=""
                                 required
 
                                 class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
@@ -674,7 +639,7 @@
                                     id="roleBadge"
                                     class="shrink-0 rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[10px] font-semibold text-blue-600">
 
-                                    <%= selectedRoleDisplay %>
+                                    Receptionist
 
                                 </span>
 
@@ -746,29 +711,60 @@
 
 
 <!-- =========================================================
-     ROLE DISPLAY SCRIPT
-     ========================================================= -->
+     ROLE DISPLAY + REST API SUBMISSION
+========================================================== -->
 
 <script>
 
-    const roleSelect = document.getElementById("role");
-    const roleBadge = document.getElementById("roleBadge");
-    const roleDescription = document.getElementById("roleDescription");
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+    const form =
+        document.getElementById("addUserForm");
+
+    const roleSelect =
+        document.getElementById("role");
+
+    const roleBadge =
+        document.getElementById("roleBadge");
+
+    const roleDescription =
+        document.getElementById("roleDescription");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const errorText =
+        document.getElementById("errorText");
+
+    const submitButton =
+        form.querySelector('button[type="submit"]');
+
+
+    /*
+     * ========================================================
+     * ROLE DISPLAY
+     * ========================================================
+     */
 
     function updateRoleDisplay() {
 
-        const role = roleSelect.value;
+        const role =
+            roleSelect.value;
 
         if (role === "ADMIN") {
 
-            roleBadge.textContent = "Administrator";
+            roleBadge.textContent =
+                "Administrator";
 
             roleDescription.textContent =
                 "Administrator access to system management and reports.";
 
         } else {
 
-            roleBadge.textContent = "Receptionist";
+            roleBadge.textContent =
+                "Receptionist";
 
             roleDescription.textContent =
                 "Receptionist access for clinic operational tasks.";
@@ -778,11 +774,454 @@
     }
 
 
-    roleSelect.addEventListener("change", updateRoleDisplay);
+    /*
+     * ========================================================
+     * SHOW API ERROR
+     * ========================================================
+     */
+
+    function showError(message) {
+
+        errorText.textContent =
+            message || "User could not be created.";
+
+        errorMessage.classList.remove(
+            "hidden"
+        );
+
+        errorMessage.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
 
 
-    // Set correct display when page loads
+    /*
+     * ========================================================
+     * HIDE ERROR
+     * ========================================================
+     */
+
+    function hideError() {
+
+        errorMessage.classList.add(
+            "hidden"
+        );
+
+        errorText.textContent =
+            "";
+
+    }
+
+
+    /*
+     * ========================================================
+     * CREATE USER
+     *
+     * POST /api/users
+     *
+     * UserApi expects:
+     * fullName
+     * email
+     * phone
+     * address
+     * position
+     * username
+     * password
+     * role
+     * ========================================================
+     */
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            hideError();
+
+
+            /*
+             * ------------------------------------------------
+             * GET FORM VALUES
+             * ------------------------------------------------
+             */
+
+            const fullName =
+                document
+                    .getElementById("fullName")
+                    .value
+                    .trim();
+
+            const position =
+                document
+                    .getElementById("position")
+                    .value
+                    .trim();
+
+            const role =
+                roleSelect
+                    .value
+                    .trim();
+
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
+
+            const phone =
+                document
+                    .getElementById("phone")
+                    .value
+                    .trim();
+
+            const address =
+                document
+                    .getElementById("address")
+                    .value
+                    .trim();
+
+            const username =
+                document
+                    .getElementById("username")
+                    .value
+                    .trim();
+
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
+
+
+            /*
+             * ------------------------------------------------
+             * CLIENT-SIDE VALIDATION
+             * ------------------------------------------------
+             */
+
+            if (!fullName) {
+
+                showError(
+                    "Full name is required."
+                );
+
+                return;
+
+            }
+
+
+            if (!username) {
+
+                showError(
+                    "Username is required."
+                );
+
+                return;
+
+            }
+
+
+            if (!password) {
+
+                showError(
+                    "Password is required."
+                );
+
+                return;
+
+            }
+
+
+            if (password.length < 4) {
+
+                showError(
+                    "Password must contain at least 4 characters."
+                );
+
+                return;
+
+            }
+
+
+            /*
+             * ------------------------------------------------
+             * PREVENT DOUBLE SUBMISSION
+             * ------------------------------------------------
+             */
+
+            submitButton.disabled =
+                true;
+
+            submitButton.classList.add(
+                "opacity-70",
+                "cursor-not-allowed"
+            );
+
+
+            /*
+             * ------------------------------------------------
+             * BUILD FORM DATA
+             *
+             * UserApi currently reads
+             * application/x-www-form-urlencoded
+             * request bodies.
+             * ------------------------------------------------
+             */
+
+            const formData =
+                new URLSearchParams();
+
+
+            formData.append(
+                "fullName",
+                fullName
+            );
+
+            formData.append(
+                "position",
+                position
+            );
+
+            formData.append(
+                "role",
+                role
+            );
+
+            formData.append(
+                "email",
+                email
+            );
+
+            formData.append(
+                "phone",
+                phone
+            );
+
+            formData.append(
+                "address",
+                address
+            );
+
+            formData.append(
+                "username",
+                username
+            );
+
+            formData.append(
+                "password",
+                password
+            );
+
+
+            /*
+             * ------------------------------------------------
+             * REST API REQUEST
+             *
+             * POST /api/users
+             * ------------------------------------------------
+             */
+
+            try {
+
+                const response =
+                    await fetch(
+                        contextPath +
+                        "/api/users",
+                        {
+                            method: "POST",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded; charset=UTF-8",
+
+                                "Accept":
+                                    "application/json"
+                            },
+
+                            body:
+                                formData.toString()
+                        }
+                    );
+
+
+                /*
+                 * ------------------------------------------------
+                 * READ RESPONSE
+                 * ------------------------------------------------
+                 */
+
+                let data = null;
+
+                try {
+
+                    data =
+                        await response.json();
+
+                }
+                catch (jsonError) {
+
+                    data = null;
+
+                }
+
+
+                /*
+                 * ------------------------------------------------
+                 * API SUCCESS
+                 *
+                 * UserApi returns 201 when
+                 * the user is successfully created.
+                 * ------------------------------------------------
+                 */
+
+                if (
+                    response.ok &&
+                    response.status >= 200 &&
+                    response.status < 300
+                ) {
+
+                    window.location.href =
+                        contextPath +
+                        "/admin/users";
+
+                    return;
+
+                }
+
+
+                /*
+                 * ------------------------------------------------
+                 * API ERROR
+                 * ------------------------------------------------
+                 */
+
+                let message =
+                    "User could not be created.";
+
+
+                if (data) {
+
+                    if (data.message) {
+
+                        message =
+                            data.message;
+
+                    }
+                    else if (data.error) {
+
+                        if (
+                            typeof data.error ===
+                            "string"
+                        ) {
+
+                            message =
+                                data.error;
+
+                        }
+                        else if (
+                            data.error.message
+                        ) {
+
+                            message =
+                                data.error.message;
+
+                        }
+
+                    }
+
+                }
+
+
+                if (response.status === 401) {
+
+                    window.location.href =
+                        contextPath +
+                        "/login";
+
+                    return;
+
+                }
+
+
+                if (response.status === 403) {
+
+                    message =
+                        "You do not have permission to create users.";
+
+                }
+
+
+                if (response.status === 409) {
+
+                    message =
+                        data && data.message
+                            ? data.message
+                            : "Username already exists.";
+
+                }
+
+
+                showError(
+                    message
+                );
+
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Create user API error:",
+                    error
+                );
+
+
+                showError(
+                    "Unable to connect to the server. Please try again."
+                );
+
+            }
+            finally {
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.classList.remove(
+                    "opacity-70",
+                    "cursor-not-allowed"
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+     * ========================================================
+     * ROLE CHANGE
+     * ========================================================
+     */
+
+    roleSelect.addEventListener(
+        "change",
+        updateRoleDisplay
+    );
+
+
+    /*
+     * ========================================================
+     * INITIAL ROLE DISPLAY
+     * ========================================================
+     */
+
     updateRoleDisplay();
+
+})();
 
 </script>
 

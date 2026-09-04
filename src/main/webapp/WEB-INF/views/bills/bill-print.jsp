@@ -1,27 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="com.sunrise.model.Bill" %>
-<%@ page import="com.sunrise.model.Patient" %>
-<%@ page import="com.sunrise.model.Treatment" %>
-<%@ page import="com.sunrise.model.Appointment" %>
-<%@ page import="com.sunrise.model.Dentist" %>
 
-<%
-    Bill bill =
-        (Bill) request.getAttribute("bill");
-
-    Patient patient =
-        (Patient) request.getAttribute("patient");
-
-    Treatment treatment =
-        (Treatment) request.getAttribute("treatment");
-
-    Appointment appointment =
-        (Appointment) request.getAttribute("appointment");
-
-    Dentist dentist =
-        (Dentist) request.getAttribute("dentist");
-%>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -34,9 +13,7 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0">
 
-    <title>
-        <%= bill.getBillNumber() %> | Sunrise Dental
-    </title>
+    <title>Bill | Sunrise Dental</title>
 
 
     <!-- =====================================================
@@ -456,355 +433,190 @@
 
 <body>
 
+<button type="button" class="print-button" onclick="window.print()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9V2h12v7"/>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+        <path d="M6 14h12v8H6z"/>
+    </svg>
+    Print Bill
+</button>
 
-    <!-- =====================================================
-         PRINT BUTTON
-    ====================================================== -->
+<div class="receipt">
 
-    <button
-        type="button"
-        class="print-button"
-        onclick="window.print()">
-
-
-        <svg
-            width="15"
-            height="15"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round">
-
-            <path d="M6 9V2h12v7"/>
-
-            <path
-                d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-
-            <path d="M6 14h12v8H6z"/>
-
-        </svg>
-
-
-        Print Bill
-
-    </button>
-
-
-
-    <!-- =====================================================
-         RECEIPT
-    ====================================================== -->
-
-    <div class="receipt">
-
-
-        <!-- =================================================
-             HEADER
-        ================================================== -->
-
-        <div class="header">
-
-
-            <div>
-
-                <div class="brand">
-                    Sunrise Dental
-                </div>
-
-
-                <div class="subtitle">
-                    Clinic Management System
-                </div>
-
-            </div>
-
-
-
-            <div class="bill-number">
-
-                <div class="label">
-                    Bill Number
-                </div>
-
-
-                <div class="value">
-                    <%= bill.getBillNumber() %>
-                </div>
-
-            </div>
-
-
+    <div class="header">
+        <div>
+            <div class="brand">Sunrise Dental</div>
+            <div class="subtitle">Clinic Management System</div>
         </div>
 
-
-
-        <!-- =================================================
-             PATIENT INFORMATION
-        ================================================== -->
-
-        <div class="section">
-
-
-            <div class="section-title">
-                Patient Information
-            </div>
-
-
-            <div class="info-grid">
-
-
-                <!-- PATIENT -->
-
-                <div class="info">
-
-                    <div class="label">
-                        Patient
-                    </div>
-
-
-                    <div class="value">
-
-                        <%= patient != null
-                            ? patient.getName()
-                            : "Patient #" + bill.getPatientId() %>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- BILL TYPE -->
-
-                <div class="info">
-
-                    <div class="label">
-                        Bill Type
-                    </div>
-
-
-                    <div class="value">
-
-                        <%= "WALK_IN".equals(
-                                bill.getBillType())
-                            ? "Walk-in / Custom"
-                            : "Appointment" %>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
+        <div class="bill-number">
+            <div class="label">Bill Number</div>
+            <div id="billNumber" class="value">Loading...</div>
         </div>
-
-
-
-        <!-- =================================================
-             APPOINTMENT INFORMATION
-        ================================================== -->
-
-        <% if (appointment != null) { %>
-
-
-        <div class="section">
-
-
-            <div class="section-title">
-                Appointment Information
-            </div>
-
-
-            <div class="info-grid">
-
-
-                <!-- APPOINTMENT -->
-
-                <div class="info">
-
-                    <div class="label">
-                        Appointment
-                    </div>
-
-
-                    <div class="value">
-                        <%= appointment.getAppointmentNumber() %>
-                    </div>
-
-                </div>
-
-
-
-                <!-- DENTIST -->
-
-                <div class="info">
-
-                    <div class="label">
-                        Dentist
-                    </div>
-
-
-                    <div class="value">
-
-                        <%= dentist != null
-                            ? dentist.getDentistName()
-                            : "Not available" %>
-
-                    </div>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-        <% } %>
-
-
-
-        <!-- =================================================
-             BILL SUMMARY
-        ================================================== -->
-
-        <div class="section">
-
-
-            <div class="section-title">
-                Bill Summary
-            </div>
-
-
-            <table class="table">
-
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            Description
-                        </th>
-
-                        <th class="amount">
-                            Amount
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-
-                    <!-- CONSULTATION -->
-
-                    <tr>
-
-                        <td>
-                            Consultation Fee
-                        </td>
-
-
-                        <td class="amount">
-
-                            LKR
-                            <%= String.format(
-                                "%.2f",
-                                bill.getConsultationFee()
-                            ) %>
-
-                        </td>
-
-                    </tr>
-
-
-
-                    <!-- TREATMENT -->
-
-                    <tr>
-
-                        <td>
-
-                            <%= treatment != null
-                                ? treatment.getTreatmentName()
-                                : "Treatment" %>
-
-                        </td>
-
-
-                        <td class="amount">
-
-                            LKR
-                            <%= String.format(
-                                "%.2f",
-                                bill.getTreatmentFee()
-                            ) %>
-
-                        </td>
-
-                    </tr>
-
-
-                </tbody>
-
-            </table>
-
-
-
-            <!-- =================================================
-                 TOTAL
-            ================================================== -->
-
-            <div class="total">
-
-
-                <span class="total-label">
-                    Total
-                </span>
-
-
-                <span class="total-value">
-
-                    LKR
-                    <%= String.format(
-                        "%.2f",
-                        bill.getTotalAmount()
-                    ) %>
-
-                </span>
-
-
-            </div>
-
-
-        </div>
-
-
-
-        <!-- =================================================
-             FOOTER
-        ================================================== -->
-
-        <div class="footer">
-
-            Thank you for choosing Sunrise Dental.
-
-            <br>
-
-            This is a computer-generated bill.
-
-        </div>
-
-
     </div>
 
+    <div class="section">
+        <div class="section-title">Patient Information</div>
+
+        <div class="info-grid">
+            <div class="info">
+                <div class="label">Patient</div>
+                <div id="patientName" class="value">Loading...</div>
+            </div>
+
+            <div class="info">
+                <div class="label">Bill Type</div>
+                <div id="billType" class="value">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="appointmentSection" class="section hidden-print-section" style="display:none;">
+        <div class="section-title">Appointment Information</div>
+
+        <div class="info-grid">
+            <div class="info">
+                <div class="label">Appointment</div>
+                <div id="appointmentNumber" class="value">-</div>
+            </div>
+
+            <div class="info">
+                <div class="label">Dentist</div>
+                <div id="dentistName" class="value">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Bill Summary</div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th class="amount">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    <td>Consultation Fee</td>
+                    <td id="consultationFee" class="amount">LKR 0.00</td>
+                </tr>
+
+                <tr>
+                    <td id="treatmentName">Treatment</td>
+                    <td id="treatmentFee" class="amount">LKR 0.00</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="total">
+            <span class="total-label">Total</span>
+            <span id="totalAmount" class="total-value">LKR 0.00</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Thank you for choosing Sunrise Dental.
+        <br>
+        This is a computer-generated bill.
+    </div>
+
+</div>
+
+<script>
+(function () {
+    "use strict";
+
+    var contextPath = "<%= request.getContextPath() %>";
+    var params = new URLSearchParams(window.location.search);
+    var billId = params.get("id") || params.get("billId") || "";
+
+    function setText(id, value) {
+        var el = document.getElementById(id);
+        if (el) {
+            el.textContent = value == null || value === "" ? "N/A" : String(value);
+        }
+    }
+
+    function money(value) {
+        var n = Number(value);
+        return isNaN(n) ? "LKR 0.00" : "LKR " + n.toFixed(2);
+    }
+
+    function getJson(url) {
+        return fetch(contextPath + url, {
+            credentials: "same-origin",
+            headers: { "Accept": "application/json" }
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("Unable to load billing information.");
+            }
+            return response.json();
+        });
+    }
+
+    if (!billId) {
+        setText("billNumber", "Bill not found");
+        return;
+    }
+
+    getJson("/api/billing/" + encodeURIComponent(billId))
+        .then(function (bill) {
+            setText("billNumber", bill.billNumber);
+            setText("consultationFee", money(bill.consultationFee));
+            setText("treatmentFee", money(bill.treatmentFee));
+            setText("totalAmount", money(bill.totalAmount));
+
+            var type = String(bill.billType || "").toUpperCase();
+
+            if (type === "WALK_IN") {
+                setText("billType", "Walk-in / Custom");
+            } else {
+                setText("billType", "Appointment");
+                document.getElementById("appointmentSection").style.display = "block";
+            }
+
+            return Promise.all([
+                getJson("/api/patients/" + encodeURIComponent(bill.patientId)),
+                bill.treatmentId
+                    ? getJson("/api/treatments/" + encodeURIComponent(bill.treatmentId))
+                    : Promise.resolve(null),
+                bill.appointmentId
+                    ? getJson("/api/appointments/" + encodeURIComponent(bill.appointmentId))
+                    : Promise.resolve(null)
+            ]);
+        })
+        .then(function (data) {
+            var patient = data[0];
+            var treatment = data[1];
+            var appointment = data[2];
+
+            setText("patientName", patient && (patient.name || patient.fullName || patient.patientName));
+
+            if (treatment) {
+                setText("treatmentName", treatment.treatmentName || treatment.name);
+            }
+
+            if (appointment) {
+                setText("appointmentNumber", appointment.appointmentNumber);
+
+                if (appointment.dentistId) {
+                    return getJson("/api/dentists/" + encodeURIComponent(appointment.dentistId))
+                        .then(function (dentist) {
+                            setText("dentistName", dentist && (dentist.dentistName || dentist.name));
+                        });
+                }
+            }
+        })
+        .catch(function (error) {
+            console.error("Could not load printable bill:", error);
+            setText("billNumber", "Unable to load bill");
+        });
+})();
+</script>
 
 </body>
-
 </html>

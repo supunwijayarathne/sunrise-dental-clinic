@@ -1,33 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="java.util.List" %>
-<%@ page import="com.sunrise.model.Appointment" %>
-<%@ page import="com.sunrise.model.Patient" %>
-<%@ page import="com.sunrise.model.Treatment" %>
-<%@ page import="com.sunrise.model.Dentist" %>
-
-<%
-    String contextPath = request.getContextPath();
-
-    String error =
-            (String) request.getAttribute("error");
-
-    String generatedBillNumber =
-            (String) request.getAttribute("generatedBillNumber");
-
-    List<Appointment> appointments =
-            (List<Appointment>) request.getAttribute("appointments");
-
-    List<Patient> patients =
-            (List<Patient>) request.getAttribute("patients");
-
-    List<Treatment> treatments =
-            (List<Treatment>) request.getAttribute("treatments");
-
-    List<Dentist> dentists =
-            (List<Dentist>) request.getAttribute("dentists");
-%>
-
+<% String contextPath = request.getContextPath(); %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -176,9 +149,7 @@
                     <span
                         class="font-inter text-[11px] font-medium text-slate-500">
 
-                        <%= generatedBillNumber != null
-                                ? generatedBillNumber
-                                : "New Bill" %>
+                        New Bill
 
                     </span>
 
@@ -192,53 +163,7 @@
                  ERROR MESSAGE
             ================================================== -->
 
-            <% if (error != null && !error.trim().isEmpty()) { %>
-
-                <div
-                    class="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-5 py-4">
-
-
-                    <svg
-                        class="mt-0.5 h-5 w-5 shrink-0 text-red-500"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24">
-
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"/>
-
-                        <path
-                            stroke-linecap="round"
-                            d="M12 8v5M12 16h.01"/>
-
-                    </svg>
-
-
-                    <div>
-
-                        <p
-                            class="font-manrope text-xs font-bold text-red-700">
-
-                            Unable to create bill
-
-                        </p>
-
-
-                        <p
-                            class="mt-1 font-inter text-[11px] text-red-600">
-
-                            <%= error %>
-
-                        </p>
-
-                    </div>
-
-                </div>
-
-            <% } %>
+            
 
 
 
@@ -271,7 +196,7 @@
 
                         <input
                             type="text"
-                            value="<%= generatedBillNumber != null ? generatedBillNumber : "" %>"
+                            value=""
                             readonly
                             class="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-inter text-sm font-medium text-slate-600"
                         />
@@ -426,8 +351,6 @@
                 ================================================== -->
 
                 <form
-                    method="post"
-                    action="<%= contextPath %>/bills/add"
                     id="billForm">
 
 
@@ -490,134 +413,9 @@
                                 onchange="loadAppointmentInfo()"
                                 class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 font-inter text-sm text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                             >
-
                                 <option value="">
                                     Select an appointment
                                 </option>
-
-
-                                <%
-                                    if (appointments != null) {
-
-                                        for (Appointment appointment : appointments) {
-
-                                            Patient appointmentPatient = null;
-
-                                            Dentist appointmentDentist = null;
-
-                                            Treatment appointmentTreatment = null;
-
-
-                                            if (patients != null) {
-
-                                                for (Patient patient : patients) {
-
-                                                    if (patient.getPatientId()
-                                                            == appointment.getPatientId()) {
-
-                                                        appointmentPatient = patient;
-
-                                                        break;
-
-                                                    }
-
-                                                }
-
-                                            }
-
-
-                                            if (dentists != null) {
-
-                                                for (Dentist dentist : dentists) {
-
-                                                    if (dentist.getDentistId()
-                                                            == appointment.getDentistId()) {
-
-                                                        appointmentDentist = dentist;
-
-                                                        break;
-
-                                                    }
-
-                                                }
-
-                                            }
-
-
-                                            if (treatments != null) {
-
-                                                for (Treatment treatment : treatments) {
-
-                                                    if (treatment.getTreatmentId()
-                                                            == appointment.getTreatmentId()) {
-
-                                                        appointmentTreatment = treatment;
-
-                                                        break;
-
-                                                    }
-
-                                                }
-
-                                            }
-
-
-                                            String patientName =
-                                                    appointmentPatient != null
-                                                            ? appointmentPatient.getName()
-                                                            : "Patient #" + appointment.getPatientId();
-
-
-                                            String dentistName =
-                                                    appointmentDentist != null
-                                                            ? appointmentDentist.getDentistName()
-                                                            : "Dentist #" + appointment.getDentistId();
-
-
-                                            String treatmentName =
-                                                    appointmentTreatment != null
-                                                            ? appointmentTreatment.getTreatmentName()
-                                                            : "Treatment #" + appointment.getTreatmentId();
-
-
-                                            double treatmentFee =
-                                                    appointmentTreatment != null
-                                                            ? appointmentTreatment.getTreatmentFee()
-                                                            : 0;
-
-
-                                            double consultationFee =
-                                                    appointmentDentist != null
-                                                            ? appointmentDentist.getConsultationFee()
-                                                            : 0;
-                                %>
-
-
-                                <option
-                                    value="<%= appointment.getAppointmentId() %>"
-                                    data-patient="<%= patientName %>"
-                                    data-dentist="<%= dentistName %>"
-                                    data-treatment="<%= treatmentName %>"
-                                    data-treatment-fee="<%= treatmentFee %>"
-                                    data-consultation-fee="<%= consultationFee %>"
-                                >
-
-                                    <%= appointment.getAppointmentNumber() %>
-                                    -
-                                    <%= patientName %>
-                                    -
-                                    <%= appointment.getAppointmentDate() %>
-                                    <%= appointment.getAppointmentTime() %>
-
-                                </option>
-
-
-                                <%
-                                        }
-
-                                    }
-                                %>
-
                             </select>
 
                         </div>
@@ -764,36 +562,9 @@
                                     id="patientId"
                                     class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 font-inter text-sm text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 >
-
                                     <option value="">
                                         Select patient
                                     </option>
-
-
-                                    <%
-                                        if (patients != null) {
-
-                                            for (Patient patient : patients) {
-                                    %>
-
-
-                                    <option
-                                        value="<%= patient.getPatientId() %>"
-                                    >
-
-                                        <%= patient.getPatientCode() %>
-                                        -
-                                        <%= patient.getName() %>
-
-                                    </option>
-
-
-                                    <%
-                                            }
-
-                                        }
-                                    %>
-
                                 </select>
 
                             </div>
@@ -818,35 +589,9 @@
                                     onchange="updateTreatmentFee()"
                                     class="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 font-inter text-sm text-slate-700 transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                 >
-
                                     <option value="">
                                         Select treatment
                                     </option>
-
-
-                                    <%
-                                        if (treatments != null) {
-
-                                            for (Treatment treatment : treatments) {
-                                    %>
-
-
-                                    <option
-                                        value="<%= treatment.getTreatmentId() %>"
-                                        data-fee="<%= treatment.getTreatmentFee() %>"
-                                    >
-
-                                        <%= treatment.getTreatmentName() %>
-
-                                    </option>
-
-
-                                    <%
-                                            }
-
-                                        }
-                                    %>
-
                                 </select>
 
                             </div>
@@ -1093,420 +838,420 @@
      JAVASCRIPT
 ========================================================= -->
 
+
 <script>
+(function () {
+    "use strict";
 
+    var contextPath = "<%= contextPath %>";
 
-    // =========================================================
-    // SWITCH BILL TYPE
-    // =========================================================
+    var billForm = document.getElementById("billForm");
+    var billType = document.getElementById("billType");
+    var appointmentSelect = document.getElementById("appointmentId");
+    var patientSelect = document.getElementById("patientId");
+    var treatmentSelect = document.getElementById("treatmentId");
+    var consultationFee = document.getElementById("consultationFee");
+    var treatmentFee = document.getElementById("treatmentFee");
+    var totalAmount = document.getElementById("totalAmount");
 
-    function switchBillType(type) {
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
-        const appointmentSection =
-            document.getElementById("appointmentSection");
+    function getJson(url) {
+        return fetch(contextPath + url, {
+            method: "GET",
+            credentials: "same-origin",
+            headers: { "Accept": "application/json" }
+        }).then(function (response) {
+            if (response.status === 401) {
+                window.location.href = contextPath + "/login";
+                throw new Error("Not authenticated");
+            }
 
-        const walkInSection =
-            document.getElementById("walkInSection");
+            if (!response.ok) {
+                throw new Error("Unable to load data.");
+            }
 
-        const billType =
-            document.getElementById("billType");
+            return response.json();
+        });
+    }
 
-        const appointmentCard =
-            document.getElementById("appointmentTypeCard");
+    function showApiError(message) {
+        var existing = document.getElementById("restApiError");
 
-        const walkInCard =
-            document.getElementById("walkInTypeCard");
+        if (!existing) {
+            existing = document.createElement("div");
+            existing.id = "restApiError";
+            existing.className = "mb-5 rounded-xl border border-red-200 bg-red-50 px-5 py-4";
 
-        const appointmentId =
-            document.getElementById("appointmentId");
+            var title = document.createElement("p");
+            title.className = "font-manrope text-xs font-bold text-red-700";
+            title.textContent = "Unable to create bill";
 
-        const patientId =
-            document.getElementById("patientId");
+            var detail = document.createElement("p");
+            detail.id = "restApiErrorText";
+            detail.className = "mt-1 font-inter text-[11px] text-red-600";
 
-        const treatmentId =
-            document.getElementById("treatmentId");
+            existing.appendChild(title);
+            existing.appendChild(detail);
 
-        const consultationFee =
-            document.getElementById("consultationFee");
+            var card = document.getElementById("billForm").parentElement;
+            card.parentNode.insertBefore(existing, card);
+        }
 
-        const treatmentFee =
-            document.getElementById("treatmentFee");
+        document.getElementById("restApiErrorText").textContent = message;
+    }
 
+    function money(value) {
+        var n = Number(value);
+        return isNaN(n) ? "0.00" : n.toFixed(2);
+    }
+
+    function calculateTotal() {
+        var consultation = parseFloat(consultationFee.value) || 0;
+        var treatment = parseFloat(treatmentFee.value) || 0;
+        totalAmount.innerText = "LKR " + (consultation + treatment).toFixed(2);
+    }
+
+    function fillAppointments(appointments) {
+        appointmentSelect.innerHTML = '<option value="">Select an appointment</option>';
+
+        appointments.forEach(function (appointment) {
+            var option = document.createElement("option");
+            option.value = appointment.appointmentId;
+
+            var number = appointment.appointmentNumber || ("Appointment #" + appointment.appointmentId);
+            var date = appointment.appointmentDate || "";
+            var time = appointment.appointmentTime || "";
+
+            option.textContent = number + " - " + date + " " + time;
+            appointmentSelect.appendChild(option);
+        });
+    }
+
+    function fillPatients(patients) {
+        patientSelect.innerHTML = '<option value="">Select patient</option>';
+
+        patients.forEach(function (patient) {
+            var option = document.createElement("option");
+            option.value = patient.patientId;
+
+            var code = patient.patientCode || ("Patient #" + patient.patientId);
+            var name = patient.name || patient.fullName || patient.patientName || "";
+
+            option.textContent = code + " - " + name;
+            patientSelect.appendChild(option);
+        });
+    }
+
+    function fillTreatments(treatments) {
+        treatmentSelect.innerHTML = '<option value="">Select treatment</option>';
+
+        treatments.forEach(function (treatment) {
+            var option = document.createElement("option");
+            option.value = treatment.treatmentId;
+            option.setAttribute("data-fee", treatment.treatmentFee == null ? "0" : treatment.treatmentFee);
+            option.textContent = treatment.treatmentName || treatment.name || ("Treatment #" + treatment.treatmentId);
+            treatmentSelect.appendChild(option);
+        });
+    }
+
+    function generateBillNumber(bills) {
+        var maxId = 0;
+
+        if (Array.isArray(bills)) {
+            bills.forEach(function (bill) {
+                var id = Number(bill.billId);
+                if (!isNaN(id) && id > maxId) {
+                    maxId = id;
+                }
+            });
+        }
+
+        var nextId = maxId + 1;
+        var year = new Date().getFullYear();
+
+        return "BILL-" + year + "-" + String(nextId).padStart(4, "0");
+    }
+
+    function loadFormData() {
+        return Promise.all([
+            getJson("/api/appointments"),
+            getJson("/api/patients"),
+            getJson("/api/treatments"),
+            getJson("/api/billing")
+        ]).then(function (data) {
+            fillAppointments(data[0] || []);
+            fillPatients(data[1] || []);
+            fillTreatments(data[2] || []);
+
+            var billNumber = generateBillNumber(data[3] || []);
+            var billNumberInput = document.querySelector('input[readonly]');
+
+            if (billNumberInput) {
+                billNumberInput.value = billNumber;
+            }
+
+            var headerBillNumber = document.querySelector(".md\\:flex span");
+            if (headerBillNumber) {
+                headerBillNumber.textContent = billNumber;
+            }
+        });
+    }
+
+    function loadAppointmentInfo() {
+        var id = appointmentSelect.value;
+
+        if (!id) {
+            document.getElementById("appointmentPatient").innerText = "Select an appointment";
+            document.getElementById("appointmentDentist").innerText = "Select an appointment";
+            document.getElementById("appointmentTreatment").innerText = "Select an appointment";
+            consultationFee.value = "";
+            treatmentFee.value = "";
+            calculateTotal();
+            return;
+        }
+
+        getJson("/api/appointments/" + encodeURIComponent(id))
+            .then(function (appointment) {
+                var requests = [
+                    getJson("/api/patients/" + encodeURIComponent(appointment.patientId)),
+                    getJson("/api/dentists/" + encodeURIComponent(appointment.dentistId)),
+                    getJson("/api/treatments/" + encodeURIComponent(appointment.treatmentId))
+                ];
+
+                return Promise.all(requests);
+            })
+            .then(function (data) {
+                var patient = data[0];
+                var dentist = data[1];
+                var treatment = data[2];
+
+                document.getElementById("appointmentPatient").innerText =
+                    patient ? (patient.name || patient.fullName || "Not available") : "Not available";
+
+                document.getElementById("appointmentDentist").innerText =
+                    dentist ? (dentist.dentistName || dentist.name || "Not available") : "Not available";
+
+                document.getElementById("appointmentTreatment").innerText =
+                    treatment ? (treatment.treatmentName || treatment.name || "Not available") : "Not available";
+
+                consultationFee.value =
+                    dentist && dentist.consultationFee != null
+                        ? money(dentist.consultationFee)
+                        : "0.00";
+
+                treatmentFee.value =
+                    treatment && treatment.treatmentFee != null
+                        ? money(treatment.treatmentFee)
+                        : "0.00";
+
+                calculateTotal();
+            })
+            .catch(function (error) {
+                console.error(error);
+                showApiError(error.message || "Unable to load appointment details.");
+            });
+    }
+
+    function updateTreatmentFee() {
+        var option = treatmentSelect.options[treatmentSelect.selectedIndex];
+
+        if (option && option.value) {
+            treatmentFee.value = money(option.getAttribute("data-fee"));
+        } else {
+            treatmentFee.value = "";
+        }
+
+        calculateTotal();
+    }
+
+    window.switchBillType = function (type) {
+        var appointmentSection = document.getElementById("appointmentSection");
+        var walkInSection = document.getElementById("walkInSection");
+        var appointmentCard = document.getElementById("appointmentTypeCard");
+        var walkInCard = document.getElementById("walkInTypeCard");
 
         billType.value = type;
 
-
         if (type === "APPOINTMENT") {
+            appointmentSection.classList.remove("hidden");
+            walkInSection.classList.add("hidden");
 
+            appointmentCard.classList.remove("border-slate-200", "bg-white");
+            appointmentCard.classList.add("border-[#2563EB]", "bg-blue-50");
 
-            appointmentSection.classList.remove(
-                "hidden"
-            );
+            walkInCard.classList.remove("border-[#2563EB]", "bg-blue-50");
+            walkInCard.classList.add("border-slate-200", "bg-white");
 
-            walkInSection.classList.add(
-                "hidden"
-            );
-
-
-            appointmentCard.classList.remove(
-                "border-slate-200",
-                "bg-white"
-            );
-
-            appointmentCard.classList.add(
-                "border-[#2563EB]",
-                "bg-blue-50"
-            );
-
-
-            walkInCard.classList.remove(
-                "border-[#2563EB]",
-                "bg-blue-50"
-            );
-
-            walkInCard.classList.add(
-                "border-slate-200",
-                "bg-white"
-            );
-
-
-            appointmentId.required = true;
-
-            patientId.required = false;
-
-            treatmentId.required = false;
-
+            appointmentSelect.required = true;
+            patientSelect.required = false;
+            treatmentSelect.required = false;
 
             consultationFee.readOnly = true;
-
             treatmentFee.readOnly = true;
 
-
+            patientSelect.value = "";
+            treatmentSelect.value = "";
             consultationFee.value = "";
-
             treatmentFee.value = "";
 
-
             calculateTotal();
+        } else {
+            appointmentSection.classList.add("hidden");
+            walkInSection.classList.remove("hidden");
 
-        }
+            walkInCard.classList.remove("border-slate-200", "bg-white");
+            walkInCard.classList.add("border-[#2563EB]", "bg-blue-50");
 
-        else {
+            appointmentCard.classList.remove("border-[#2563EB]", "bg-blue-50");
+            appointmentCard.classList.add("border-slate-200", "bg-white");
 
-
-            appointmentSection.classList.add(
-                "hidden"
-            );
-
-            walkInSection.classList.remove(
-                "hidden"
-            );
-
-
-            walkInCard.classList.remove(
-                "border-slate-200",
-                "bg-white"
-            );
-
-            walkInCard.classList.add(
-                "border-[#2563EB]",
-                "bg-blue-50"
-            );
-
-
-            appointmentCard.classList.remove(
-                "border-[#2563EB]",
-                "bg-blue-50"
-            );
-
-            appointmentCard.classList.add(
-                "border-slate-200",
-                "bg-white"
-            );
-
-
-            appointmentId.required = false;
-
-            patientId.required = true;
-
-            treatmentId.required = true;
-
+            appointmentSelect.required = false;
+            patientSelect.required = true;
+            treatmentSelect.required = true;
 
             consultationFee.readOnly = false;
-
             treatmentFee.readOnly = true;
 
-
-            appointmentId.value = "";
-
+            appointmentSelect.value = "";
             consultationFee.value = "";
-
             treatmentFee.value = "";
 
-
-            resetAppointmentInfo();
+            document.getElementById("appointmentPatient").innerText = "Select an appointment";
+            document.getElementById("appointmentDentist").innerText = "Select an appointment";
+            document.getElementById("appointmentTreatment").innerText = "Select an appointment";
 
             calculateTotal();
-
         }
+    };
 
-    }
+    appointmentSelect.addEventListener("change", loadAppointmentInfo);
+    treatmentSelect.addEventListener("change", updateTreatmentFee);
+    consultationFee.addEventListener("input", calculateTotal);
 
+    billForm.addEventListener("submit", function (event) {
+        event.preventDefault();
 
+        var button = billForm.querySelector('button[type="submit"]');
+        var billNumberInput = billForm.querySelector('input[readonly]');
+        var type = billType.value;
 
-    // =========================================================
-    // LOAD APPOINTMENT INFORMATION
-    // =========================================================
-
-    function loadAppointmentInfo() {
-
-        const select =
-            document.getElementById(
-                "appointmentId"
-            );
-
-
-        const selected =
-            select.options[
-                select.selectedIndex
-            ];
-
-
-        const patient =
-            document.getElementById(
-                "appointmentPatient"
-            );
-
-
-        const dentist =
-            document.getElementById(
-                "appointmentDentist"
-            );
-
-
-        const treatment =
-            document.getElementById(
-                "appointmentTreatment"
-            );
-
-
-        const consultationFee =
-            document.getElementById(
-                "consultationFee"
-            );
-
-
-        const treatmentFee =
-            document.getElementById(
-                "treatmentFee"
-            );
-
-
-        if (!selected.value) {
-
-            resetAppointmentInfo();
-
-            consultationFee.value = "";
-
-            treatmentFee.value = "";
-
-            calculateTotal();
-
+        if (!billNumberInput || !billNumberInput.value.trim()) {
+            showApiError("Unable to generate bill number.");
             return;
-
         }
 
+        var patientId = type === "APPOINTMENT"
+            ? ""
+            : patientSelect.value;
 
-        patient.innerText =
-            selected.dataset.patient ||
-            "Not available";
-
-
-        dentist.innerText =
-            selected.dataset.dentist ||
-            "Not available";
-
-
-        treatment.innerText =
-            selected.dataset.treatment ||
-            "Not available";
-
-
-        const consultation =
-            parseFloat(
-                selected.dataset.consultationFee
-            ) || 0;
-
-
-        const treatmentAmount =
-            parseFloat(
-                selected.dataset.treatmentFee
-            ) || 0;
-
-
-        consultationFee.value =
-            consultation.toFixed(2);
-
-
-        treatmentFee.value =
-            treatmentAmount.toFixed(2);
-
-
-        calculateTotal();
-
-    }
-
-
-
-    // =========================================================
-    // RESET APPOINTMENT INFO
-    // =========================================================
-
-    function resetAppointmentInfo() {
-
-        document.getElementById(
-            "appointmentPatient"
-        ).innerText =
-            "Select an appointment";
-
-
-        document.getElementById(
-            "appointmentDentist"
-        ).innerText =
-            "Select an appointment";
-
-
-        document.getElementById(
-            "appointmentTreatment"
-        ).innerText =
-            "Select an appointment";
-
-    }
-
-
-
-    // =========================================================
-    // UPDATE TREATMENT FEE
-    // =========================================================
-
-    function updateTreatmentFee() {
-
-        const select =
-            document.getElementById(
-                "treatmentId"
-            );
-
-
-        const selected =
-            select.options[
-                select.selectedIndex
-            ];
-
-
-        const fee =
-            selected.getAttribute(
-                "data-fee"
-            );
-
-
-        const treatmentFee =
-            document.getElementById(
-                "treatmentFee"
-            );
-
-
-        if (fee) {
-
-            treatmentFee.value =
-                parseFloat(fee).toFixed(2);
-
+        if (type === "APPOINTMENT" && !appointmentSelect.value) {
+            showApiError("Please select an appointment.");
+            return;
         }
 
-        else {
-
-            treatmentFee.value = "";
-
+        if (type === "WALK_IN" && (!patientSelect.value || !treatmentSelect.value)) {
+            showApiError("Please select a patient and treatment.");
+            return;
         }
 
+        var payload = {
+            billNumber: billNumberInput.value.trim(),
+            billType: type,
+            appointmentId: type === "APPOINTMENT" ? appointmentSelect.value : "",
+            patientId: type === "APPOINTMENT" ? "" : patientSelect.value,
+            treatmentId: type === "APPOINTMENT" ? "" : treatmentSelect.value,
+            consultationFee: consultationFee.value || "0",
+            treatmentFee: treatmentFee.value || "0"
+        };
 
-        calculateTotal();
+        if (type === "APPOINTMENT") {
+            // The appointment API is used to obtain the patient/treatment IDs.
+            getJson("/api/appointments/" + encodeURIComponent(appointmentSelect.value))
+                .then(function (appointment) {
+                    payload.patientId = appointment.patientId;
+                    payload.treatmentId = appointment.treatmentId;
+                    return createBill(payload);
+                })
+                .catch(function (error) {
+                    showApiError(error.message || "Unable to load appointment.");
+                });
+        } else {
+            createBill(payload);
+        }
 
-    }
+        function createBill(data) {
+            button.disabled = true;
+            button.textContent = "Creating...";
 
+            return fetch(contextPath + "/api/billing", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                },
+                body: new URLSearchParams(data).toString()
+            })
+            .then(function (response) {
+                return response.text().then(function (body) {
+                    var json = null;
 
+                    try {
+                        json = body ? JSON.parse(body) : null;
+                    } catch (e) {}
 
-    // =========================================================
-    // CALCULATE TOTAL
-    // =========================================================
+                    if (!response.ok) {
+                        throw new Error(
+                            json && (json.message || json.error)
+                                ? (json.message || json.error)
+                                : body || "Unable to create bill."
+                        );
+                    }
 
-    function calculateTotal() {
+                    return json;
+                });
+            })
+            .then(function (createdBill) {
+                var createdId = createdBill && createdBill.billId;
 
-        const consultation =
-            parseFloat(
-                document.getElementById(
-                    "consultationFee"
-                ).value
-            ) || 0;
-
-
-        const treatment =
-            parseFloat(
-                document.getElementById(
-                    "treatmentFee"
-                ).value
-            ) || 0;
-
-
-        const total =
-            consultation + treatment;
-
-
-        document.getElementById(
-            "totalAmount"
-        ).innerText =
-            "LKR " + total.toFixed(2);
-
-    }
-
-
-
-    // =========================================================
-    // FORM SUBMIT
-    // =========================================================
-
-    document.getElementById(
-        "billForm"
-    ).addEventListener(
-        "submit",
-        function () {
-
-            const type =
-                document.getElementById(
-                    "billType"
-                ).value;
-
-
-            if (type === "WALK_IN") {
-
-                const treatment =
-                    document.getElementById(
-                        "treatmentId"
-                    );
-
-
-                if (treatment.value) {
-
-                    updateTreatmentFee();
-
+                if (createdId) {
+                    window.location.href =
+                        contextPath +
+                        "/bills/view?id=" +
+                        encodeURIComponent(createdId) +
+                        "&success=1";
+                } else {
+                    window.location.href = contextPath + "/bills?success=1";
                 }
+            })
+            .catch(function (error) {
+                console.error("Bill creation failed:", error);
+                showApiError(error.message || "Unable to create bill.");
 
-            }
-
+                button.disabled = false;
+                button.textContent = "Create Bill";
+            });
         }
-    );
+    });
 
+    loadFormData().catch(function (error) {
+        console.error("Could not load billing form data:", error);
+        showApiError(error.message || "Could not load appointments, patients, treatments or bills.");
+    });
+
+    window.calculateTotal = calculateTotal;
+    window.updateTreatmentFee = updateTreatmentFee;
+
+})();
 </script>
-
 
 </body>
 

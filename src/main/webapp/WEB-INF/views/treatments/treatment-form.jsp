@@ -2,17 +2,11 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="com.sunrise.model.Treatment" %>
-
 <%
-    Treatment treatment =
-        (Treatment) request.getAttribute("treatment");
-
-    String formMode =
-        (String) request.getAttribute("formMode");
+    String treatmentIdParam = request.getParameter("id");
 
     boolean editMode =
-        "edit".equals(formMode);
+        treatmentIdParam != null && !treatmentIdParam.trim().isEmpty();
 
     String title =
         editMode ? "Edit Treatment" : "Add Treatment";
@@ -313,7 +307,9 @@
                 <form
                     id="treatmentForm"
                     method="post"
-                    action="<%= request.getContextPath() %>/treatments/<%= editMode ? "edit" : "add" %>"
+                    action="#"
+                    data-edit-mode="<%= editMode %>"
+                    data-treatment-id="<%= editMode ? treatmentIdParam : "" %>"
                     class="px-7 py-7"
                 >
 
@@ -326,8 +322,9 @@
 
                         <input
                             type="hidden"
+                            id="treatmentId"
                             name="treatmentId"
-                            value="<%= treatment.getTreatmentId() %>"
+                            value="<%= treatmentIdParam %>"
                         >
 
                     <% } %>
@@ -356,7 +353,7 @@
 
 
                                     <p class="mt-1 text-xs font-extrabold">
-                                        #<%= treatment.getTreatmentId() %>
+                                        #<%= treatmentIdParam %>
                                     </p>
 
 
@@ -403,10 +400,7 @@
                             name="treatmentName"
                             maxlength="100"
                             placeholder="e.g. Dental Cleaning"
-                            value="<%= treatment != null
-                                && treatment.getTreatmentName() != null
-                                ? treatment.getTreatmentName()
-                                : "" %>"
+                            value=""
                             required
                             class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-3 font-inter text-[11px] text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
                         >
@@ -447,10 +441,7 @@
                             placeholder="Enter treatment description"
                             required
                             class="min-h-[130px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-3 font-inter text-[11px] leading-5 text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
-                        ><%= treatment != null
-                            && treatment.getDescription() != null
-                            ? treatment.getDescription()
-                            : "" %></textarea>
+                        ></textarea>
 
 
                         <p class="mt-1.5 font-inter text-[8px] text-slate-400">
@@ -496,9 +487,7 @@
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
-                                value="<%= treatment != null
-                                    ? treatment.getTreatmentFee()
-                                    : "" %>"
+                                value=""
                                 required
                                 class="w-full rounded-lg border border-slate-200 bg-white py-3 pl-12 pr-3.5 font-inter text-[11px] text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
                             >
@@ -542,9 +531,7 @@
 
                             <option
                                 value="true"
-                                <%= treatment == null || treatment.isActive()
-                                    ? "selected"
-                                    : "" %>
+                                selected
                             >
                                 Active
                             </option>
@@ -552,9 +539,7 @@
 
                             <option
                                 value="false"
-                                <%= treatment != null && !treatment.isActive()
-                                    ? "selected"
-                                    : "" %>
+
                             >
                                 Inactive
                             </option>
@@ -848,6 +833,109 @@
 
 </div>
 
+
+
+
+<script>
+(function () {
+    var form = document.getElementById("treatmentForm");
+    var editMode = form.getAttribute("data-edit-mode") === "true";
+    var treatmentId = form.getAttribute("data-treatment-id");
+
+    var contextPath = "<%= request.getContextPath() %>";
+    var apiUrl = contextPath + "/api/treatments";
+
+    function loadTreatment() {
+        if (!editMode || !treatmentId) {
+            return;
+        }
+
+        fetch(apiUrl + "/" + encodeURIComponent(treatmentId), {
+            method: "GET",
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                throw new Error("Failed to load treatment");
+            }
+            return response.json();
+        })
+        .then(function (data) {
+            document.getElementById("treatmentId").value =
+                data.treatmentId != null ? data.treatmentId : treatmentId;
+
+            document.getElementById("treatmentName").value =
+                data.treatmentName != null ? data.treatmentName : "";
+
+            document.getElementById("description").value =
+                data.description != null ? data.description : "";
+
+            document.getElementById("treatmentFee").value =
+                data.treatmentFee != null ? data.treatmentFee : "";
+
+            document.getElementById("active").value =
+                data.active === true ? "true" : "false";
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var body = new URLSearchParams();
+
+        body.append("treatmentName",
+            document.getElementById("treatmentName").value);
+
+        body.append("description",
+            document.getElementById("description").value);
+
+        body.append("treatmentFee",
+            document.getElementById("treatmentFee").value);
+
+        body.append("active",
+            document.getElementById("active").value);
+
+        var url = apiUrl;
+        var method = "POST";
+
+        if (editMode && treatmentId) {
+            url = apiUrl + "/" + encodeURIComponent(treatmentId);
+            method = "PUT";
+        }
+
+        fetch(url, {
+            method: method,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "Accept": "application/json"
+            },
+            body: body.toString()
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                return response.text().then(function (text) {
+                    throw new Error(text || "Failed to save treatment");
+                });
+            }
+            return response.text();
+        })
+        .then(function () {
+            window.location.href = contextPath + "/treatments";
+        })
+        .catch(function (error) {
+            console.error(error);
+            alert("Unable to save treatment.");
+        });
+    });
+
+    loadTreatment();
+})();
+</script>
 
 </body>
 

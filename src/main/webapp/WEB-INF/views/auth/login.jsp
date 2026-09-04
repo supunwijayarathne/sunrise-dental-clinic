@@ -66,7 +66,7 @@
           crossorigin>
 
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
@@ -144,9 +144,6 @@
             ================================================== -->
 
             <div class="max-w-[430px]">
-
-
-                <!-- Home Icon REMOVED -->
 
 
                 <h2
@@ -303,37 +300,28 @@
 
 
                 <!-- =================================================
-                     ERROR MESSAGE
+                     API ERROR MESSAGE
                 ================================================== -->
 
-                <% if (request.getAttribute("error") != null) { %>
-
+                <div
+                    id="loginError"
+                    class="mb-5 hidden items-start gap-3 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3"
+                >
 
                     <div
-                        class="mb-5 flex items-start gap-3 rounded-lg border border-red-100 bg-red-50 px-3.5 py-3"
+                        class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 font-inter text-[10px] font-bold text-red-600"
                     >
-
-
-                        <div
-                            class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-100 font-inter text-[10px] font-bold text-red-600"
-                        >
-                            !
-                        </div>
-
-
-                        <p
-                            class="font-inter text-[10px] font-medium leading-5 text-red-700"
-                        >
-
-                            <%= request.getAttribute("error") %>
-
-                        </p>
-
-
+                        !
                     </div>
 
 
-                <% } %>
+                    <p
+                        id="loginErrorText"
+                        class="font-inter text-[10px] font-medium leading-5 text-red-700"
+                    >
+                    </p>
+
+                </div>
 
 
 
@@ -342,8 +330,7 @@
                 ================================================== -->
 
                 <form
-                    method="post"
-                    action="<%= request.getContextPath() %>/login"
+                    id="loginForm"
                     class="space-y-5"
                 >
 
@@ -479,12 +466,16 @@
 
                     <button
                         type="submit"
+                        id="loginButton"
                         class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#2563EB] py-3 font-inter text-[11px] font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] focus:outline-none focus:ring-4 focus:ring-blue-100"
                     >
 
-                        Sign In
+                        <span id="loginButtonText">
+                            Sign In
+                        </span>
 
                         <svg
+                            id="loginButtonIcon"
                             class="h-3.5 w-3.5"
                             fill="none"
                             stroke="currentColor"
@@ -576,6 +567,308 @@
 
 
 </div>
+
+
+
+<!-- =========================================================
+     REST API LOGIN
+========================================================== -->
+
+<script>
+
+    const contextPath = "<%= request.getContextPath() %>";
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const loginError =
+        document.getElementById("loginError");
+
+    const loginErrorText =
+        document.getElementById("loginErrorText");
+
+    const loginButton =
+        document.getElementById("loginButton");
+
+    const loginButtonText =
+        document.getElementById("loginButtonText");
+
+    const loginButtonIcon =
+        document.getElementById("loginButtonIcon");
+
+
+    // =========================================================
+    // SHOW ERROR
+    // =========================================================
+
+    function showLoginError(message) {
+
+        loginErrorText.textContent =
+            message;
+
+        loginError.classList.remove("hidden");
+
+        loginError.classList.add("flex");
+    }
+
+
+    // =========================================================
+    // HIDE ERROR
+    // =========================================================
+
+    function hideLoginError() {
+
+        loginError.classList.add("hidden");
+
+        loginError.classList.remove("flex");
+
+        loginErrorText.textContent = "";
+    }
+
+
+    // =========================================================
+    // LOGIN
+    // =========================================================
+
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            hideLoginError();
+
+
+            const username =
+                document.getElementById("username")
+                    .value
+                    .trim();
+
+            const password =
+                document.getElementById("password")
+                    .value;
+
+
+            // -----------------------------------------------------
+            // Client-side validation
+            // -----------------------------------------------------
+
+            if (!username) {
+
+                showLoginError(
+                    "Please enter your username."
+                );
+
+                return;
+            }
+
+
+            if (!password) {
+
+                showLoginError(
+                    "Please enter your password."
+                );
+
+                return;
+            }
+
+
+            // -----------------------------------------------------
+            // Disable button
+            // -----------------------------------------------------
+
+            loginButton.disabled = true;
+
+            loginButton.classList.add(
+                "opacity-70",
+                "cursor-not-allowed"
+            );
+
+            loginButtonText.textContent =
+                "Signing in...";
+
+            loginButtonIcon.classList.add(
+                "hidden"
+            );
+
+
+            try {
+
+                // -------------------------------------------------
+                // Send login request to REST API
+                // -------------------------------------------------
+
+                const response =
+                    await fetch(
+                        contextPath + "/api/auth/login",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded"
+                            },
+
+                            credentials: "same-origin",
+
+                            body:
+                                new URLSearchParams({
+                                    username: username,
+                                    password: password
+                                })
+                        }
+                    );
+
+
+                // -------------------------------------------------
+                // Read API response
+                // -------------------------------------------------
+
+                let data = null;
+
+                try {
+
+                    data =
+                        await response.json();
+
+                } catch (jsonError) {
+
+                    data = null;
+                }
+
+
+                // -------------------------------------------------
+                // Login failed
+                // -------------------------------------------------
+
+                if (!response.ok) {
+
+                    if (
+                        data &&
+                        data.message
+                    ) {
+
+                        showLoginError(
+                            data.message
+                        );
+
+                    } else {
+
+                        showLoginError(
+                            "Invalid username or password."
+                        );
+                    }
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Check successful response
+                // -------------------------------------------------
+
+                if (
+                    !data ||
+                    data.success !== true ||
+                    !data.user
+                ) {
+
+                    showLoginError(
+                        "Unable to sign in. Please try again."
+                    );
+
+                    return;
+                }
+
+
+                const user =
+                    data.user;
+
+
+                // -------------------------------------------------
+                // First-login user
+                // -------------------------------------------------
+
+                if (
+                    user.firstLogin === true
+                ) {
+
+                    window.location.href =
+                        contextPath + "/help";
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Get user role
+                // -------------------------------------------------
+
+                const role =
+                    user.role
+                        ? user.role
+                            .trim()
+                            .toUpperCase()
+                        : "";
+
+
+                // -------------------------------------------------
+                // Admin dashboard
+                // -------------------------------------------------
+
+                if (role === "ADMIN") {
+
+                    window.location.href =
+                        contextPath + "/admin/dashboard";
+
+                    return;
+                }
+
+
+                // -------------------------------------------------
+                // Receptionist dashboard
+                // -------------------------------------------------
+
+                window.location.href =
+                    contextPath + "/dashboard";
+
+
+            } catch (error) {
+
+                console.error(
+                    "Login API error:",
+                    error
+                );
+
+                showLoginError(
+                    "Unable to connect to the server. Please try again."
+                );
+
+            } finally {
+
+                // -------------------------------------------------
+                // Re-enable button
+                // -------------------------------------------------
+
+                loginButton.disabled = false;
+
+                loginButton.classList.remove(
+                    "opacity-70",
+                    "cursor-not-allowed"
+                );
+
+                loginButtonText.textContent =
+                    "Sign In";
+
+                loginButtonIcon.classList.remove(
+                    "hidden"
+                );
+            }
+
+        }
+    );
+
+</script>
 
 
 </body>

@@ -2,11 +2,8 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="com.sunrise.model.Dentist" %>
-
 <%
-    Dentist dentist =
-        (Dentist) request.getAttribute("dentist");
+    String contextPath = request.getContextPath();
 %>
 
 <!DOCTYPE html>
@@ -132,8 +129,11 @@
                 </p>
 
 
-                <p class="mt-0.5 text-xs font-extrabold text-blue-600">
-                    #<%= dentist.getDentistId() %>
+                <p
+                    id="topDentistId"
+                    class="mt-0.5 text-xs font-extrabold text-blue-600"
+                >
+                    -
                 </p>
 
 
@@ -146,30 +146,74 @@
 
         <!-- SUCCESS -->
 
-        <% if ("1".equals(request.getParameter("updated"))) { %>
+        <div
+            id="successMessage"
+            class="mb-5 hidden flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700"
+        >
 
 
-            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
+                ✓
+            </span>
 
 
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
-                    ✓
-                </span>
+            Dentist updated successfully.
 
 
-                Dentist updated successfully.
+        </div>
 
 
-            </div>
+
+        <!-- LOADING -->
+
+        <div
+            id="loadingState"
+            class="mx-auto max-w-[900px] rounded-xl border border-slate-200 bg-white px-7 py-10 text-center"
+        >
+
+            <p class="font-inter text-[10px] text-slate-400">
+                Loading dentist details...
+            </p>
+
+        </div>
 
 
-        <% } %>
+
+        <!-- ERROR -->
+
+        <div
+            id="errorState"
+            class="mx-auto hidden max-w-[900px] rounded-xl border border-red-100 bg-red-50 px-7 py-8 text-center"
+        >
+
+            <p class="font-inter text-[10px] font-semibold text-red-600">
+                Unable to load dentist details.
+            </p>
+
+
+            <p
+                id="errorText"
+                class="mt-1 font-inter text-[9px] text-red-500"
+            ></p>
+
+
+            <a
+                href="<%= contextPath %>/dentists"
+                class="mt-4 inline-block rounded-lg bg-[#2563EB] px-4 py-2 font-inter text-[10px] font-semibold text-white"
+            >
+                Back to Dentists
+            </a>
+
+        </div>
 
 
 
         <!-- CONTENT -->
 
-        <div class="mx-auto max-w-[900px]">
+        <div
+            id="dentistContent"
+            class="mx-auto hidden max-w-[900px]"
+        >
 
 
             <!-- PROFILE CARD -->
@@ -184,34 +228,37 @@
 
                     <!-- AVATAR -->
 
-                    <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-xl font-extrabold text-blue-600">
+                    <div
+                        id="dentistAvatar"
+                        class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-xl font-extrabold text-blue-600"
+                    >
 
-
-                        <%= dentist.getDentistName()
-                            != null
-                            && !dentist.getDentistName().isBlank()
-                            ? dentist.getDentistName()
-                                .substring(0, 1)
-                                .toUpperCase()
-                            : "D" %>
-
+                        D
 
                     </div>
 
 
+                    <!-- NAME + SPECIALIZATION -->
+
                     <div class="flex-1">
 
 
-                        <h2 class="text-lg font-extrabold tracking-[-0.4px]">
+                        <h2
+                            id="dentistName"
+                            class="text-lg font-extrabold tracking-[-0.4px]"
+                        >
 
-                            <%= dentist.getDentistName() %>
+                            -
 
                         </h2>
 
 
-                        <p class="mt-1 font-inter text-[10px] text-slate-500">
+                        <p
+                            id="dentistSpecialization"
+                            class="mt-1 font-inter text-[10px] text-slate-500"
+                        >
 
-                            <%= dentist.getSpecialization() %>
+                            -
 
                         </p>
 
@@ -222,27 +269,14 @@
 
                     <!-- STATUS -->
 
-                    <% if (dentist.isActive()) { %>
+                    <span
+                        id="profileStatus"
+                        class="rounded-full px-3 py-1.5 font-inter text-[9px] font-semibold"
+                    >
 
+                        -
 
-                        <span class="rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600">
-
-                            Active
-
-                        </span>
-
-
-                    <% } else { %>
-
-
-                        <span class="rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500">
-
-                            Inactive
-
-                        </span>
-
-
-                    <% } %>
+                    </span>
 
 
                 </div>
@@ -254,19 +288,22 @@
                 <div class="grid grid-cols-2">
 
 
-                    <!-- NAME -->
+                    <!-- DENTIST ID -->
 
                     <div class="border-b border-r border-slate-100 px-7 py-5">
 
 
                         <p class="font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-                            Dentist Name
+                            Dentist ID
                         </p>
 
 
-                        <p class="mt-2 text-sm font-bold">
+                        <p
+                            id="detailDentistId"
+                            class="mt-2 text-sm font-bold"
+                        >
 
-                            <%= dentist.getDentistName() %>
+                            -
 
                         </p>
 
@@ -285,9 +322,12 @@
                         </p>
 
 
-                        <p class="mt-2 text-sm font-bold">
+                        <p
+                            id="detailSpecialization"
+                            class="mt-2 text-sm font-bold"
+                        >
 
-                            <%= dentist.getSpecialization() %>
+                            -
 
                         </p>
 
@@ -306,13 +346,12 @@
                         </p>
 
 
-                        <p class="mt-2 text-sm font-extrabold text-[#2563EB]">
+                        <p
+                            id="detailFee"
+                            class="mt-2 text-sm font-extrabold text-[#2563EB]"
+                        >
 
-                            LKR
-                            <%= String.format(
-                                "%.2f",
-                                dentist.getConsultationFee()
-                            ) %>
+                            -
 
                         </p>
 
@@ -331,9 +370,12 @@
                         </p>
 
 
-                        <p class="mt-2 text-sm font-bold">
+                        <p
+                            id="detailPhone"
+                            class="mt-2 text-sm font-bold"
+                        >
 
-                            <%= dentist.getPhoneNumber() %>
+                            -
 
                         </p>
 
@@ -352,14 +394,12 @@
                         </p>
 
 
-                        <p class="mt-2 break-all text-sm font-bold">
+                        <p
+                            id="detailEmail"
+                            class="mt-2 break-all text-sm font-bold"
+                        >
 
-
-                            <%= dentist.getEmail() == null
-                                || dentist.getEmail().isBlank()
-                                ? "-"
-                                : dentist.getEmail() %>
-
+                            -
 
                         </p>
 
@@ -381,37 +421,24 @@
                         <div class="mt-2">
 
 
-                            <% if (dentist.isActive()) { %>
+                            <span
+                                id="detailStatus"
+                                class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold"
+                            >
 
 
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-emerald-600">
+                                <span
+                                    id="statusDot"
+                                    class="h-1.5 w-1.5 rounded-full"
+                                ></span>
 
 
-                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-
-
-                                    Active
-
-
+                                <span id="statusText">
+                                    -
                                 </span>
 
 
-                            <% } else { %>
-
-
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 font-inter text-[9px] font-semibold text-slate-500">
-
-
-                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-
-
-                                    Inactive
-
-
-                                </span>
-
-
-                            <% } %>
+                            </span>
 
 
                         </div>
@@ -465,9 +492,12 @@
                     </p>
 
 
-                    <p class="mt-1 text-[11px] font-bold">
+                    <p
+                        id="summarySpecialization"
+                        class="mt-1 text-[11px] font-bold"
+                    >
 
-                        <%= dentist.getSpecialization() %>
+                        -
 
                     </p>
 
@@ -509,13 +539,12 @@
                     </p>
 
 
-                    <p class="mt-1 text-[11px] font-extrabold">
+                    <p
+                        id="summaryFee"
+                        class="mt-1 text-[11px] font-extrabold"
+                    >
 
-                        LKR
-                        <%= String.format(
-                            "%.2f",
-                            dentist.getConsultationFee()
-                        ) %>
+                        -
 
                     </p>
 
@@ -546,6 +575,7 @@
                                 r="9"
                             />
 
+
                             <path
                                 stroke-linecap="round"
                                 d="M8 12l2.5 2.5L16 9"
@@ -562,11 +592,12 @@
                     </p>
 
 
-                    <p class="mt-1 text-[11px] font-bold">
+                    <p
+                        id="summaryStatus"
+                        class="mt-1 text-[11px] font-bold"
+                    >
 
-                        <%= dentist.isActive()
-                            ? "Available"
-                            : "Inactive" %>
+                        -
 
                     </p>
 
@@ -584,7 +615,7 @@
 
 
                 <a
-                    href="<%= request.getContextPath() %>/dentists"
+                    href="<%= contextPath %>/dentists"
                     class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 font-inter text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50"
                 >
 
@@ -594,7 +625,8 @@
 
 
                 <a
-                    href="<%= request.getContextPath() %>/dentists/edit?id=<%= dentist.getDentistId() %>"
+                    id="editButton"
+                    href="#"
                     class="flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[10px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]"
                 >
 
@@ -612,6 +644,7 @@
                             d="M12 20h9"
                         />
 
+
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
@@ -619,6 +652,7 @@
                         />
 
                     </svg>
+
 
                     Edit Dentist
 
@@ -654,6 +688,633 @@
 
 
 </div>
+
+
+
+<!-- =========================================================
+     REST API
+     ========================================================= -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    /* =====================================================
+       CONTEXT PATH
+       ===================================================== */
+
+    var contextPath =
+        "<%= contextPath %>";
+
+
+    /* =====================================================
+       GET DENTIST ID FROM URL
+       ===================================================== */
+
+    var urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    var dentistId =
+        urlParams.get("id") ||
+        urlParams.get("dentistId");
+
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    var loadingState =
+        document.getElementById(
+            "loadingState"
+        );
+
+
+    var errorState =
+        document.getElementById(
+            "errorState"
+        );
+
+
+    var errorText =
+        document.getElementById(
+            "errorText"
+        );
+
+
+    var dentistContent =
+        document.getElementById(
+            "dentistContent"
+        );
+
+
+    var topDentistId =
+        document.getElementById(
+            "topDentistId"
+        );
+
+
+    var dentistAvatar =
+        document.getElementById(
+            "dentistAvatar"
+        );
+
+
+    var dentistName =
+        document.getElementById(
+            "dentistName"
+        );
+
+
+    var dentistSpecialization =
+        document.getElementById(
+            "dentistSpecialization"
+        );
+
+
+    var profileStatus =
+        document.getElementById(
+            "profileStatus"
+        );
+
+
+    var detailDentistId =
+        document.getElementById(
+            "detailDentistId"
+        );
+
+
+    var detailSpecialization =
+        document.getElementById(
+            "detailSpecialization"
+        );
+
+
+    var detailFee =
+        document.getElementById(
+            "detailFee"
+        );
+
+
+    var detailPhone =
+        document.getElementById(
+            "detailPhone"
+        );
+
+
+    var detailEmail =
+        document.getElementById(
+            "detailEmail"
+        );
+
+
+    var detailStatus =
+        document.getElementById(
+            "detailStatus"
+        );
+
+
+    var statusDot =
+        document.getElementById(
+            "statusDot"
+        );
+
+
+    var statusText =
+        document.getElementById(
+            "statusText"
+        );
+
+
+    var summarySpecialization =
+        document.getElementById(
+            "summarySpecialization"
+        );
+
+
+    var summaryFee =
+        document.getElementById(
+            "summaryFee"
+        );
+
+
+    var summaryStatus =
+        document.getElementById(
+            "summaryStatus"
+        );
+
+
+    var editButton =
+        document.getElementById(
+            "editButton"
+        );
+
+
+    var successMessage =
+        document.getElementById(
+            "successMessage"
+        );
+
+
+
+    /* =====================================================
+       CHECK ID
+       ===================================================== */
+
+    if (!dentistId) {
+
+        loadingState.classList.add(
+            "hidden"
+        );
+
+
+        errorState.classList.remove(
+            "hidden"
+        );
+
+
+        errorText.textContent =
+            "No dentist ID was provided.";
+
+        return;
+
+    }
+
+
+
+    /* =====================================================
+       SUCCESS MESSAGE
+       ===================================================== */
+
+    if (
+        urlParams.get("updated") === "1"
+    ) {
+
+        successMessage.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       LOAD DENTIST
+       ===================================================== */
+
+    function loadDentist() {
+
+
+        /*
+         * REST API:
+         *
+         * GET /api/dentists/{id}
+         */
+
+        var apiUrl =
+            contextPath +
+            "/api/dentists/" +
+            encodeURIComponent(
+                dentistId
+            );
+
+
+        console.log(
+            "GET:",
+            apiUrl
+        );
+
+
+        fetch(
+            apiUrl,
+            {
+                method: "GET",
+
+                credentials:
+                    "same-origin",
+
+                headers: {
+
+                    "Accept":
+                        "application/json"
+
+                }
+
+            }
+        )
+
+        .then(function (response) {
+
+
+            /* LOGIN REQUIRED */
+
+            if (
+                response.status ===
+                401
+            ) {
+
+                window.location.href =
+                    contextPath +
+                    "/login";
+
+                return null;
+
+            }
+
+
+            /* NOT FOUND */
+
+            if (
+                response.status ===
+                404
+            ) {
+
+                throw new Error(
+                    "Dentist not found."
+                );
+
+            }
+
+
+            /* OTHER ERROR */
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Unable to load dentist. HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            return response.json();
+
+        })
+
+        .then(function (dentist) {
+
+
+            if (!dentist) {
+
+                return;
+
+            }
+
+
+            console.log(
+                "Dentist:",
+                dentist
+            );
+
+
+            renderDentist(
+                dentist
+            );
+
+        })
+
+        .catch(function (error) {
+
+            console.error(
+                "Dentist API error:",
+                error
+            );
+
+
+            loadingState.classList.add(
+                "hidden"
+            );
+
+
+            dentistContent.classList.add(
+                "hidden"
+            );
+
+
+            errorState.classList.remove(
+                "hidden"
+            );
+
+
+            errorText.textContent =
+                error.message ||
+                "Unable to load dentist details.";
+
+        });
+
+    }
+
+
+
+    /* =====================================================
+       RENDER DENTIST
+       ===================================================== */
+
+    function renderDentist(
+        dentist
+    ) {
+
+
+        /*
+         * Fields returned by DentistApi:
+         *
+         * dentistId
+         * dentistName
+         * specialization
+         * consultationFee
+         * phoneNumber
+         * email
+         * active
+         */
+
+
+        var id =
+            dentist.dentistId;
+
+
+        var name =
+            dentist.dentistName ||
+            "-";
+
+
+        var specialization =
+            dentist.specialization ||
+            "-";
+
+
+        var fee =
+            Number(
+                dentist.consultationFee || 0
+            );
+
+
+        var phone =
+            dentist.phoneNumber ||
+            "-";
+
+
+        var email =
+            dentist.email ||
+            "-";
+
+
+        var active =
+            dentist.active === true;
+
+
+
+        /* =================================================
+           TOP ID
+           ================================================= */
+
+        topDentistId.textContent =
+            "#" + id;
+
+
+
+        /* =================================================
+           MAIN AVATAR
+           ================================================= */
+
+        var firstLetter =
+            name
+                .trim()
+                .substring(0, 1)
+                .toUpperCase();
+
+
+        dentistAvatar.textContent =
+            firstLetter ||
+            "D";
+
+
+
+        /* =================================================
+           MAIN NAME
+           ================================================= */
+
+        dentistName.textContent =
+            name;
+
+
+        dentistSpecialization.textContent =
+            specialization;
+
+
+
+        /* =================================================
+           PROFILE STATUS
+           ================================================= */
+
+        if (active) {
+
+            profileStatus.textContent =
+                "Active";
+
+
+            profileStatus.className =
+                "rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600";
+
+        }
+
+        else {
+
+            profileStatus.textContent =
+                "Inactive";
+
+
+            profileStatus.className =
+                "rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500";
+
+        }
+
+
+
+        /* =================================================
+           DETAILS
+           ================================================= */
+
+        /*
+         * Changed:
+         *
+         * Dentist Name
+         *      ↓
+         * Dentist ID
+         */
+
+        detailDentistId.textContent =
+            "#" + id;
+
+
+        detailSpecialization.textContent =
+            specialization;
+
+
+        detailFee.textContent =
+            "LKR " +
+            fee.toFixed(2);
+
+
+        detailPhone.textContent =
+            phone;
+
+
+        detailEmail.textContent =
+            email;
+
+
+
+        /* =================================================
+           ACCOUNT STATUS
+           ================================================= */
+
+        if (active) {
+
+
+            detailStatus.className =
+                "inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-emerald-600";
+
+
+            statusDot.className =
+                "h-1.5 w-1.5 rounded-full bg-emerald-400";
+
+
+            statusText.textContent =
+                "Active";
+
+
+        }
+
+        else {
+
+
+            detailStatus.className =
+                "inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 font-inter text-[9px] font-semibold text-slate-500";
+
+
+            statusDot.className =
+                "h-1.5 w-1.5 rounded-full bg-slate-400";
+
+
+            statusText.textContent =
+                "Inactive";
+
+
+        }
+
+
+
+        /* =================================================
+           QUICK SUMMARY
+           ================================================= */
+
+        summarySpecialization.textContent =
+            specialization;
+
+
+        summaryFee.textContent =
+            "LKR " +
+            fee.toFixed(2);
+
+
+        summaryStatus.textContent =
+            active
+                ? "Available"
+                : "Inactive";
+
+
+
+        /* =================================================
+           EDIT BUTTON
+           ================================================= */
+
+        editButton.href =
+            contextPath +
+            "/dentists/edit?id=" +
+            encodeURIComponent(
+                id
+            );
+
+
+
+        /* =================================================
+           SHOW CONTENT
+           ================================================= */
+
+        loadingState.classList.add(
+            "hidden"
+        );
+
+
+        errorState.classList.add(
+            "hidden"
+        );
+
+
+        dentistContent.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+
+    /* =====================================================
+       START
+       ===================================================== */
+
+    loadDentist();
+
+
+})();
+
+</script>
 
 
 </body>

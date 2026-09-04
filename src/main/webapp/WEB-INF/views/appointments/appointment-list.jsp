@@ -2,25 +2,8 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="java.util.List" %>
-<%@ page import="com.sunrise.model.Appointment" %>
-<%@ page import="com.sunrise.model.Patient" %>
-<%@ page import="com.sunrise.model.Dentist" %>
-<%@ page import="com.sunrise.model.Treatment" %>
-<%@ page import="com.sunrise.dao.PatientDAO" %>
-<%@ page import="com.sunrise.dao.DentistDAO" %>
-<%@ page import="com.sunrise.dao.TreatmentDAO" %>
-
 <%
-    List<Appointment> appointments =
-        (List<Appointment>) request.getAttribute("appointments");
-
-    String keyword =
-        (String) request.getAttribute("keyword");
-
-    PatientDAO patientDAO = new PatientDAO();
-    DentistDAO dentistDAO = new DentistDAO();
-    TreatmentDAO treatmentDAO = new TreatmentDAO();
+    String contextPath = request.getContextPath();
 %>
 
 <!DOCTYPE html>
@@ -101,54 +84,22 @@
         </div>
 
 
-        <!-- SUCCESS -->
-
-        <% if ("1".equals(request.getParameter("success"))) { %>
-
-            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
-
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
-                    ✓
-                </span>
-
-                Appointment created successfully.
-
-            </div>
-
-        <% } %>
-
-
-        <% if ("1".equals(request.getParameter("updated"))) { %>
-
-            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
-
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
-                    ✓
-                </span>
-
-                Appointment updated successfully.
-
-            </div>
-
-        <% } %>
-
-
         <!-- SEARCH -->
 
         <div class="mb-5 rounded-xl border border-slate-200 bg-white p-4">
 
             <form
-                method="get"
-                action="<%= request.getContextPath() %>/appointments"
+                id="searchForm"
                 class="flex gap-2"
             >
 
                 <div class="relative flex-1">
 
                     <input
+                        id="keyword"
                         type="text"
                         name="keyword"
-                        value="<%= keyword != null ? keyword : "" %>"
+                        value=""
                         placeholder="Search appointment number, patient, dentist, treatment or status..."
                         class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
                     >
@@ -164,16 +115,13 @@
                 </button>
 
 
-                <% if (keyword != null && !keyword.trim().isEmpty()) { %>
-
-                    <a
-                        href="<%= request.getContextPath() %>/appointments"
-                        class="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-                    >
-                        Clear
-                    </a>
-
-                <% } %>
+                <button
+                    id="clearSearch"
+                    type="button"
+                    class="hidden rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                >
+                    Clear
+                </button>
 
             </form>
 
@@ -194,8 +142,8 @@
                 <span class="font-inter text-[10px] text-slate-500">
 
                     Total:
-                    <strong class="text-slate-700">
-                        <%= appointments != null ? appointments.size() : 0 %>
+                    <strong id="totalAppointments" class="text-slate-700">
+                        0
                     </strong>
 
                 </span>
@@ -203,230 +151,115 @@
             </div>
 
 
-            <% if (appointments != null && !appointments.isEmpty()) { %>
+            <div id="loadingState" class="px-5 py-16 text-center">
 
-
-                <div class="overflow-x-auto">
-
-                    <table class="w-full min-w-[900px]">
-
-                        <thead class="bg-slate-50">
-
-                            <tr>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Appointment No.
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Patient
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Dentist
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Treatment
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Date
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Time
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Status
-                                </th>
-
-                                <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
-                                    Actions
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody>
-
-
-                        <% for (Appointment appointment : appointments) {
-
-                            Patient patient =
-                                patientDAO.getPatientById(
-                                    appointment.getPatientId()
-                                );
-
-                            Dentist dentist =
-                                dentistDAO.getDentistById(
-                                    appointment.getDentistId()
-                                );
-
-                            Treatment treatment =
-                                treatmentDAO.getTreatmentById(
-                                    appointment.getTreatmentId()
-                                );
-
-                            String status =
-                                appointment.getStatus();
-
-                            String statusClass =
-                                status.toLowerCase()
-                                      .replace("_", "-");
-
-                            String statusBg = "bg-blue-50 text-blue-700";
-
-                            if ("COMPLETED".equals(status)) {
-                                statusBg = "bg-emerald-50 text-emerald-700";
-                            } else if ("CANCELLED".equals(status)) {
-                                statusBg = "bg-red-50 text-red-700";
-                            } else if ("NO_SHOW".equals(status)) {
-                                statusBg = "bg-amber-50 text-amber-700";
-                            } else if ("BILLED".equals(status)) {
-                                statusBg = "bg-violet-50 text-violet-700";
-                            }
-                        %>
-
-
-                            <tr class="border-t border-slate-100 transition hover:bg-slate-50/70">
-
-
-                                <td class="px-4 py-3">
-
-                                    <a
-                                        href="<%= request.getContextPath() %>/appointments/view?id=<%= appointment.getAppointmentId() %>"
-                                        class="text-[10px] font-extrabold text-blue-600 hover:underline"
-                                    >
-                                        <%= appointment.getAppointmentNumber() %>
-                                    </a>
-
-                                </td>
-
-
-                                <td class="px-4 py-3 text-[10px] font-medium">
-
-                                    <%= patient != null
-                                        ? patient.getName()
-                                        : "Unknown Patient" %>
-
-                                </td>
-
-
-                                <td class="px-4 py-3 text-[10px] font-medium">
-
-                                    <%= dentist != null
-                                        ? dentist.getDentistName()
-                                        : "Unknown Dentist" %>
-
-                                </td>
-
-
-                                <td class="px-4 py-3 text-[10px] font-medium">
-
-                                    <%= treatment != null
-                                        ? treatment.getTreatmentName()
-                                        : "Unknown Treatment" %>
-
-                                </td>
-
-
-                                <td class="px-4 py-3 font-inter text-[10px] text-slate-500">
-
-                                    <%= appointment.getAppointmentDate() %>
-
-                                </td>
-
-
-                                <td class="px-4 py-3 font-inter text-[10px] text-slate-500">
-
-                                    <%= appointment.getAppointmentTime() %>
-
-                                </td>
-
-
-                                <td class="px-4 py-3">
-
-                                    <span class="inline-flex rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold <%= statusBg %>">
-
-                                        <%= status.replace("_", " ") %>
-
-                                    </span>
-
-                                </td>
-
-
-                                <td class="px-4 py-3">
-
-                                    <div class="flex gap-1">
-
-                                        <a
-                                            href="<%= request.getContextPath() %>/appointments/view?id=<%= appointment.getAppointmentId() %>"
-                                            class="rounded-md px-2 py-1 text-[9px] font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-                                        >
-                                            View
-                                        </a>
-
-                                        <a
-                                            href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>"
-                                            class="rounded-md px-2 py-1 text-[9px] font-semibold text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-                                        >
-                                            Edit
-                                        </a>
-
-                                    </div>
-
-                                </td>
-
-
-                            </tr>
-
-
-                        <% } %>
-
-
-                        </tbody>
-
-                    </table>
-
+                <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                    ...
                 </div>
 
+                <h3 class="text-sm font-extrabold">
+                    Loading appointments
+                </h3>
 
-            <% } else { %>
+                <p class="mt-1 font-inter text-[10px] text-slate-500">
+                    Please wait while appointment records are loaded.
+                </p>
+
+            </div>
 
 
-                <div class="px-5 py-16 text-center">
+            <div id="tableContainer" class="hidden overflow-x-auto">
 
-                    <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                        &#9638;
-                    </div>
+                <table class="w-full min-w-[900px]">
 
-                    <h3 class="text-sm font-extrabold">
-                        No appointments found
-                    </h3>
+                    <thead class="bg-slate-50">
 
-                    <p class="mt-1 font-inter text-[10px] text-slate-500">
+                        <tr>
 
-                        <% if (keyword != null && !keyword.trim().isEmpty()) { %>
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Appointment No.
+                            </th>
 
-                            No appointments found for
-                            "<strong><%= keyword %></strong>".
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Patient
+                            </th>
 
-                        <% } else { %>
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Dentist
+                            </th>
 
-                            No appointments have been booked yet.
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Treatment
+                            </th>
 
-                        <% } %>
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Date
+                            </th>
 
-                    </p>
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Time
+                            </th>
 
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Status
+                            </th>
+
+                            <th class="px-4 py-3 text-left font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-500">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="appointmentsTableBody"></tbody>
+
+                </table>
+
+            </div>
+
+
+            <div id="emptyState" class="hidden px-5 py-16 text-center">
+
+                <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                    &#9638;
                 </div>
 
+                <h3 class="text-sm font-extrabold">
+                    No appointments found
+                </h3>
 
-            <% } %>
+                <p id="emptyMessage" class="mt-1 font-inter text-[10px] text-slate-500">
+                    No appointments have been booked yet.
+                </p>
+
+            </div>
+
+
+            <div id="errorState" class="hidden px-5 py-16 text-center">
+
+                <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-500">
+                    !
+                </div>
+
+                <h3 class="text-sm font-extrabold">
+                    Unable to load appointments
+                </h3>
+
+                <p id="errorMessage" class="mt-1 font-inter text-[10px] text-red-500">
+                    Please try again.
+                </p>
+
+                <button
+                    id="retryButton"
+                    type="button"
+                    class="mt-4 rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-bold text-white hover:bg-[#1D4ED8]"
+                >
+                    Try Again
+                </button>
+
+            </div>
 
 
         </div>
@@ -438,3 +271,571 @@
 
 </body>
 </html>
+<script>
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+    const searchForm = document.getElementById("searchForm");
+    const keywordInput = document.getElementById("keyword");
+    const clearSearch = document.getElementById("clearSearch");
+
+    const totalAppointments =
+        document.getElementById("totalAppointments");
+
+    const loadingState =
+        document.getElementById("loadingState");
+
+    const tableContainer =
+        document.getElementById("tableContainer");
+
+    const appointmentsTableBody =
+        document.getElementById("appointmentsTableBody");
+
+    const emptyState =
+        document.getElementById("emptyState");
+
+    const emptyMessage =
+        document.getElementById("emptyMessage");
+
+    const errorState =
+        document.getElementById("errorState");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const retryButton =
+        document.getElementById("retryButton");
+
+
+    let lastKeyword = "";
+
+
+    function escapeHtml(value) {
+
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    function getJson(url) {
+
+        return fetch(
+            contextPath + url,
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        ).then(function (response) {
+
+            if (response.status === 401) {
+                window.location.href =
+                    contextPath + "/login";
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    "API request failed: " +
+                    response.status
+                );
+            }
+
+            return response.json();
+        });
+    }
+
+
+    function showLoading() {
+
+        loadingState.classList.remove("hidden");
+        tableContainer.classList.add("hidden");
+        emptyState.classList.add("hidden");
+        errorState.classList.add("hidden");
+
+    }
+
+
+    function showTable() {
+
+        loadingState.classList.add("hidden");
+        tableContainer.classList.remove("hidden");
+        emptyState.classList.add("hidden");
+        errorState.classList.add("hidden");
+
+    }
+
+
+    function showEmpty(message) {
+
+        loadingState.classList.add("hidden");
+        tableContainer.classList.add("hidden");
+        errorState.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+
+        emptyMessage.textContent = message;
+
+    }
+
+
+    function showError(message) {
+
+        loadingState.classList.add("hidden");
+        tableContainer.classList.add("hidden");
+        emptyState.classList.add("hidden");
+        errorState.classList.remove("hidden");
+
+        errorMessage.textContent = message;
+
+    }
+
+
+    function getPatientName(patientId, patients) {
+
+        const patient =
+            patients.find(function (item) {
+                return Number(item.patientId) === Number(patientId);
+            });
+
+        return patient
+            ? (patient.name || patient.fullName || "Unknown Patient")
+            : "Unknown Patient";
+    }
+
+
+    function getDentistName(dentistId, dentists) {
+
+        const dentist =
+            dentists.find(function (item) {
+                return Number(item.dentistId) === Number(dentistId);
+            });
+
+        return dentist
+            ? (dentist.dentistName || dentist.name || "Unknown Dentist")
+            : "Unknown Dentist";
+    }
+
+
+    function getTreatmentName(treatmentId, treatments) {
+
+        const treatment =
+            treatments.find(function (item) {
+                return Number(item.treatmentId) === Number(treatmentId);
+            });
+
+        return treatment
+            ? (treatment.treatmentName || treatment.name || "Unknown Treatment")
+            : "Unknown Treatment";
+    }
+
+
+    function statusClass(status) {
+
+        const value =
+            String(status || "").toUpperCase();
+
+        if (value === "COMPLETED") {
+            return "bg-emerald-50 text-emerald-700";
+        }
+
+        if (value === "CANCELLED") {
+            return "bg-red-50 text-red-700";
+        }
+
+        if (value === "NO_SHOW") {
+            return "bg-amber-50 text-amber-700";
+        }
+
+        if (value === "BILLED") {
+            return "bg-violet-50 text-violet-700";
+        }
+
+        return "bg-blue-50 text-blue-700";
+    }
+
+
+    function formatTime(value) {
+
+        if (!value) {
+            return "";
+        }
+
+        return String(value).substring(0, 5);
+
+    }
+
+
+    function renderAppointments(
+        appointments,
+        patients,
+        dentists,
+        treatments
+    ) {
+
+        appointmentsTableBody.innerHTML = "";
+
+        totalAppointments.textContent =
+            appointments.length;
+
+
+        if (!appointments.length) {
+
+            const message =
+                lastKeyword
+                    ? 'No appointments found for "' +
+                      lastKeyword +
+                      '".'
+                    : "No appointments have been booked yet.";
+
+            showEmpty(message);
+
+            return;
+        }
+
+
+        appointments.forEach(function (appointment) {
+
+            const appointmentId =
+                appointment.appointmentId;
+
+            const appointmentNumber =
+                appointment.appointmentNumber || "N/A";
+
+            const patientName =
+                getPatientName(
+                    appointment.patientId,
+                    patients
+                );
+
+            const dentistName =
+                getDentistName(
+                    appointment.dentistId,
+                    dentists
+                );
+
+            const treatmentName =
+                getTreatmentName(
+                    appointment.treatmentId,
+                    treatments
+                );
+
+            const date =
+                appointment.appointmentDate || "";
+
+            const time =
+                formatTime(
+                    appointment.appointmentTime
+                );
+
+            const status =
+                String(
+                    appointment.status || "BOOKED"
+                ).toUpperCase();
+
+            const displayStatus =
+                status.replace(/_/g, " ");
+
+
+            const row =
+                document.createElement("tr");
+
+            row.className =
+                "border-t border-slate-100 transition hover:bg-slate-50/70";
+
+
+            row.innerHTML =
+                '<td class="px-4 py-3">' +
+
+                    '<a href="' +
+                    contextPath +
+                    '/appointments/view?id=' +
+                    encodeURIComponent(appointmentId) +
+                    '" class="text-[10px] font-extrabold text-blue-600 hover:underline">' +
+                    escapeHtml(appointmentNumber) +
+                    '</a>' +
+
+                '</td>' +
+
+
+                '<td class="px-4 py-3 text-[10px] font-medium">' +
+                    escapeHtml(patientName) +
+                '</td>' +
+
+
+                '<td class="px-4 py-3 text-[10px] font-medium">' +
+                    escapeHtml(dentistName) +
+                '</td>' +
+
+
+                '<td class="px-4 py-3 text-[10px] font-medium">' +
+                    escapeHtml(treatmentName) +
+                '</td>' +
+
+
+                '<td class="px-4 py-3 font-inter text-[10px] text-slate-500">' +
+                    escapeHtml(date) +
+                '</td>' +
+
+
+                '<td class="px-4 py-3 font-inter text-[10px] text-slate-500">' +
+                    escapeHtml(time) +
+                '</td>' +
+
+
+                '<td class="px-4 py-3">' +
+
+                    '<span class="inline-flex rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold ' +
+                    statusClass(status) +
+                    '">' +
+
+                        escapeHtml(displayStatus) +
+
+                    '</span>' +
+
+                '</td>' +
+
+
+                '<td class="px-4 py-3 align-middle">' +
+
+                    '<div class="flex items-center justify-start gap-2 whitespace-nowrap">' +
+
+                        '<a href="' +
+                        contextPath +
+                        '/appointments/view?id=' +
+                        encodeURIComponent(appointmentId) +
+                        '" class="inline-flex items-center justify-center rounded-lg bg-blue-50 px-3 py-1.5 font-inter text-[9px] font-semibold leading-none text-blue-600 transition hover:bg-blue-100">' +
+                            'View' +
+                        '</a>' +
+
+                        '<a href="' +
+                        contextPath +
+                        '/appointments/edit?id=' +
+                        encodeURIComponent(appointmentId) +
+                        '" class="inline-flex items-center justify-center rounded-lg bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold leading-none text-slate-600 transition hover:bg-slate-200">' +
+                            'Edit' +
+                        '</a>' +
+
+                    '</div>' +
+
+                '</td>';
+
+
+            appointmentsTableBody.appendChild(row);
+
+        });
+
+
+        showTable();
+
+    }
+
+
+    async function loadAppointments(keyword) {
+
+        showLoading();
+
+        lastKeyword =
+            keyword ? keyword.trim() : "";
+
+        try {
+
+            let appointmentUrl =
+                "/api/appointments";
+
+            if (lastKeyword) {
+
+                appointmentUrl +=
+                    "?keyword=" +
+                    encodeURIComponent(lastKeyword);
+
+            }
+
+
+            /*
+             * Appointment API returns IDs for patient,
+             * dentist and treatment. Load the related
+             * REST resources once and use them to display
+             * the same names as the original JSP.
+             */
+
+            const results =
+                await Promise.all([
+                    getJson(appointmentUrl),
+                    getJson("/api/patients"),
+                    getJson("/api/dentists"),
+                    getJson("/api/treatments")
+                ]);
+
+
+            const appointments =
+                Array.isArray(results[0])
+                    ? results[0]
+                    : [];
+
+            const patients =
+                Array.isArray(results[1])
+                    ? results[1]
+                    : [];
+
+            const dentists =
+                Array.isArray(results[2])
+                    ? results[2]
+                    : [];
+
+            const treatments =
+                Array.isArray(results[3])
+                    ? results[3]
+                    : [];
+
+
+            renderAppointments(
+                appointments,
+                patients,
+                dentists,
+                treatments
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Could not load appointments:",
+                error
+            );
+
+            showError(
+                "Could not load appointment records. " +
+                "Please check that the REST APIs are running."
+            );
+
+        }
+
+    }
+
+
+    searchForm.addEventListener(
+        "submit",
+        function (event) {
+
+            event.preventDefault();
+
+            const keyword =
+                keywordInput.value.trim();
+
+            if (keyword) {
+
+                clearSearch.classList.remove("hidden");
+
+            } else {
+
+                clearSearch.classList.add("hidden");
+
+            }
+
+            loadAppointments(keyword);
+
+        }
+    );
+
+
+    clearSearch.addEventListener(
+        "click",
+        function () {
+
+            keywordInput.value = "";
+
+            clearSearch.classList.add("hidden");
+
+            loadAppointments("");
+
+        }
+    );
+
+
+    retryButton.addEventListener(
+        "click",
+        function () {
+
+            loadAppointments(lastKeyword);
+
+        }
+    );
+
+
+    /*
+     * Preserve the original success-message behaviour.
+     * Messages are displayed only from the query string;
+     * appointment data itself always comes from REST APIs.
+     */
+
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const success =
+        urlParams.get("success");
+
+    const updated =
+        urlParams.get("updated");
+
+
+    if (success === "1") {
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700";
+
+        message.innerHTML =
+            '<span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">✓</span>' +
+            "Appointment created successfully.";
+
+        const searchBox =
+            document.getElementById("searchForm").parentElement;
+
+        searchBox.parentNode.insertBefore(
+            message,
+            searchBox
+        );
+
+    } else if (updated === "1") {
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700";
+
+        message.innerHTML =
+            '<span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">✓</span>' +
+            "Appointment updated successfully.";
+
+        const searchBox =
+            document.getElementById("searchForm").parentElement;
+
+        searchBox.parentNode.insertBefore(
+            message,
+            searchBox
+        );
+
+    }
+
+
+    loadAppointments("");
+
+
+})();
+</script>

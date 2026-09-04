@@ -1,34 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="com.sunrise.model.User" %>
-
 <%
-    User user = (User) request.getAttribute("user");
-
-    String error = (String) request.getAttribute("error");
-
     String contextPath = request.getContextPath();
-
-    if (user == null) {
-        response.sendRedirect(contextPath + "/admin/users");
-        return;
-    }
-
-    String currentRole = user.getRole();
-
-    if (currentRole == null || currentRole.trim().isEmpty()) {
-        currentRole = "RECEPTIONIST";
-    }
-
-    currentRole = currentRole.toUpperCase();
-
-    String roleDisplay;
-
-    if ("ADMIN".equalsIgnoreCase(currentRole)) {
-        roleDisplay = "Administrator";
-    } else {
-        roleDisplay = "Receptionist";
-    }
+    String userId = request.getParameter("id");
 %>
 
 <!DOCTYPE html>
@@ -203,59 +177,52 @@
              ERROR MESSAGE
              ================================================= -->
 
-        <% if (error != null) { %>
+        <div
+            id="errorMessage"
+            class="hidden mb-6 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
 
-            <div class="mb-6 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5">
+            <div class="mt-0.5 shrink-0 text-red-500">
 
+                <svg
+                    class="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24">
 
-                <div class="mt-0.5 shrink-0 text-red-500">
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="9"/>
 
-                    <svg
-                        class="h-4 w-4"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        d="M12 8v4"/>
 
-                        <circle
-                            cx="12"
-                            cy="12"
-                            r="9"/>
+                    <path
+                        stroke-linecap="round"
+                        d="M12 16h.01"/>
 
-                        <path
-                            stroke-linecap="round"
-                            d="M12 8v4"/>
-
-                        <path
-                            stroke-linecap="round"
-                            d="M12 16h.01"/>
-
-                    </svg>
-
-                </div>
-
-
-                <div>
-
-                    <p class="font-inter text-xs font-semibold text-red-700">
-
-                        Unable to update user
-
-                    </p>
-
-
-                    <p class="mt-0.5 font-inter text-[11px] text-red-600">
-
-                        <%= error %>
-
-                    </p>
-
-                </div>
-
+                </svg>
 
             </div>
 
-        <% } %>
+            <div>
+
+                <p class="font-inter text-xs font-semibold text-red-700">
+
+                    Unable to update user
+
+                </p>
+
+                <p
+                    id="errorText"
+                    class="mt-0.5 font-inter text-[11px] text-red-600">
+                </p>
+
+            </div>
+
+        </div>
 
 
 
@@ -265,7 +232,7 @@
 
         <form
             method="post"
-            action="<%= contextPath %>/admin/edit-user">
+            action="#editUser">
 
 
             <!-- Hidden ID -->
@@ -273,7 +240,7 @@
             <input
                 type="hidden"
                 name="userId"
-                value="<%= user.getUserId() %>">
+                value="<%= userId == null ? "" : userId %>">
 
 
 
@@ -375,9 +342,7 @@
                                     id="fullName"
                                     name="fullName"
 
-                                    value="<%= user.getFullName() != null
-                                            ? user.getFullName()
-                                            : "" %>"
+                                    value=""
 
                                     required
 
@@ -405,10 +370,7 @@
                                     id="position"
                                     name="position"
 
-                                    value="<%= user.getPosition() != null &&
-                                             !user.getPosition().trim().isEmpty()
-                                                ? user.getPosition()
-                                                : "Staff" %>"
+                                    value=""
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -440,10 +402,7 @@
 
 
                                     <option
-                                        value="RECEPTIONIST"
-                                        <%= "RECEPTIONIST".equalsIgnoreCase(currentRole)
-                                                ? "selected"
-                                                : "" %>>
+                                        value="RECEPTIONIST">
 
                                         Receptionist
 
@@ -451,10 +410,7 @@
 
 
                                     <option
-                                        value="ADMIN"
-                                        <%= "ADMIN".equalsIgnoreCase(currentRole)
-                                                ? "selected"
-                                                : "" %>>
+                                        value="ADMIN">
 
                                         Administrator
 
@@ -491,9 +447,7 @@
                                     id="email"
                                     name="email"
 
-                                    value="<%= user.getEmail() != null
-                                            ? user.getEmail()
-                                            : "" %>"
+                                    value=""
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -519,9 +473,7 @@
                                     id="phone"
                                     name="phone"
 
-                                    value="<%= user.getPhone() != null
-                                            ? user.getPhone()
-                                            : "" %>"
+                                    value=""
 
                                     class="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
@@ -547,9 +499,7 @@
                                     name="address"
                                     rows="3"
 
-                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"><%= user.getAddress() != null
-                                            ? user.getAddress()
-                                            : "" %></textarea>
+                                    class="w-full resize-none rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 font-inter text-xs text-[#172033] transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"></textarea>
 
                             </div>
 
@@ -646,7 +596,7 @@
 
                                 <p class="font-inter text-xs font-medium text-slate-600">
 
-                                    @<%= user.getUsername() %>
+                                    @<span id="currentUsername">Loading...</span>
 
                                 </p>
 
@@ -687,7 +637,7 @@
                                     id="currentRoleDisplay"
                                     class="font-inter text-xs font-medium text-slate-600">
 
-                                    <%= roleDisplay %>
+                                    Receptionist
 
                                 </span>
 
@@ -696,7 +646,7 @@
                                     id="currentRoleBadge"
                                     class="rounded-full bg-blue-50 px-2.5 py-1 font-inter text-[9px] font-semibold text-blue-600">
 
-                                    <%= currentRole %>
+                                    RECEPTIONIST
 
                                 </span>
 
@@ -729,39 +679,23 @@
                             </p>
 
 
-                            <% if (user.isActive()) { %>
+                            <div
+                                id="accountStatus"
+                                class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-2.5">
 
-                                <div class="flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-2.5">
+                                <span
+                                    class="h-2 w-2 rounded-full bg-emerald-500">
+                                </span>
 
+                                <span
+                                    id="accountStatusText"
+                                    class="font-inter text-xs font-semibold text-emerald-700">
 
-                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                    Active
 
+                                </span>
 
-                                    <span class="font-inter text-xs font-semibold text-emerald-700">
-
-                                        Active
-
-                                    </span>
-
-                                </div>
-
-                            <% } else { %>
-
-                                <div class="flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3.5 py-2.5">
-
-
-                                    <span class="h-2 w-2 rounded-full bg-red-500"></span>
-
-
-                                    <span class="font-inter text-xs font-semibold text-red-700">
-
-                                        Inactive
-
-                                    </span>
-
-                                </div>
-
-                            <% } %>
+                            </div>
 
 
                         </div>
@@ -832,62 +766,1016 @@
 
 
 <!-- =========================================================
-     ROLE DISPLAY SCRIPT
+     REST API USER EDIT
      ========================================================= -->
 
 <script>
 
-    const roleSelect = document.getElementById("role");
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+    const requestedUserId =
+        "<%= userId == null ? "" : userId %>" ||
+        new URLSearchParams(
+            window.location.search
+        ).get("id") ||
+        new URLSearchParams(
+            window.location.search
+        ).get("userId") ||
+        "";
+
+
+    const form =
+        document.querySelector(
+            "form"
+        );
+
+
+    const submitButton =
+        form
+            ? form.querySelector(
+                'button[type="submit"]'
+            )
+            : null;
+
+
+    const roleSelect =
+        document.getElementById(
+            "role"
+        );
+
 
     const currentRoleDisplay =
-        document.getElementById("currentRoleDisplay");
+        document.getElementById(
+            "currentRoleDisplay"
+        );
+
 
     const currentRoleBadge =
-        document.getElementById("currentRoleBadge");
+        document.getElementById(
+            "currentRoleBadge"
+        );
+
 
     const roleChangeDescription =
-        document.getElementById("roleChangeDescription");
+        document.getElementById(
+            "roleChangeDescription"
+        );
 
 
-    function updateRoleDisplay() {
+    const errorMessage =
+        document.getElementById(
+            "errorMessage"
+        );
 
-        const role = roleSelect.value;
+
+    const errorText =
+        document.getElementById(
+            "errorText"
+        );
 
 
-        if (role === "ADMIN") {
+    /*
+     * =========================================================
+     * SHOW ERROR
+     * =========================================================
+     */
 
-            currentRoleDisplay.textContent =
-                "Administrator";
+    function showError(message) {
 
-            currentRoleBadge.textContent =
-                "ADMIN";
+        if (!errorMessage) {
+            return;
+        }
 
-            roleChangeDescription.textContent =
-                "Administrator access to system management and reports.";
 
-        } else {
+        if (errorText) {
 
-            currentRoleDisplay.textContent =
-                "Receptionist";
+            errorText.textContent =
+                message;
 
-            currentRoleBadge.textContent =
-                "RECEPTIONIST";
+        }
 
-            roleChangeDescription.textContent =
-                "Receptionist access for clinic operational tasks.";
+
+        errorMessage.classList.remove(
+            "hidden"
+        );
+
+
+        errorMessage.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+
+    }
+
+
+    /*
+     * =========================================================
+     * HIDE ERROR
+     * =========================================================
+     */
+
+    function hideError() {
+
+        if (!errorMessage) {
+            return;
+        }
+
+
+        errorMessage.classList.add(
+            "hidden"
+        );
+
+
+        if (errorText) {
+
+            errorText.textContent =
+                "";
 
         }
 
     }
 
 
-    roleSelect.addEventListener(
-        "change",
-        updateRoleDisplay
-    );
+    /*
+     * =========================================================
+     * VALUE HELPER
+     * =========================================================
+     */
 
+    function valueOrEmpty(value) {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return "";
+
+        }
+
+        return String(value);
+
+    }
+
+
+    /*
+     * =========================================================
+     * ROLE DISPLAY
+     * =========================================================
+     */
+
+    function updateRoleDisplay() {
+
+        if (!roleSelect) {
+            return;
+        }
+
+
+        const role =
+            roleSelect.value;
+
+
+        if (
+            role.toUpperCase() ===
+            "ADMIN"
+        ) {
+
+            if (currentRoleDisplay) {
+
+                currentRoleDisplay.textContent =
+                    "Administrator";
+
+            }
+
+
+            if (currentRoleBadge) {
+
+                currentRoleBadge.textContent =
+                    "ADMIN";
+
+            }
+
+
+            if (roleChangeDescription) {
+
+                roleChangeDescription.textContent =
+                    "Administrator access to system management and reports.";
+
+            }
+
+        }
+        else {
+
+            if (currentRoleDisplay) {
+
+                currentRoleDisplay.textContent =
+                    "Receptionist";
+
+            }
+
+
+            if (currentRoleBadge) {
+
+                currentRoleBadge.textContent =
+                    "RECEPTIONIST";
+
+            }
+
+
+            if (roleChangeDescription) {
+
+                roleChangeDescription.textContent =
+                    "Receptionist access for clinic operational tasks.";
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * ACCOUNT STATUS
+     * =========================================================
+     */
+
+    function updateAccountStatus(
+        isActive
+    ) {
+
+        const statusBox =
+            document.getElementById(
+                "accountStatus"
+            );
+
+
+        const statusText =
+            document.getElementById(
+                "accountStatusText"
+            );
+
+
+        if (
+            !statusBox ||
+            !statusText
+        ) {
+
+            return;
+
+        }
+
+
+        if (isActive) {
+
+            statusBox.className =
+                "flex items-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-2.5";
+
+
+            statusText.className =
+                "font-inter text-xs font-semibold text-emerald-700";
+
+
+            statusText.textContent =
+                "Active";
+
+
+            const dot =
+                statusBox.querySelector(
+                    "span:first-child"
+                );
+
+
+            if (dot) {
+
+                dot.className =
+                    "h-2 w-2 rounded-full bg-emerald-500";
+
+            }
+
+        }
+        else {
+
+            statusBox.className =
+                "flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3.5 py-2.5";
+
+
+            statusText.className =
+                "font-inter text-xs font-semibold text-red-700";
+
+
+            statusText.textContent =
+                "Inactive";
+
+
+            const dot =
+                statusBox.querySelector(
+                    "span:first-child"
+                );
+
+
+            if (dot) {
+
+                dot.className =
+                    "h-2 w-2 rounded-full bg-red-500";
+
+            }
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * LOAD USER
+     *
+     * GET /api/users/{id}
+     * =========================================================
+     */
+
+    async function loadUser() {
+
+        if (!requestedUserId) {
+
+            showError(
+                "User ID is required."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    contextPath +
+                    "/api/users/" +
+                    encodeURIComponent(
+                        requestedUserId
+                    ),
+                    {
+                        method: "GET",
+                        credentials: "same-origin",
+                        headers: {
+                            "Accept":
+                                "application/json"
+                        }
+                    }
+                );
+
+
+            if (
+                response.status ===
+                401
+            ) {
+
+                window.location.href =
+                    contextPath + "/login";
+
+                return;
+
+            }
+
+
+            if (
+                response.status ===
+                403
+            ) {
+
+                showError(
+                    "You do not have permission to edit users."
+                );
+
+                return;
+
+            }
+
+
+            if (
+                response.status ===
+                404
+            ) {
+
+                showError(
+                    "User not found."
+                );
+
+                return;
+
+            }
+
+
+            let data = null;
+
+
+            try {
+
+                data =
+                    await response.json();
+
+            }
+            catch (jsonError) {
+
+                data = null;
+
+            }
+
+
+            if (!response.ok) {
+
+                const message =
+                    data && data.message
+                        ? data.message
+                        : "Unable to load user.";
+
+                showError(message);
+
+                return;
+
+            }
+
+
+            const user =
+                data && data.user
+                    ? data.user
+                    : data;
+
+
+            if (!user) {
+
+                showError(
+                    "User information could not be loaded."
+                );
+
+                return;
+
+            }
+
+
+            populateUser(
+                user
+            );
+
+        }
+        catch (error) {
+
+            console.error(
+                "Load user API error:",
+                error
+            );
+
+
+            showError(
+                "Unable to connect to the server. Please try again."
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * POPULATE USER
+     * =========================================================
+     */
+
+    function populateUser(
+        user
+    ) {
+
+        const fullName =
+            valueOrEmpty(
+                user.fullName
+            );
+
+
+        const position =
+            valueOrEmpty(
+                user.position
+            );
+
+
+        const email =
+            valueOrEmpty(
+                user.email
+            );
+
+
+        const phone =
+            valueOrEmpty(
+                user.phone
+            );
+
+
+        const address =
+            valueOrEmpty(
+                user.address
+            );
+
+
+        const username =
+            valueOrEmpty(
+                user.username
+            );
+
+
+        let role =
+            valueOrEmpty(
+                user.role
+            ).toUpperCase();
+
+
+        if (!role) {
+
+            role =
+                "RECEPTIONIST";
+
+        }
+
+
+        /*
+         * Form fields
+         */
+
+        const fullNameInput =
+            document.getElementById(
+                "fullName"
+            );
+
+
+        const positionInput =
+            document.getElementById(
+                "position"
+            );
+
+
+        const emailInput =
+            document.getElementById(
+                "email"
+            );
+
+
+        const phoneInput =
+            document.getElementById(
+                "phone"
+            );
+
+
+        const addressInput =
+            document.getElementById(
+                "address"
+            );
+
+
+        if (fullNameInput) {
+
+            fullNameInput.value =
+                fullName;
+
+        }
+
+
+        if (positionInput) {
+
+            positionInput.value =
+                position;
+
+        }
+
+
+        if (emailInput) {
+
+            emailInput.value =
+                email;
+
+        }
+
+
+        if (phoneInput) {
+
+            phoneInput.value =
+                phone;
+
+        }
+
+
+        if (addressInput) {
+
+            addressInput.value =
+                address;
+
+        }
+
+
+        /*
+         * Username
+         */
+
+        const usernameElement =
+            document.getElementById(
+                "currentUsername"
+            );
+
+
+        if (usernameElement) {
+
+            usernameElement.textContent =
+                username;
+
+        }
+
+
+        /*
+         * Role
+         */
+
+        if (roleSelect) {
+
+            roleSelect.value =
+                role;
+
+        }
+
+
+        updateRoleDisplay();
+
+
+        /*
+         * Account status
+         */
+
+        updateAccountStatus(
+            user.active === true
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * SAVE USER
+     *
+     * PUT /api/users/{id}
+     *
+     * UserApi reads application/x-www-form-urlencoded
+     * request bodies.
+     * =========================================================
+     */
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                hideError();
+
+
+                if (!requestedUserId) {
+
+                    showError(
+                        "User ID is required."
+                    );
+
+                    return;
+
+                }
+
+
+                const fullName =
+                    document
+                        .getElementById(
+                            "fullName"
+                        )
+                        .value
+                        .trim();
+
+
+                const position =
+                    document
+                        .getElementById(
+                            "position"
+                        )
+                        .value
+                        .trim();
+
+
+                const role =
+                    roleSelect
+                        ? roleSelect.value.trim()
+                        : "RECEPTIONIST";
+
+
+                const email =
+                    document
+                        .getElementById(
+                            "email"
+                        )
+                        .value
+                        .trim();
+
+
+                const phone =
+                    document
+                        .getElementById(
+                            "phone"
+                        )
+                        .value
+                        .trim();
+
+
+                const address =
+                    document
+                        .getElementById(
+                            "address"
+                        )
+                        .value
+                        .trim();
+
+
+                /*
+                 * Client-side validation
+                 */
+
+                if (!fullName) {
+
+                    showError(
+                        "Full name is required."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * Prevent double submission
+                 */
+
+                if (submitButton) {
+
+                    submitButton.disabled =
+                        true;
+
+                    submitButton.classList.add(
+                        "opacity-70",
+                        "cursor-not-allowed"
+                    );
+
+                }
+
+
+                /*
+                 * Build URL encoded body
+                 */
+
+                const formData =
+                    new URLSearchParams();
+
+
+                formData.append(
+                    "fullName",
+                    fullName
+                );
+
+
+                formData.append(
+                    "position",
+                    position
+                );
+
+
+                formData.append(
+                    "role",
+                    role
+                );
+
+
+                formData.append(
+                    "email",
+                    email
+                );
+
+
+                formData.append(
+                    "phone",
+                    phone
+                );
+
+
+                formData.append(
+                    "address",
+                    address
+                );
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            contextPath +
+                            "/api/users/" +
+                            encodeURIComponent(
+                                requestedUserId
+                            ),
+                            {
+                                method: "PUT",
+
+                                credentials:
+                                    "same-origin",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded; charset=UTF-8",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                body:
+                                    formData.toString()
+                            }
+                        );
+
+
+                    let data = null;
+
+
+                    try {
+
+                        data =
+                            await response.json();
+
+                    }
+                    catch (jsonError) {
+
+                        data = null;
+
+                    }
+
+
+                    /*
+                     * Success
+                     */
+
+                    if (
+                        response.ok &&
+                        response.status >= 200 &&
+                        response.status < 300
+                    ) {
+
+                        window.location.href =
+                            contextPath +
+                            "/admin/users";
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Authentication
+                     */
+
+                    if (
+                        response.status ===
+                        401
+                    ) {
+
+                        window.location.href =
+                            contextPath +
+                            "/login";
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * Authorization
+                     */
+
+                    if (
+                        response.status ===
+                        403
+                    ) {
+
+                        showError(
+                            "You do not have permission to update users."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * API error
+                     */
+
+                    let message =
+                        "User could not be updated.";
+
+
+                    if (data) {
+
+                        if (data.message) {
+
+                            message =
+                                data.message;
+
+                        }
+                        else if (
+                            typeof data.error ===
+                            "string"
+                        ) {
+
+                            message =
+                                data.error;
+
+                        }
+
+                    }
+
+
+                    showError(
+                        message
+                    );
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Update user API error:",
+                        error
+                    );
+
+
+                    showError(
+                        "Unable to connect to the server. Please try again."
+                    );
+
+                }
+                finally {
+
+                    if (submitButton) {
+
+                        submitButton.disabled =
+                            false;
+
+                        submitButton.classList.remove(
+                            "opacity-70",
+                            "cursor-not-allowed"
+                        );
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * ROLE CHANGE
+     * =========================================================
+     */
+
+    if (roleSelect) {
+
+        roleSelect.addEventListener(
+            "change",
+            updateRoleDisplay
+        );
+
+    }
+
+
+    /*
+     * Initial display
+     */
 
     updateRoleDisplay();
+
+
+    /*
+     * Load current user from REST API
+     */
+
+    loadUser();
+
+})();
 
 </script>
 

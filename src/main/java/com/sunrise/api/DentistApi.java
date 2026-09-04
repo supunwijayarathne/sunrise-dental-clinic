@@ -404,7 +404,11 @@ public class DentistApi extends HttpServlet {
 
 
             // =====================================================
-            // READ PUT PARAMETERS
+            // READ PARAMETERS
+            //
+            // For PUT requests, first try normal parameters.
+            // If they are not available, read the form-urlencoded
+            // request body manually.
             // =====================================================
 
             String dentistName =
@@ -439,6 +443,120 @@ public class DentistApi extends HttpServlet {
 
 
             // =====================================================
+            // FALLBACK: READ PUT BODY
+            // =====================================================
+
+            if (dentistName == null
+                    && specialization == null
+                    && consultationFee == null
+                    && phoneNumber == null
+                    && email == null
+                    && active == null) {
+
+                StringBuilder body =
+                        new StringBuilder();
+
+                String line;
+
+                java.io.BufferedReader reader =
+                        request.getReader();
+
+                while ((line = reader.readLine()) != null) {
+
+                    body.append(line);
+                }
+
+
+                String requestBody =
+                        body.toString();
+
+
+                if (!requestBody.isEmpty()) {
+
+                    String[] parameters =
+                            requestBody.split("&");
+
+
+                    for (String parameter :
+                            parameters) {
+
+                        String[] pair =
+                                parameter.split(
+                                        "=",
+                                        2
+                                );
+
+
+                        if (pair.length != 2) {
+                            continue;
+                        }
+
+
+                        String key =
+                                java.net.URLDecoder.decode(
+                                        pair[0],
+                                        "UTF-8"
+                                );
+
+
+                        String value =
+                                java.net.URLDecoder.decode(
+                                        pair[1],
+                                        "UTF-8"
+                                );
+
+
+                        if ("dentistName".equals(key)) {
+
+                            dentistName =
+                                    value;
+
+                        }
+                        else if (
+                                "specialization".equals(key)
+                        ) {
+
+                            specialization =
+                                    value;
+
+                        }
+                        else if (
+                                "consultationFee".equals(key)
+                        ) {
+
+                            consultationFee =
+                                    value;
+
+                        }
+                        else if (
+                                "phoneNumber".equals(key)
+                        ) {
+
+                            phoneNumber =
+                                    value;
+
+                        }
+                        else if (
+                                "email".equals(key)
+                        ) {
+
+                            email =
+                                    value;
+
+                        }
+                        else if (
+                                "active".equals(key)
+                        ) {
+
+                            active =
+                                    value;
+                        }
+                    }
+                }
+            }
+
+
+            // =====================================================
             // UPDATE VALUES
             // =====================================================
 
@@ -458,13 +576,27 @@ public class DentistApi extends HttpServlet {
             }
 
 
-            if (!ApiUtil.blank(consultationFee)) {
+            if (consultationFee != null
+                    && !consultationFee.trim().isEmpty()) {
 
-                dentist.setConsultationFee(
-                        Double.parseDouble(
-                                consultationFee
-                        )
-                );
+                try {
+
+                    dentist.setConsultationFee(
+                            Double.parseDouble(
+                                    consultationFee.trim()
+                            )
+                    );
+
+                } catch (NumberFormatException e) {
+
+                    ApiUtil.error(
+                            response,
+                            400,
+                            "Invalid consultation fee"
+                    );
+
+                    return;
+                }
             }
 
 
@@ -498,7 +630,11 @@ public class DentistApi extends HttpServlet {
             // UPDATE THROUGH SERVICE
             // =====================================================
 
-            if (dentistService.updateDentist(dentist)) {
+            if (
+                    dentistService.updateDentist(
+                            dentist
+                    )
+            ) {
 
                 response.setStatus(
                         HttpServletResponse.SC_OK
@@ -517,13 +653,6 @@ public class DentistApi extends HttpServlet {
                 );
             }
 
-        } catch (NumberFormatException e) {
-
-            ApiUtil.error(
-                    response,
-                    400,
-                    "Invalid consultation fee"
-            );
 
         } catch (Exception e) {
 

@@ -1,11 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="com.sunrise.model.User" %>
-
 <%
-    User loggedUser =
-            (User) session.getAttribute("loggedUser");
-
     String contextPath =
             request.getContextPath();
 %>
@@ -106,9 +101,7 @@
 
                     <span class="font-semibold text-slate-700">
 
-                        <%= loggedUser != null
-                                ? loggedUser.getFullName()
-                                : "Administrator" %>
+                        <span id="adminWelcomeName">Administrator</span>
 
                     </span>
 
@@ -179,7 +172,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            ${userCount}
+                            <span id="activeUserCount">0</span>
 
                         </p>
 
@@ -245,7 +238,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            ${stats.todayAppointments}
+                            <span id="todayAppointmentCount">0</span>
 
                         </p>
 
@@ -307,7 +300,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            ${stats.todayBills}
+                            <span id="todayBillCount">0</span>
 
                         </p>
 
@@ -367,7 +360,7 @@
 
                         <p class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            Rs. ${stats.todayRevenue}
+                            Rs. <span id="todayRevenue">0.00</span>
 
                         </p>
 
@@ -516,7 +509,7 @@
 
                                 <p class="mt-1.5 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                    ${userCount}
+                                    <span id="userAccountCount">0</span>
 
                                 </p>
 
@@ -874,6 +867,357 @@
 
 </div>
 
+
+
+<script>
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+    /*
+     * =========================================================
+     * API HELPERS
+     * =========================================================
+     */
+
+    async function getJson(url) {
+
+        const response = await fetch(
+            contextPath + url,
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        );
+
+        if (response.status === 401) {
+            window.location.href =
+                contextPath + "/login";
+            return null;
+        }
+
+        if (response.status === 403) {
+            console.error("Access denied:", url);
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(
+                "API request failed: " +
+                response.status
+            );
+        }
+
+        return await response.json();
+    }
+
+
+    /*
+     * =========================================================
+     * CURRENT ADMIN
+     *
+     * GET /api/auth/me
+     * =========================================================
+     */
+
+    async function loadCurrentAdmin() {
+
+        try {
+
+            const data =
+                await getJson("/api/auth/me");
+
+            if (!data) {
+                return;
+            }
+
+            const user =
+                data.user || data;
+
+            if (!user) {
+                return;
+            }
+
+            const name =
+                user.fullName ||
+                user.username ||
+                "Administrator";
+
+            const nameElement =
+                document.getElementById(
+                    "adminWelcomeName"
+                );
+
+            if (nameElement) {
+                nameElement.textContent = name;
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Could not load current admin:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * USER STATISTICS
+     *
+     * GET /api/users
+     *
+     * UserApi returns:
+     * userId
+     * fullName
+     * username
+     * role
+     * active
+     * etc.
+     * =========================================================
+     */
+
+    async function loadUserStatistics() {
+
+        try {
+
+            const users =
+                await getJson("/api/users");
+
+            if (!users || !Array.isArray(users)) {
+                return;
+            }
+
+            const activeUsers =
+                users.filter(function (user) {
+                    return user.active === true;
+                }).length;
+
+
+            const activeUserCount =
+                document.getElementById(
+                    "activeUserCount"
+                );
+
+            const userAccountCount =
+                document.getElementById(
+                    "userAccountCount"
+                );
+
+
+            if (activeUserCount) {
+                activeUserCount.textContent =
+                    activeUsers;
+            }
+
+            if (userAccountCount) {
+                userAccountCount.textContent =
+                    activeUsers;
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Could not load user statistics:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * TODAY'S APPOINTMENTS
+     *
+     * GET /api/appointments/today
+     * =========================================================
+     */
+
+    async function loadTodayAppointments() {
+
+        try {
+
+            const appointments =
+                await getJson(
+                    "/api/appointments/today"
+                );
+
+            if (
+                !appointments ||
+                !Array.isArray(appointments)
+            ) {
+                return;
+            }
+
+            const countElement =
+                document.getElementById(
+                    "todayAppointmentCount"
+                );
+
+            if (countElement) {
+
+                countElement.textContent =
+                    appointments.length;
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Could not load today's appointments:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * TODAY'S BILLING STATISTICS
+     *
+     * GET /api/reports?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+     *
+     * The report API provides:
+     * totalBills
+     * totalRevenue
+     *
+     * Using today's date as both start and end gives
+     * today's billing statistics without changing the
+     * dashboard design.
+     * =========================================================
+     */
+
+    async function loadTodayBilling() {
+
+        try {
+
+            const today =
+                new Date();
+
+            const year =
+                today.getFullYear();
+
+            const month =
+                String(
+                    today.getMonth() + 1
+                ).padStart(2, "0");
+
+            const day =
+                String(
+                    today.getDate()
+                ).padStart(2, "0");
+
+            const date =
+                year + "-" +
+                month + "-" +
+                day;
+
+
+            const data =
+                await getJson(
+                    "/api/reports" +
+                    "?startDate=" +
+                    encodeURIComponent(date) +
+                    "&endDate=" +
+                    encodeURIComponent(date)
+                );
+
+
+            if (!data) {
+                return;
+            }
+
+
+            const billCountElement =
+                document.getElementById(
+                    "todayBillCount"
+                );
+
+            const revenueElement =
+                document.getElementById(
+                    "todayRevenue"
+                );
+
+
+            if (billCountElement) {
+
+                billCountElement.textContent =
+                    Number(
+                        data.totalBills || 0
+                    );
+
+            }
+
+
+            if (revenueElement) {
+
+                revenueElement.textContent =
+                    Number(
+                        data.totalRevenue || 0
+                    ).toLocaleString(
+                        "en-LK",
+                        {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }
+                    );
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Could not load today's billing statistics:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * LOAD DASHBOARD
+     * =========================================================
+     */
+
+    async function loadDashboard() {
+
+        await Promise.all([
+            loadCurrentAdmin(),
+            loadUserStatistics(),
+            loadTodayAppointments(),
+            loadTodayBilling()
+        ]);
+
+    }
+
+
+    /*
+     * =========================================================
+     * START
+     * =========================================================
+     */
+
+    loadDashboard();
+
+})();
+</script>
 
 </body>
 

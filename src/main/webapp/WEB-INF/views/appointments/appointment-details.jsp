@@ -2,39 +2,8 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="com.sunrise.model.Appointment" %>
-<%@ page import="com.sunrise.model.Patient" %>
-<%@ page import="com.sunrise.model.Dentist" %>
-<%@ page import="com.sunrise.model.Treatment" %>
-
 <%
-    Appointment appointment =
-        (Appointment) request.getAttribute("appointment");
-
-    Patient patient =
-        (Patient) request.getAttribute("patient");
-
-    Dentist dentist =
-        (Dentist) request.getAttribute("dentist");
-
-    Treatment treatment =
-        (Treatment) request.getAttribute("treatment");
-
-    String status =
-        appointment.getStatus();
-
-    String statusBg =
-        "bg-blue-50 text-blue-700";
-
-    if ("COMPLETED".equals(status)) {
-        statusBg = "bg-emerald-50 text-emerald-700";
-    } else if ("CANCELLED".equals(status)) {
-        statusBg = "bg-red-50 text-red-700";
-    } else if ("NO_SHOW".equals(status)) {
-        statusBg = "bg-amber-50 text-amber-700";
-    } else if ("BILLED".equals(status)) {
-        statusBg = "bg-violet-50 text-violet-700";
-    }
+    String contextPath = request.getContextPath();
 %>
 
 <!DOCTYPE html>
@@ -126,7 +95,7 @@
                     </p>
 
                     <h2 class="mt-1 text-base font-extrabold">
-                        <%= appointment.getAppointmentNumber() %>
+                        <span id="appointmentNumber">—</span>
                     </h2>
 
                 </div>
@@ -135,9 +104,9 @@
             </div>
 
 
-            <span class="rounded-full px-3 py-1.5 font-inter text-[9px] font-semibold <%= statusBg %>">
+            <span id="headerStatus" class="rounded-full px-3 py-1.5 font-inter text-[9px] font-semibold bg-blue-50 text-blue-700">
 
-                <%= status.replace("_", " ") %>
+                <span id="statusText">—</span>
 
             </span>
 
@@ -146,20 +115,10 @@
 
 
         <!-- SUCCESS -->
-
-        <% if ("1".equals(request.getParameter("updated"))) { %>
-
-            <div class="mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
-
-                <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">
-                    ✓
-                </span>
-
-                Appointment updated successfully.
-
-            </div>
-
-        <% } %>
+        <div id="updateSuccessMessage" class="hidden mb-5 flex items-center gap-3 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-100">✓</span>
+            Appointment updated successfully.
+        </div>
 
 
         <!-- GRID -->
@@ -195,7 +154,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getAppointmentId() %>
+                            <span id="appointmentId">—</span>
                         </p>
 
                     </div>
@@ -208,7 +167,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getAppointmentNumber() %>
+                            <span id="appointmentNumberInfo">—</span>
                         </p>
 
                     </div>
@@ -221,7 +180,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getAppointmentDate() %>
+                            <span id="appointmentDate">—</span>
                         </p>
 
                     </div>
@@ -234,7 +193,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getAppointmentTime() %>
+                            <span id="appointmentTime">—</span>
                         </p>
 
                     </div>
@@ -248,8 +207,8 @@
 
                         <p class="mt-2">
 
-                            <span class="rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold <%= statusBg %>">
-                                <%= status.replace("_", " ") %>
+                            <span id="detailStatus" class="rounded-full px-2.5 py-1 font-inter text-[9px] font-semibold bg-blue-50 text-blue-700">
+                                <span id="statusTextInfo">—</span>
                             </span>
 
                         </p>
@@ -291,9 +250,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= patient != null
-                                ? patient.getPatientCode()
-                                : "N/A" %>
+                            <span id="patientCode">—</span>
                         </p>
 
                     </div>
@@ -306,9 +263,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= patient != null
-                                ? patient.getName()
-                                : "N/A" %>
+                            <span id="patientName">—</span>
                         </p>
 
                     </div>
@@ -321,9 +276,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= patient != null
-                                ? patient.getContactNumber()
-                                : "N/A" %>
+                            <span id="patientContact">—</span>
                         </p>
 
                     </div>
@@ -363,9 +316,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= dentist != null
-                                ? dentist.getDentistName()
-                                : "N/A" %>
+                            <span id="dentistName">—</span>
                         </p>
 
                     </div>
@@ -378,9 +329,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= dentist != null
-                                ? dentist.getSpecialization()
-                                : "N/A" %>
+                            <span id="dentistSpecialization">—</span>
                         </p>
 
                     </div>
@@ -420,9 +369,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= treatment != null
-                                ? treatment.getTreatmentName()
-                                : "N/A" %>
+                            <span id="treatmentName">—</span>
                         </p>
 
                     </div>
@@ -436,19 +383,7 @@
 
                         <p class="mt-1 text-xs font-semibold">
 
-                            <% if (treatment != null) { %>
-
-                                LKR
-                                <%= String.format(
-                                    "%.2f",
-                                    treatment.getTreatmentFee()
-                                ) %>
-
-                            <% } else { %>
-
-                                N/A
-
-                            <% } %>
+                            <span id="treatmentFee">—</span>
 
                         </p>
 
@@ -481,10 +416,7 @@
 
                 <div class="rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 font-inter text-[11px] leading-7 text-slate-600">
 
-                    <%= appointment.getNotes() != null
-                        && !appointment.getNotes().isBlank()
-                        ? appointment.getNotes()
-                        : "No additional notes." %>
+                    <span id="appointmentNotes">No additional notes.</span>
 
                 </div>
 
@@ -520,7 +452,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            User ID: <%= appointment.getCreatedBy() %>
+                            User ID: <span id="createdBy">—</span>
                         </p>
 
                     </div>
@@ -533,9 +465,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getCreatedAt() != null
-                                ? appointment.getCreatedAt()
-                                : "N/A" %>
+                            <span id="createdAt">—</span>
                         </p>
 
                     </div>
@@ -548,9 +478,7 @@
                         </p>
 
                         <p class="mt-1 text-xs font-semibold">
-                            <%= appointment.getUpdatedAt() != null
-                                ? appointment.getUpdatedAt()
-                                : "N/A" %>
+                            <span id="updatedAt">—</span>
                         </p>
 
                     </div>
@@ -571,7 +499,7 @@
 
 
             <a
-                href="<%= request.getContextPath() %>/appointments/edit?id=<%= appointment.getAppointmentId() %>"
+                href="#" id="editAppointmentLink"
                 class="rounded-lg bg-[#2563EB] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#1D4ED8]"
             >
                 Edit Appointment
@@ -579,7 +507,7 @@
 
 
             <a
-                href="<%= request.getContextPath() %>/appointments"
+                href="<%= contextPath %>/appointments"
                 class="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
             >
                 ← Back to Appointments
@@ -596,3 +524,453 @@
 </body>
 
 </html>
+<script>
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+    const params = new URLSearchParams(window.location.search);
+
+    const appointmentId =
+        params.get("id") ||
+        params.get("appointmentId") ||
+        "";
+
+
+    function setText(id, val, fallback) {
+
+        const element =
+            document.getElementById(id);
+
+        if (!element) {
+            return;
+        }
+
+        if (
+            val === null ||
+            val === undefined ||
+            String(val).trim() === ""
+        ) {
+            element.textContent =
+                fallback || "N/A";
+        } else {
+            element.textContent =
+                String(val);
+        }
+    }
+
+
+    function getJson(url) {
+
+        return fetch(
+            contextPath + url,
+            {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    "Accept": "application/json"
+                }
+            }
+        ).then(function (response) {
+
+            if (response.status === 401) {
+                window.location.href =
+                    contextPath + "/login";
+                return null;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    "API request failed: " +
+                    response.status
+                );
+            }
+
+            return response.json();
+
+        });
+    }
+
+
+    function getPatientName(patient) {
+
+        if (!patient) {
+            return "N/A";
+        }
+
+        return patient.name ||
+               patient.fullName ||
+               "N/A";
+    }
+
+
+    function getDentistName(dentist) {
+
+        if (!dentist) {
+            return "N/A";
+        }
+
+        return dentist.dentistName ||
+               dentist.name ||
+               dentist.fullName ||
+               "N/A";
+    }
+
+
+    function getTreatmentName(treatment) {
+
+        if (!treatment) {
+            return "N/A";
+        }
+
+        return treatment.treatmentName ||
+               treatment.name ||
+               "N/A";
+    }
+
+
+    function setStatus(status) {
+
+        const display =
+            String(status || "BOOKED")
+                .replace(/_/g, " ");
+
+        let classes =
+            "bg-blue-50 text-blue-700";
+
+        const s =
+            String(status || "")
+                .toUpperCase();
+
+        if (s === "COMPLETED") {
+            classes =
+                "bg-emerald-50 text-emerald-700";
+        } else if (s === "CANCELLED") {
+            classes =
+                "bg-red-50 text-red-700";
+        } else if (s === "NO_SHOW") {
+            classes =
+                "bg-amber-50 text-amber-700";
+        } else if (s === "BILLED") {
+            classes =
+                "bg-violet-50 text-violet-700";
+        }
+
+        const headerStatus =
+            document.getElementById("headerStatus");
+
+        if (headerStatus) {
+            headerStatus.className =
+                "rounded-full px-3 py-1.5 font-inter " +
+                "text-[9px] font-semibold " +
+                classes;
+
+            headerStatus.textContent =
+                display;
+        }
+
+        const detailStatus =
+            document.getElementById("detailStatus");
+
+        if (detailStatus) {
+            detailStatus.className =
+                "rounded-full px-2.5 py-1 font-inter " +
+                "text-[9px] font-semibold " +
+                classes;
+
+            detailStatus.textContent =
+                display;
+        }
+
+        setText(
+            "statusText",
+            display
+        );
+
+        setText(
+            "statusTextInfo",
+            display
+        );
+    }
+
+
+    function showError(message) {
+
+        let element =
+            document.getElementById(
+                "apiErrorMessage"
+            );
+
+        if (!element) {
+
+            element =
+                document.createElement("div");
+
+            element.id =
+                "apiErrorMessage";
+
+            element.className =
+                "mb-5 rounded-lg border border-red-100 " +
+                "bg-red-50 px-4 py-3 text-xs font-semibold " +
+                "text-red-700";
+
+            const main =
+                document.querySelector("main");
+
+            if (main) {
+                main.prepend(element);
+            }
+        }
+
+        element.textContent =
+            message;
+    }
+
+
+    async function loadAppointment() {
+
+        if (!appointmentId) {
+            showError(
+                "No appointment ID was provided."
+            );
+            return;
+        }
+
+
+        try {
+
+            const appointment =
+                await getJson(
+                    "/api/appointments/" +
+                    encodeURIComponent(
+                        appointmentId
+                    )
+                );
+
+
+            if (!appointment) {
+                return;
+            }
+
+
+            const related =
+                await Promise.all([
+
+                    appointment.patientId
+                        ? getJson(
+                            "/api/patients/" +
+                            encodeURIComponent(
+                                appointment.patientId
+                            )
+                          )
+                        : Promise.resolve(null),
+
+                    appointment.dentistId
+                        ? getJson(
+                            "/api/dentists/" +
+                            encodeURIComponent(
+                                appointment.dentistId
+                            )
+                          )
+                        : Promise.resolve(null),
+
+                    appointment.treatmentId
+                        ? getJson(
+                            "/api/treatments/" +
+                            encodeURIComponent(
+                                appointment.treatmentId
+                            )
+                          )
+                        : Promise.resolve(null)
+
+                ]);
+
+
+            const patient =
+                related[0];
+
+            const dentist =
+                related[1];
+
+            const treatment =
+                related[2];
+
+
+            // Appointment Information
+            setText(
+                "appointmentId",
+                appointment.appointmentId
+            );
+
+            const appointmentNumber =
+                appointment.appointmentNumber ||
+                appointment.appointmentNo ||
+                appointment.number;
+
+            setText(
+                "appointmentNumber",
+                appointmentNumber
+            );
+
+            setText(
+                "appointmentNumberInfo",
+                appointmentNumber
+            );
+
+            setText(
+                "appointmentDate",
+                appointment.appointmentDate ||
+                appointment.date
+            );
+
+            setText(
+                "appointmentTime",
+                appointment.appointmentTime
+                    ? String(
+                        appointment.appointmentTime
+                      ).substring(0, 5)
+                    : appointment.time
+            );
+
+
+            // Patient
+            setText(
+                "patientCode",
+                patient
+                    ? patient.patientCode
+                    : null
+            );
+
+            setText(
+                "patientName",
+                getPatientName(patient)
+            );
+
+            setText(
+                "patientContact",
+                patient
+                    ? patient.contactNumber
+                    : null
+            );
+
+
+            // Dentist
+            setText(
+                "dentistName",
+                getDentistName(dentist)
+            );
+
+            setText(
+                "dentistSpecialization",
+                dentist
+                    ? dentist.specialization
+                    : null
+            );
+
+
+            // Treatment
+            setText(
+                "treatmentName",
+                getTreatmentName(treatment)
+            );
+
+            const fee =
+                treatment &&
+                treatment.treatmentFee !== null &&
+                treatment.treatmentFee !== undefined
+                    ? "LKR " +
+                      Number(
+                          treatment.treatmentFee
+                      ).toFixed(2)
+                    : null;
+
+            setText(
+                "treatmentFee",
+                fee
+            );
+
+
+            // Other information
+            setText(
+                "appointmentNotes",
+                appointment.notes &&
+                String(appointment.notes).trim()
+                    ? appointment.notes
+                    : "No additional notes."
+            );
+
+            setText(
+                "createdBy",
+                appointment.createdBy
+            );
+
+            setText(
+                "createdAt",
+                appointment.createdAt
+            );
+
+            setText(
+                "updatedAt",
+                appointment.updatedAt
+            );
+
+
+            setStatus(
+                appointment.status
+            );
+
+
+            // Build the Edit button only after the real
+            // appointment ID has been received.
+            const editLink =
+                document.getElementById(
+                    "editAppointmentLink"
+                );
+
+            if (editLink) {
+
+                editLink.href =
+                    contextPath +
+                    "/appointments/edit?id=" +
+                    encodeURIComponent(
+                        appointment.appointmentId
+                    );
+
+                editLink.style.display =
+                    "inline-flex";
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Could not load appointment:",
+                error
+            );
+
+            showError(
+                "Could not load appointment details. " +
+                "Please check the appointment ID and REST API."
+            );
+        }
+    }
+
+
+    // Show the original success message when the edit
+    // operation redirects back with ?updated=1.
+    if (params.get("updated") === "1") {
+
+        const message =
+            document.getElementById(
+                "updateSuccessMessage"
+            );
+
+        if (message) {
+            message.classList.remove("hidden");
+        }
+    }
+
+
+    loadAppointment();
+
+})();
+</script>

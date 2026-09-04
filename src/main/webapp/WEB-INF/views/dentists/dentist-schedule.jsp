@@ -1,79 +1,7 @@
-<%@ page language="java"
-    contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8" %>
-
-<%@ page import="java.util.List" %>
-<%@ page import="java.util.Map" %>
-<%@ page import="java.util.HashMap" %>
-<%@ page import="java.util.ArrayList" %>
-
-<%@ page import="com.sunrise.model.Dentist" %>
-<%@ page import="com.sunrise.model.DentistSchedule" %>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-    Dentist dentist =
-        (Dentist) request.getAttribute("dentist");
-
-    List<DentistSchedule> schedules =
-        (List<DentistSchedule>)
-        request.getAttribute("schedules");
-
-    String error =
-        (String) request.getAttribute("error");
-
-    String contextPath =
-        request.getContextPath();
-
-
-    String[] days = {
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY"
-    };
-
-
-    /*
-     * Group schedules by day.
-     */
-    Map<String, List<DentistSchedule>> daySchedules =
-        new HashMap<>();
-
-
-    for (String day : days) {
-
-        daySchedules.put(
-            day,
-            new ArrayList<DentistSchedule>()
-        );
-    }
-
-
-    if (schedules != null) {
-
-        for (DentistSchedule schedule : schedules) {
-
-            String day =
-                schedule.getDayOfWeek();
-
-            if (day != null) {
-
-                day = day.toUpperCase();
-
-                if (daySchedules.containsKey(day)) {
-
-                    daySchedules
-                        .get(day)
-                        .add(schedule);
-                }
-            }
-        }
-    }
+String contextPath = request.getContextPath();
 %>
-
 
 <!DOCTYPE html>
 
@@ -88,7 +16,7 @@
         content="width=device-width, initial-scale=1.0">
 
     <title>
-        Schedule | <%= dentist.getDentistName() %>
+        Schedule | <span id="dentistName">Loading...</span>
     </title>
 
 
@@ -189,7 +117,7 @@
                     <h1
                         class="font-manrope text-[24px] font-extrabold tracking-tight text-[#172033]">
 
-                        <%= dentist.getDentistName() %>
+                        <span id="dentistName">Loading...</span>
 
                     </h1>
 
@@ -197,9 +125,7 @@
                     <p
                         class="mt-1 font-inter text-xs text-slate-500">
 
-                        <%= dentist.getSpecialization() != null
-                            ? dentist.getSpecialization()
-                            : "Dentist" %>
+                        <span id="dentistSpecialization">Dentist</span>
 
                     </p>
 
@@ -207,7 +133,7 @@
 
 
                 <a
-                    href="<%= contextPath %>/dentists/view?id=<%= dentist.getDentistId() %>"
+                    id="backButton" href="<%= contextPath %>/dentists"
                     class="rounded-md border border-slate-200 bg-white px-4 py-2 font-inter text-[10px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
 
                     Back
@@ -221,21 +147,17 @@
             <!-- ERROR -->
             <!-- ================================================= -->
 
-            <% if (error != null && !error.trim().isEmpty()) { %>
+            <div
+    id="errorMessage"
+    class="mb-5 hidden rounded-lg border border-red-100 bg-red-50 px-4 py-3">
 
-                <div
-                    class="mb-5 rounded-lg border border-red-100 bg-red-50 px-4 py-3">
+    <p
+        id="errorText"
+        class="font-inter text-[11px] font-medium text-red-600">
 
-                    <p
-                        class="font-inter text-[11px] font-medium text-red-600">
+    </p>
 
-                        <%= error %>
-
-                    </p>
-
-                </div>
-
-            <% } %>
+</div>
 
 
             <!-- ================================================= -->
@@ -264,16 +186,30 @@
             <!-- SCHEDULE FORM -->
             <!-- ================================================= -->
 
+            <div
+                id="errorMessage"
+                class="mb-5 hidden rounded-lg border border-red-100 bg-red-50 px-4 py-3">
+                <p id="errorText"
+                    class="font-inter text-[11px] font-medium text-red-600"></p>
+            </div>
+
+            <div
+                id="successMessage"
+                class="mb-5 hidden rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+                <p class="font-inter text-[11px] font-medium text-blue-600">
+                    Schedule updated successfully.
+                </p>
+            </div>
+
             <form
-                method="post"
-                action="<%= contextPath %>/dentists/schedule/save"
                 id="scheduleForm">
 
 
                 <input
                     type="hidden"
                     name="dentistId"
-                    value="<%= dentist.getDentistId() %>">
+                    id="dentistId"
+                    value="">
 
 
                 <!-- ================================================= -->
@@ -333,36 +269,14 @@
 
                     <div>
 
-                        <%
-                            for (String day : days) {
-
-                                List<DentistSchedule> dayList =
-                                    daySchedules.get(day);
-
-                                boolean hasSchedule =
-                                    dayList != null
-                                    && !dayList.isEmpty();
-                        %>
-
-
-                        <!-- ================================================= -->
-                        <!-- DAY ROW -->
-                        <!-- ================================================= -->
-
                         <div
                             class="border-b border-slate-100 px-6 py-5"
-                            data-day="<%= day %>">
-
-
-                            <!-- DAY HEADER -->
+                            data-day="MONDAY">
 
                             <div
                                 class="mb-3 flex items-center justify-between">
 
-
-                                <div
-                                    class="flex items-center gap-3">
-
+                                <div class="flex items-center gap-3">
 
                                     <div
                                         class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
@@ -370,34 +284,25 @@
                                         <span
                                             class="font-inter text-[10px] font-bold text-slate-500">
 
-                                            <%= day.substring(0, 1) %>
+                                            M
 
                                         </span>
 
                                     </div>
-
 
                                     <div>
 
                                         <p
                                             class="font-manrope text-[12px] font-bold text-[#172033]">
 
-                                            <%= day.substring(0, 1)
-                                                + day.substring(1).toLowerCase() %>
+                                            Monday
 
                                         </p>
-
 
                                         <p
                                             class="day-status font-inter text-[9px] text-slate-400">
 
-                                            <%= hasSchedule
-                                                ? dayList.size()
-                                                + " working period"
-                                                + (dayList.size() > 1
-                                                    ? "s"
-                                                    : "")
-                                                : "Day off" %>
+                                            Day off
 
                                         </p>
 
@@ -405,12 +310,9 @@
 
                                 </div>
 
-
-                                <!-- ADD PERIOD -->
-
                                 <button
                                     type="button"
-                                    onclick="addPeriod('<%= day %>')"
+                                    onclick="addPeriod('MONDAY')"
                                     class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
 
                                     + Add period
@@ -419,227 +321,514 @@
 
                             </div>
 
-
-                            <!-- ================================================= -->
-                            <!-- PERIODS -->
-                            <!-- ================================================= -->
-
                             <div
-                                id="periods-<%= day %>"
+                                id="periods-MONDAY"
                                 class="space-y-2.5">
 
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
 
-                                <% if (hasSchedule) { %>
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
 
-                                    <%
-                                        for (
-                                            DentistSchedule schedule
-                                            : dayList
-                                        ) {
-                                    %>
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="TUESDAY">
 
+                            <div
+                                class="mb-3 flex items-center justify-between">
 
-                                    <!-- PERIOD -->
+                                <div class="flex items-center gap-3">
 
                                     <div
-                                        class="period-row flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
-                                        data-day="<%= day %>">
-
-
-                                        <!-- VERY IMPORTANT:
-                                             DAY VALUE IS INSIDE EVERY ROW -->
-
-                                        <input
-                                            type="hidden"
-                                            name="dayOfWeek"
-                                            value="<%= day %>">
-
-
-                                        <!-- START TIME -->
-
-                                        <div
-                                            class="min-w-[180px] flex-1">
-
-                                            <label
-                                                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                                                Start time
-
-                                            </label>
-
-
-                                            <input
-                                                type="time"
-                                                name="startTime"
-                                                value="<%= schedule.getStartTime() %>"
-                                                required
-                                                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-                                        </div>
-
-
-                                        <!-- TO -->
-
-                                        <div
-                                            class="pb-2 font-inter text-[10px] text-slate-400">
-
-                                            to
-
-                                        </div>
-
-
-                                        <!-- END TIME -->
-
-                                        <div
-                                            class="min-w-[180px] flex-1">
-
-                                            <label
-                                                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                                                End time
-
-                                            </label>
-
-
-                                            <input
-                                                type="time"
-                                                name="endTime"
-                                                value="<%= schedule.getEndTime() %>"
-                                                required
-                                                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-                                        </div>
-
-
-                                        <!-- SLOT DURATION -->
-
-                                        <div
-                                            class="w-[145px]">
-
-                                            <label
-                                                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                                                Slot duration
-
-                                            </label>
-
-
-                                            <select
-                                                name="slotDuration"
-                                                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-
-                                                <option
-                                                    value="15"
-                                                    <%= schedule.getSlotDuration() == 15
-                                                        ? "selected"
-                                                        : "" %>>
-
-                                                    15 minutes
-
-                                                </option>
-
-
-                                                <option
-                                                    value="30"
-                                                    <%= schedule.getSlotDuration() == 30
-                                                        ? "selected"
-                                                        : "" %>>
-
-                                                    30 minutes
-
-                                                </option>
-
-
-                                                <option
-                                                    value="45"
-                                                    <%= schedule.getSlotDuration() == 45
-                                                        ? "selected"
-                                                        : "" %>>
-
-                                                    45 minutes
-
-                                                </option>
-
-
-                                                <option
-                                                    value="60"
-                                                    <%= schedule.getSlotDuration() == 60
-                                                        ? "selected"
-                                                        : "" %>>
-
-                                                    60 minutes
-
-                                                </option>
-
-                                            </select>
-
-                                        </div>
-
-
-                                        <!-- REMOVE -->
-
-                                        <button
-                                            type="button"
-                                            onclick="removePeriod(this)"
-                                            class="h-[38px] rounded-md border border-red-100 bg-white px-3 font-inter text-[9px] font-semibold text-red-500 transition hover:bg-red-50">
-
-                                            Remove
-
-                                        </button>
-
-
-                                    </div>
-
-
-                                    <%
-                                        }
-                                    %>
-
-
-                                <% } else { %>
-
-
-                                    <!-- EMPTY DAY -->
-
-                                    <div
-                                        class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
-
-
-                                        <p
-                                            class="font-inter text-[10px] text-slate-400">
-
-                                            No working hours configured.
-
-                                        </p>
-
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
 
                                         <span
-                                            class="font-inter text-[9px] font-medium text-slate-300">
+                                            class="font-inter text-[10px] font-bold text-slate-500">
 
-                                            Day off
+                                            T
 
                                         </span>
 
                                     </div>
 
+                                    <div>
 
-                                <% } %>
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
 
+                                            Tuesday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('TUESDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
 
                             </div>
 
+                            <div
+                                id="periods-TUESDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
 
                         </div>
 
 
-                        <%
-                            }
-                        %>
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="WEDNESDAY">
+
+                            <div
+                                class="mb-3 flex items-center justify-between">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+
+                                        <span
+                                            class="font-inter text-[10px] font-bold text-slate-500">
+
+                                            W
+
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
+
+                                            Wednesday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('WEDNESDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="periods-WEDNESDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="THURSDAY">
+
+                            <div
+                                class="mb-3 flex items-center justify-between">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+
+                                        <span
+                                            class="font-inter text-[10px] font-bold text-slate-500">
+
+                                            T
+
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
+
+                                            Thursday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('THURSDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="periods-THURSDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="FRIDAY">
+
+                            <div
+                                class="mb-3 flex items-center justify-between">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+
+                                        <span
+                                            class="font-inter text-[10px] font-bold text-slate-500">
+
+                                            F
+
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
+
+                                            Friday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('FRIDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="periods-FRIDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="SATURDAY">
+
+                            <div
+                                class="mb-3 flex items-center justify-between">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+
+                                        <span
+                                            class="font-inter text-[10px] font-bold text-slate-500">
+
+                                            S
+
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
+
+                                            Saturday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('SATURDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="periods-SATURDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="border-b border-slate-100 px-6 py-5"
+                            data-day="SUNDAY">
+
+                            <div
+                                class="mb-3 flex items-center justify-between">
+
+                                <div class="flex items-center gap-3">
+
+                                    <div
+                                        class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-50">
+
+                                        <span
+                                            class="font-inter text-[10px] font-bold text-slate-500">
+
+                                            S
+
+                                        </span>
+
+                                    </div>
+
+                                    <div>
+
+                                        <p
+                                            class="font-manrope text-[12px] font-bold text-[#172033]">
+
+                                            Sunday
+
+                                        </p>
+
+                                        <p
+                                            class="day-status font-inter text-[9px] text-slate-400">
+
+                                            Day off
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onclick="addPeriod('SUNDAY')"
+                                    class="rounded-md border border-slate-200 bg-white px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600">
+
+                                    + Add period
+
+                                </button>
+
+                            </div>
+
+                            <div
+                                id="periods-SUNDAY"
+                                class="space-y-2.5">
+
+                                <div
+                                    class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
+
+                                    <p
+                                        class="font-inter text-[10px] text-slate-400">
+
+                                        No working hours configured.
+
+                                    </p>
+
+                                    <span
+                                        class="font-inter text-[9px] font-medium text-slate-300">
+
+                                        Day off
+
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
-
 
                     <!-- ================================================= -->
                     <!-- FOOTER -->
@@ -674,7 +863,7 @@
 
 
                             <a
-                                href="<%= contextPath %>/dentists/view?id=<%= dentist.getDentistId() %>"
+                                id="backButton" href="<%= contextPath %>/dentists"
                                 class="rounded-md border border-slate-200 bg-white px-4 py-2 font-inter text-[10px] font-semibold text-slate-600 transition hover:bg-slate-100">
 
                                 Cancel
@@ -713,433 +902,878 @@
 
 <script>
 
+(function () {
 
-/*
- * ============================================================
- * ADD NEW PERIOD
- * ============================================================
- */
+    "use strict";
 
-function addPeriod(day) {
+    const contextPath = "<%= contextPath %>";
 
-    const container =
-        document.getElementById(
-            "periods-" + day
-        );
-
-
-    /*
-     * Remove "No working hours configured"
-     */
-
-    const empty =
-        container.querySelector(
-            ".empty-day"
-        );
-
-
-    if (empty) {
-        empty.remove();
-    }
-
-
-    /*
-     * Create new row
-     */
-
-    const row =
-        document.createElement("div");
-
-
-    row.className =
-        "period-row flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3";
-
-
-    /*
-     * IMPORTANT:
-     *
-     * dayOfWeek is created inside the row.
-     */
-
-    row.setAttribute(
-        "data-day",
-        day
+    const params = new URLSearchParams(
+        window.location.search
     );
 
+    const dentistId =
+        params.get("id")
+        || params.get("dentistId")
+        || "";
 
-    row.innerHTML = `
+    const days = [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+    ];
 
-        <input
-            type="hidden"
-            name="dayOfWeek"
-            value="${day}">
+    const dentistIdElement =
+        document.getElementById("dentistId");
 
-
-        <!-- START -->
-
-        <div class="min-w-[180px] flex-1">
-
-            <label
-                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                Start time
-
-            </label>
-
-            <input
-                type="time"
-                name="startTime"
-                value="09:00"
-                required
-                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-        </div>
-
-
-        <!-- TO -->
-
-        <div class="pb-2 font-inter text-[10px] text-slate-400">
-
-            to
-
-        </div>
-
-
-        <!-- END -->
-
-        <div class="min-w-[180px] flex-1">
-
-            <label
-                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                End time
-
-            </label>
-
-            <input
-                type="time"
-                name="endTime"
-                value="17:00"
-                required
-                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-        </div>
-
-
-        <!-- DURATION -->
-
-        <div class="w-[145px]">
-
-            <label
-                class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">
-
-                Slot duration
-
-            </label>
-
-            <select
-                name="slotDuration"
-                class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
-
-                <option value="15">
-                    15 minutes
-                </option>
-
-                <option value="30" selected>
-                    30 minutes
-                </option>
-
-                <option value="45">
-                    45 minutes
-                </option>
-
-                <option value="60">
-                    60 minutes
-                </option>
-
-            </select>
-
-        </div>
-
-
-        <!-- REMOVE -->
-
-        <button
-            type="button"
-            onclick="removePeriod(this)"
-            class="h-[38px] rounded-md border border-red-100 bg-white px-3 font-inter text-[9px] font-semibold text-red-500 transition hover:bg-red-50">
-
-            Remove
-
-        </button>
-
-    `;
-
-
-    container.appendChild(row);
-
-
-    updateDayStatus(day);
-}
-
-
-/*
- * ============================================================
- * REMOVE PERIOD
- * ============================================================
- */
-
-function removePeriod(button) {
-
-    const row =
-        button.closest(".period-row");
-
-
-    if (!row) {
-        return;
+    if (dentistIdElement) {
+        dentistIdElement.value = dentistId;
     }
 
 
-    const day =
-        row.getAttribute("data-day");
+    function showError(message) {
+
+        const box =
+            document.getElementById("errorMessage");
+
+        const text =
+            document.getElementById("errorText");
+
+        if (text) {
+            text.textContent = message;
+        }
+
+        if (box) {
+            box.classList.remove("hidden");
+        }
+    }
 
 
-    const container =
-        row.parentElement;
+    function hideError() {
+
+        const box =
+            document.getElementById("errorMessage");
+
+        if (box) {
+            box.classList.add("hidden");
+        }
+    }
 
 
-    row.remove();
+    function showSuccess() {
+
+        const box =
+            document.getElementById("successMessage");
+
+        if (box) {
+            box.classList.remove("hidden");
+        }
+    }
+
+
+    async function apiError(response) {
+
+        let body = "";
+
+        try {
+            body = await response.text();
+        } catch (e) {}
+
+        if (!body) {
+            return "Request failed. HTTP " + response.status;
+        }
+
+        try {
+
+            const json = JSON.parse(body);
+
+            if (json.message) {
+                return json.message;
+            }
+
+            if (json.error) {
+                return json.error;
+            }
+
+        } catch (e) {}
+
+        return body;
+    }
+
+
+    function formatTime(value) {
+
+        if (!value) {
+            return "";
+        }
+
+        return String(value).substring(0, 5);
+    }
+
+
+    function escapeHtml(value) {
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
 
 
     /*
-     * If there are no periods left,
-     * show Day Off message.
+     * ========================================================
+     * GET DENTIST
+     * ========================================================
      */
 
-    const remaining =
-        container.querySelectorAll(
-            ".period-row"
-        );
+    async function loadDentist() {
+
+        if (!dentistId) {
+
+            showError(
+                "Dentist ID is missing from the URL."
+            );
+
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                contextPath
+                + "/api/dentists/"
+                + encodeURIComponent(dentistId),
+                {
+                    method: "GET",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
 
 
-    if (remaining.length === 0) {
+            if (response.status === 401) {
 
-        container.innerHTML = `
+                window.location.href =
+                    contextPath + "/login";
 
-            <div
-                class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">
-
-                <p
-                    class="font-inter text-[10px] text-slate-400">
-
-                    No working hours configured.
-
-                </p>
-
-                <span
-                    class="font-inter text-[9px] font-medium text-slate-300">
-
-                    Day off
-
-                </span>
-
-            </div>
-
-        `;
-    }
+                return;
+            }
 
 
-    updateDayStatus(day);
-}
+            if (!response.ok) {
+
+                throw new Error(
+                    await apiError(response)
+                );
+            }
 
 
-/*
- * ============================================================
- * UPDATE DAY STATUS
- * ============================================================
- */
-
-function updateDayStatus(day) {
-
-    const dayContainer =
-        document.querySelector(
-            '[data-day="' + day + '"]'
-        );
+            const dentist =
+                await response.json();
 
 
-    if (!dayContainer) {
-        return;
-    }
-
-
-    const rows =
-        dayContainer.querySelectorAll(
-            ".period-row"
-        );
-
-
-    const status =
-        dayContainer.querySelector(
-            ".day-status"
-        );
-
-
-    if (!status) {
-        return;
-    }
-
-
-    if (rows.length === 0) {
-
-        status.textContent =
-            "Day off";
-
-    } else {
-
-        status.textContent =
-            rows.length
-            + " working period"
-            + (rows.length > 1
-                ? "s"
-                : "");
-    }
-}
-
-
-/*
- * ============================================================
- * FORM VALIDATION
- * ============================================================
- *
- * Make absolutely sure every period has a day.
- */
-
-document
-    .getElementById("scheduleForm")
-    .addEventListener(
-        "submit",
-        function(event) {
-
-            const rows =
-                document.querySelectorAll(
-                    ".period-row"
+            const name =
+                document.getElementById(
+                    "dentistName"
                 );
 
-
-            /*
-             * No schedule is also allowed.
-             *
-             * This means the dentist can have
-             * a completely empty weekly schedule.
-             */
+            if (name) {
+                name.textContent =
+                    dentist.dentistName || "Dentist";
+            }
 
 
-            rows.forEach(function(row) {
+            const specialization =
+                document.getElementById(
+                    "dentistSpecialization"
+                );
 
-                const day =
-                    row.getAttribute(
-                        "data-day"
+            if (specialization) {
+                specialization.textContent =
+                    dentist.specialization || "Dentist";
+            }
+
+
+            const back =
+                document.getElementById(
+                    "backButton"
+                );
+
+            if (back) {
+                back.href =
+                    contextPath + "/dentists";
+            }
+
+
+            const cancel =
+                document.getElementById(
+                    "cancelButton"
+                );
+
+            if (cancel) {
+                cancel.href =
+                    contextPath
+                    + "/dentists/view?id="
+                    + encodeURIComponent(dentistId);
+            }
+
+
+            document.title =
+                "Schedule | "
+                + (dentist.dentistName || "Dentist");
+
+
+        } catch (error) {
+
+            console.error(
+                "Dentist REST API error:",
+                error
+            );
+
+            showError(
+                "Could not load dentist information. "
+                + error.message
+            );
+        }
+    }
+
+
+    /*
+     * ========================================================
+     * GET SCHEDULE
+     * ========================================================
+     */
+
+    async function loadSchedule() {
+
+        if (!dentistId) {
+            return;
+        }
+
+        try {
+
+            const response = await fetch(
+                contextPath
+                + "/api/schedules?dentistId="
+                + encodeURIComponent(dentistId),
+                {
+                    method: "GET",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+
+            if (response.status === 401) {
+
+                window.location.href =
+                    contextPath + "/login";
+
+                return;
+            }
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    await apiError(response)
+                );
+            }
+
+
+            const schedules =
+                await response.json();
+
+
+            if (!Array.isArray(schedules)) {
+
+                throw new Error(
+                    "Invalid schedule response."
+                );
+            }
+
+
+            schedules.forEach(
+                function (schedule) {
+
+                    const day =
+                        String(
+                            schedule.dayOfWeek || ""
+                        ).toUpperCase();
+
+
+                    if (
+                        days.indexOf(day) === -1
+                    ) {
+                        return;
+                    }
+
+
+                    addPeriod(
+                        day,
+                        formatTime(schedule.startTime),
+                        formatTime(schedule.endTime),
+                        schedule.slotDuration
+                    );
+                }
+            );
+
+
+            days.forEach(
+                function (day) {
+                    updateDayStatus(day);
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Schedule REST API error:",
+                error
+            );
+
+            showError(
+                "Could not load dentist schedule. "
+                + error.message
+            );
+        }
+    }
+
+
+    /*
+     * ========================================================
+     * ADD PERIOD
+     * ========================================================
+     */
+
+    function addPeriod(
+        day,
+        startTime,
+        endTime,
+        slotDuration
+    ) {
+
+        const container =
+            document.getElementById(
+                "periods-" + day
+            );
+
+
+        if (!container) {
+            return;
+        }
+
+
+        const empty =
+            container.querySelector(
+                ".empty-day"
+            );
+
+
+        if (empty) {
+            empty.remove();
+        }
+
+
+        const start =
+            startTime || "09:00";
+
+        const end =
+            endTime || "17:00";
+
+        const duration =
+            slotDuration
+            ? String(slotDuration)
+            : "30";
+
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "period-row flex flex-wrap items-end gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3";
+
+
+        row.setAttribute(
+            "data-day",
+            day
+        );
+
+
+        row.innerHTML =
+            '<input type="hidden" name="dayOfWeek" value="'
+            + escapeHtml(day)
+            + '">'
+
+            + '<div class="min-w-[180px] flex-1">'
+
+            + '<label class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">'
+            + 'Start time'
+            + '</label>'
+
+            + '<input type="time" name="startTime" value="'
+            + escapeHtml(start)
+            + '" required class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">'
+
+            + '</div>'
+
+            + '<div class="pb-2 font-inter text-[10px] text-slate-400">'
+            + 'to'
+            + '</div>'
+
+            + '<div class="min-w-[180px] flex-1">'
+
+            + '<label class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">'
+            + 'End time'
+            + '</label>'
+
+            + '<input type="time" name="endTime" value="'
+            + escapeHtml(end)
+            + '" required class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">'
+
+            + '</div>'
+
+            + '<div class="w-[145px]">'
+
+            + '<label class="mb-1.5 block font-inter text-[9px] font-semibold uppercase tracking-wide text-slate-400">'
+            + 'Slot duration'
+            + '</label>'
+
+            + '<select name="slotDuration" class="h-[38px] w-full rounded-md border border-slate-200 bg-white px-3 font-inter text-[11px] text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100">'
+
+            + '<option value="15">15 minutes</option>'
+            + '<option value="30">30 minutes</option>'
+            + '<option value="45">45 minutes</option>'
+            + '<option value="60">60 minutes</option>'
+
+            + '</select>'
+
+            + '</div>'
+
+            + '<button type="button" class="remove-period h-[38px] rounded-md border border-red-100 bg-white px-3 font-inter text-[9px] font-semibold text-red-500 transition hover:bg-red-50">'
+
+            + 'Remove'
+
+            + '</button>';
+
+
+        container.appendChild(row);
+
+
+        const select =
+            row.querySelector(
+                '[name="slotDuration"]'
+            );
+
+
+        if (select) {
+            select.value = duration;
+        }
+
+
+        const remove =
+            row.querySelector(
+                ".remove-period"
+            );
+
+
+        if (remove) {
+
+            remove.addEventListener(
+                "click",
+                function () {
+                    removePeriod(row);
+                }
+            );
+        }
+
+
+        updateDayStatus(day);
+    }
+
+
+    window.addPeriod = addPeriod;
+
+
+    /*
+     * ========================================================
+     * REMOVE PERIOD
+     * ========================================================
+     */
+
+    function removePeriod(row) {
+
+        if (!row) {
+            return;
+        }
+
+
+        const day =
+            row.getAttribute("data-day");
+
+
+        const container =
+            row.parentElement;
+
+
+        row.remove();
+
+
+        if (
+            container
+            && container.querySelectorAll(
+                ".period-row"
+            ).length === 0
+        ) {
+
+            container.innerHTML =
+                '<div class="empty-day flex items-center justify-between rounded-lg border border-dashed border-slate-200 bg-slate-50 px-4 py-3">'
+
+                + '<p class="font-inter text-[10px] text-slate-400">'
+                + 'No working hours configured.'
+                + '</p>'
+
+                + '<span class="font-inter text-[9px] font-medium text-slate-300">'
+                + 'Day off'
+                + '</span>'
+
+                + '</div>';
+        }
+
+
+        updateDayStatus(day);
+    }
+
+
+    /*
+     * ========================================================
+     * DAY STATUS
+     * ========================================================
+     */
+
+    function updateDayStatus(day) {
+
+        const dayContainer =
+            document.querySelector(
+                '[data-day="' + day + '"]'
+            );
+
+
+        if (!dayContainer) {
+            return;
+        }
+
+
+        const rows =
+            dayContainer.querySelectorAll(
+                ".period-row"
+            );
+
+
+        const status =
+            dayContainer.querySelector(
+                ".day-status"
+            );
+
+
+        if (!status) {
+            return;
+        }
+
+
+        if (rows.length === 0) {
+
+            status.textContent =
+                "Day off";
+
+        } else {
+
+            status.textContent =
+                rows.length
+                + " working period"
+                + (
+                    rows.length > 1
+                    ? "s"
+                    : ""
+                );
+        }
+    }
+
+
+    /*
+     * ========================================================
+     * PUT SCHEDULE
+     * ========================================================
+     */
+
+    const form =
+        document.getElementById(
+            "scheduleForm"
+        );
+
+
+    if (form) {
+
+        form.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                hideError();
+
+
+                if (!dentistId) {
+
+                    showError(
+                        "Dentist ID is missing."
+                    );
+
+                    return;
+                }
+
+
+                const rows =
+                    document.querySelectorAll(
+                        ".period-row"
                     );
 
 
-                let dayInput =
-                    row.querySelector(
-                        'input[name="dayOfWeek"]'
-                    );
+                const formData =
+                    new URLSearchParams();
 
 
-                /*
-                 * Create it if somehow missing.
-                 */
+                for (
+                    let i = 0;
+                    i < rows.length;
+                    i++
+                ) {
 
-                if (!dayInput) {
+                    const row =
+                        rows[i];
 
-                    dayInput =
-                        document.createElement(
-                            "input"
+
+                    const day =
+                        row.getAttribute(
+                            "data-day"
                         );
 
-                    dayInput.type =
-                        "hidden";
 
-                    dayInput.name =
-                        "dayOfWeek";
+                    const start =
+                        row.querySelector(
+                            '[name="startTime"]'
+                        );
 
-                    row.prepend(
-                        dayInput
+
+                    const end =
+                        row.querySelector(
+                            '[name="endTime"]'
+                        );
+
+
+                    const duration =
+                        row.querySelector(
+                            '[name="slotDuration"]'
+                        );
+
+
+                    if (
+                        !day
+                        || !start
+                        || !end
+                        || !duration
+                    ) {
+                        continue;
+                    }
+
+
+                    if (
+                        !start.value
+                        || !end.value
+                    ) {
+
+                        showError(
+                            "Please enter both start and end times."
+                        );
+
+                        return;
+                    }
+
+
+                    if (
+                        end.value <= start.value
+                    ) {
+
+                        showError(
+                            day
+                            + ": End time must be after start time."
+                        );
+
+                        return;
+                    }
+
+
+                    formData.append(
+                        "dayOfWeek",
+                        day.toUpperCase()
+                    );
+
+
+                    formData.append(
+                        "startTime",
+                        start.value
+                    );
+
+
+                    formData.append(
+                        "endTime",
+                        end.value
+                    );
+
+
+                    formData.append(
+                        "slotDuration",
+                        duration.value
                     );
                 }
 
 
-                dayInput.value =
-                    day.toUpperCase();
-            });
+                const saveButton =
+                    form.querySelector(
+                        'button[type="submit"]'
+                    );
 
 
-            /*
-             * Debug output.
-             *
-             * You can remove this later.
-             */
+                if (saveButton) {
 
-            console.log(
-                "===== SCHEDULE FORM SUBMIT ====="
-            );
+                    saveButton.disabled = true;
 
+                    saveButton.textContent =
+                        "Saving...";
 
-            console.log(
-                "Days:",
-                Array.from(
-                    document.querySelectorAll(
-                        'input[name="dayOfWeek"]'
-                    )
-                ).map(
-                    input => input.value
-                )
-            );
+                    saveButton.classList.add(
+                        "opacity-70",
+                        "cursor-not-allowed"
+                    );
+                }
 
 
-            console.log(
-                "Starts:",
-                Array.from(
-                    document.querySelectorAll(
-                        'input[name="startTime"]'
-                    )
-                ).map(
-                    input => input.value
-                )
-            );
+                try {
+
+                    const response =
+                        await fetch(
+                            contextPath
+                            + "/api/schedules/"
+                            + encodeURIComponent(
+                                dentistId
+                            ),
+                            {
+                                method: "PUT",
+
+                                credentials:
+                                    "same-origin",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/x-www-form-urlencoded; charset=UTF-8",
+
+                                    "Accept":
+                                        "application/json"
+                                },
+
+                                body:
+                                    formData.toString()
+                            }
+                        );
 
 
-            console.log(
-                "Ends:",
-                Array.from(
-                    document.querySelectorAll(
-                        'input[name="endTime"]'
-                    )
-                ).map(
-                    input => input.value
-                )
-            );
+                    if (response.status === 401) {
+
+                        window.location.href =
+                            contextPath + "/login";
+
+                        return;
+                    }
 
 
-            console.log(
-                "Durations:",
-                Array.from(
-                    document.querySelectorAll(
-                        '[name="slotDuration"]'
-                    )
-                ).map(
-                    input => input.value
-                )
-            );
+                    if (!response.ok) {
+
+                        throw new Error(
+                            await apiError(response)
+                        );
+                    }
 
 
-            console.log(
-                "================================"
-            );
-        }
-    );
+                    await response.json();
+
+
+                    showSuccess();
+
+
+                    window.scrollTo({
+                        top: 0,
+                        behavior: "smooth"
+                    });
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Schedule save REST API error:",
+                        error
+                    );
+
+
+                    showError(
+                        "Could not save schedule. "
+                        + error.message
+                    );
+
+
+                } finally {
+
+                    if (saveButton) {
+
+                        saveButton.disabled = false;
+
+                        saveButton.textContent =
+                            "Save Schedule";
+
+                        saveButton.classList.remove(
+                            "opacity-70",
+                            "cursor-not-allowed"
+                        );
+                    }
+                }
+
+            }
+        );
+    }
+
+
+    /*
+     * ========================================================
+     * LOAD
+     * ========================================================
+     */
+
+    loadDentist();
+
+    loadSchedule();
+
+})();
 
 </script>
 

@@ -2,13 +2,6 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 
-<%@ page import="com.sunrise.model.Treatment" %>
-
-<%
-    Treatment treatment =
-        (Treatment) request.getAttribute("treatment");
-%>
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -91,7 +84,7 @@
     <main class="ml-[250px] min-h-screen flex-1 px-8 py-7">
 
 
-        <% if (treatment == null) { %>
+        <div id="notFound" class="hidden">
 
 
             <!-- NOT FOUND -->
@@ -156,7 +149,10 @@
             </div>
 
 
-        <% } else { %>
+        </div>
+
+
+        <div id="detailsContent">
 
 
             <!-- PAGE HEADER -->
@@ -198,7 +194,7 @@
 
                     <p class="mt-0.5 text-xs font-extrabold text-blue-600">
 
-                        #<%= treatment.getTreatmentId() %>
+                        #<span data-treatment-id></span>
 
                     </p>
 
@@ -303,14 +299,14 @@
 
                             <h2 class="text-lg font-extrabold tracking-[-0.4px]">
 
-                                <%= treatment.getTreatmentName() %>
+                                <span data-treatment-name></span>
 
                             </h2>
 
 
                             <p class="mt-1 font-inter text-[10px] text-slate-400">
 
-                                Treatment #<%= treatment.getTreatmentId() %>
+                                Treatment #<span data-treatment-id></span>
 
                             </p>
 
@@ -321,27 +317,17 @@
 
                         <!-- STATUS -->
 
-                        <% if (treatment.isActive()) { %>
+                        <span id="headerActive" class="hidden rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600">
 
+                            Active
 
-                            <span class="rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600">
+                        </span>
 
-                                Active
+                        <span id="headerInactive" class="hidden rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500">
 
-                            </span>
+                            Inactive
 
-
-                        <% } else { %>
-
-
-                            <span class="rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500">
-
-                                Inactive
-
-                            </span>
-
-
-                        <% } %>
+                        </span>
 
 
                     </div>
@@ -365,7 +351,7 @@
 
                             <p class="mt-2 text-sm font-bold">
 
-                                <%= treatment.getTreatmentName() %>
+                                <span data-treatment-name></span>
 
                             </p>
 
@@ -388,10 +374,7 @@
 
                                 LKR
 
-                                <%= String.format(
-                                    "%.2f",
-                                    treatment.getTreatmentFee()
-                                ) %>
+                                <span data-treatment-fee></span>
 
                             </p>
 
@@ -413,10 +396,7 @@
                             <p class="mt-2 max-w-[750px] text-sm leading-7 text-slate-600">
 
 
-                                <%= treatment.getDescription() == null
-                                    || treatment.getDescription().isBlank()
-                                    ? "No description provided."
-                                    : treatment.getDescription() %>
+                                <span data-treatment-description></span>
 
 
                             </p>
@@ -439,35 +419,21 @@
                             <div class="mt-2">
 
 
-                                <% if (treatment.isActive()) { %>
+                                <span id="statusActive" class="hidden inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600">
 
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
 
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 font-inter text-[9px] font-semibold text-emerald-600">
+                                    Active
 
+                                </span>
 
-                                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                <span id="statusInactive" class="hidden inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500">
 
-                                        Active
+                                    <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
 
+                                    Inactive
 
-                                    </span>
-
-
-                                <% } else { %>
-
-
-                                    <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 font-inter text-[9px] font-semibold text-slate-500">
-
-
-                                        <span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>
-
-                                        Inactive
-
-
-                                    </span>
-
-
-                                <% } %>
+                                </span>
 
 
                             </div>
@@ -489,7 +455,7 @@
 
                             <p class="mt-2 text-sm font-bold">
 
-                                #<%= treatment.getTreatmentId() %>
+                                #<span data-treatment-id></span>
 
                             </p>
 
@@ -545,10 +511,7 @@
 
                             LKR
 
-                            <%= String.format(
-                                "%.2f",
-                                treatment.getTreatmentFee()
-                            ) %>
+                            <span data-treatment-fee></span>
 
                         </p>
 
@@ -593,9 +556,7 @@
                         <p class="mt-1 text-sm font-extrabold">
 
 
-                            <%= treatment.isActive()
-                                ? "Active"
-                                : "Inactive" %>
+                            <span data-current-status></span>
 
 
                         </p>
@@ -625,7 +586,7 @@
 
 
                     <a
-                        href="<%= request.getContextPath() %>/treatments/edit?id=<%= treatment.getTreatmentId() %>"
+                        id="editTreatmentLink" href="#"
                         class="inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-5 py-2.5 font-inter text-[10px] font-bold text-white shadow-sm transition hover:bg-[#1D4ED8]"
                     >
 
@@ -681,7 +642,7 @@
             </div>
 
 
-        <% } %>
+        </div>
 
 
     </main>
@@ -689,6 +650,83 @@
 
 </div>
 
+
+
+<script>
+(function () {
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get("id") || params.get("treatmentId");
+    var apiBase = "<%= request.getContextPath() %>/api/treatments";
+
+    var notFound = document.getElementById("notFound");
+    var detailsContent = document.getElementById("detailsContent");
+
+    function setText(selector, value) {
+        var elements = document.querySelectorAll(selector);
+        elements.forEach(function (element) {
+            element.textContent = value == null ? "" : value;
+        });
+    }
+
+    function showStatus(active) {
+        var headerActive = document.getElementById("headerActive");
+        var headerInactive = document.getElementById("headerInactive");
+        var statusActive = document.getElementById("statusActive");
+        var statusInactive = document.getElementById("statusInactive");
+        var currentStatus = document.querySelector("[data-current-status]");
+
+        if (active === true) {
+            headerActive.classList.remove("hidden");
+            headerInactive.classList.add("hidden");
+            statusActive.classList.remove("hidden");
+            statusInactive.classList.add("hidden");
+            currentStatus.textContent = "Active";
+        } else {
+            headerActive.classList.add("hidden");
+            headerInactive.classList.remove("hidden");
+            statusActive.classList.add("hidden");
+            statusInactive.classList.remove("hidden");
+            currentStatus.textContent = "Inactive";
+        }
+    }
+
+    function showNotFound() {
+        detailsContent.classList.add("hidden");
+        notFound.classList.remove("hidden");
+    }
+
+    if (!id) {
+        showNotFound();
+        return;
+    }
+
+    fetch(apiBase + "/" + encodeURIComponent(id), {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+    })
+    .then(function (response) {
+        if (!response.ok) {
+            throw new Error("Treatment not found");
+        }
+        return response.json();
+    })
+    .then(function (item) {
+        setText("[data-treatment-id]", item.treatmentId);
+        setText("[data-treatment-name]", item.treatmentName);
+        setText("[data-treatment-fee]", Number(item.treatmentFee || 0).toFixed(2));
+        setText("[data-treatment-description]", item.description && item.description.trim() ? item.description : "No description provided.");
+        showStatus(item.active === true);
+
+        var editLink = document.getElementById("editTreatmentLink");
+        if (editLink) {
+            editLink.href = "<%= request.getContextPath() %>/treatments/edit?id=" + encodeURIComponent(item.treatmentId);
+        }
+    })
+    .catch(function () {
+        showNotFound();
+    });
+})();
+</script>
 
 </body>
 

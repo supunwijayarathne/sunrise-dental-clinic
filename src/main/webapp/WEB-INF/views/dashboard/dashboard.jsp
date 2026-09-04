@@ -2,74 +2,6 @@
     contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8" %>
 
-<%
-    Object totalPatientsObj =
-        request.getAttribute("totalPatients");
-
-    Object totalDentistsObj =
-        request.getAttribute("totalDentists");
-
-    Object totalTreatmentsObj =
-        request.getAttribute("totalTreatments");
-
-    Object totalAppointmentsObj =
-        request.getAttribute("totalAppointments");
-
-    Object scheduledAppointmentsObj =
-        request.getAttribute("scheduledAppointments");
-
-    Object completedAppointmentsObj =
-        request.getAttribute("completedAppointments");
-
-    Object cancelledAppointmentsObj =
-        request.getAttribute("cancelledAppointments");
-
-    Object totalBillsObj =
-        request.getAttribute("totalBills");
-
-
-    int totalPatients =
-        totalPatientsObj != null
-            ? ((Number) totalPatientsObj).intValue()
-            : 0;
-
-    int totalDentists =
-        totalDentistsObj != null
-            ? ((Number) totalDentistsObj).intValue()
-            : 0;
-
-    int totalTreatments =
-        totalTreatmentsObj != null
-            ? ((Number) totalTreatmentsObj).intValue()
-            : 0;
-
-    int totalAppointments =
-        totalAppointmentsObj != null
-            ? ((Number) totalAppointmentsObj).intValue()
-            : 0;
-
-    int scheduledAppointments =
-        scheduledAppointmentsObj != null
-            ? ((Number) scheduledAppointmentsObj).intValue()
-            : 0;
-
-    int completedAppointments =
-        completedAppointmentsObj != null
-            ? ((Number) completedAppointmentsObj).intValue()
-            : 0;
-
-    int cancelledAppointments =
-        cancelledAppointmentsObj != null
-            ? ((Number) cancelledAppointmentsObj).intValue()
-            : 0;
-
-    int totalBills =
-        totalBillsObj != null
-            ? ((Number) totalBillsObj).intValue()
-            : 0;
-%>
-
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -307,9 +239,10 @@
 
 
                         <p
+                            id="totalPatients"
                             class="font-manrope text-[25px] font-extrabold tracking-[-0.5px] text-[#172033]">
 
-                            <%= totalPatients %>
+                            —
 
                         </p>
 
@@ -353,7 +286,6 @@
 
                                 <path
                                     stroke-linecap="round"
-                                    stroke-linejoin="round"
                                     d="M12 3v18M3 12h18"/>
 
                             </svg>
@@ -386,9 +318,10 @@
 
 
                         <p
+                            id="totalDentists"
                             class="font-manrope text-[25px] font-extrabold tracking-[-0.5px] text-[#172033]">
 
-                            <%= totalDentists %>
+                            —
 
                         </p>
 
@@ -471,9 +404,10 @@
 
 
                         <p
+                            id="totalTreatments"
                             class="font-manrope text-[25px] font-extrabold tracking-[-0.5px] text-[#172033]">
 
-                            <%= totalTreatments %>
+                            —
 
                         </p>
 
@@ -554,9 +488,10 @@
 
 
                         <p
+                            id="totalBills"
                             class="font-manrope text-[25px] font-extrabold tracking-[-0.5px] text-[#172033]">
 
-                            <%= totalBills %>
+                            —
 
                         </p>
 
@@ -680,9 +615,10 @@
 
 
                             <p
+                                id="scheduledAppointments"
                                 class="mt-1 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                <%= scheduledAppointments %>
+                                —
 
                             </p>
 
@@ -725,9 +661,10 @@
 
 
                             <p
+                                id="completedAppointments"
                                 class="mt-1 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                <%= completedAppointments %>
+                                —
 
                             </p>
 
@@ -769,9 +706,10 @@
 
 
                             <p
+                                id="cancelledAppointments"
                                 class="mt-1 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                <%= cancelledAppointments %>
+                                —
 
                             </p>
 
@@ -803,9 +741,10 @@
 
 
                                 <p
+                                    id="totalAppointments"
                                     class="mt-1 font-manrope text-sm font-extrabold text-[#172033]">
 
-                                    <%= totalAppointments %>
+                                    —
 
                                 </p>
 
@@ -1062,6 +1001,249 @@
 
 
 </div>
+
+
+
+<!-- =========================================================
+     REST API DASHBOARD
+========================================================= -->
+
+<script>
+
+    const contextPath =
+        "<%= request.getContextPath() %>";
+
+
+    // =========================================================
+    // ELEMENTS
+    // =========================================================
+
+    const totalPatientsElement =
+        document.getElementById("totalPatients");
+
+    const totalDentistsElement =
+        document.getElementById("totalDentists");
+
+    const totalTreatmentsElement =
+        document.getElementById("totalTreatments");
+
+    const totalBillsElement =
+        document.getElementById("totalBills");
+
+    const totalAppointmentsElement =
+        document.getElementById("totalAppointments");
+
+    const scheduledAppointmentsElement =
+        document.getElementById("scheduledAppointments");
+
+    const completedAppointmentsElement =
+        document.getElementById("completedAppointments");
+
+    const cancelledAppointmentsElement =
+        document.getElementById("cancelledAppointments");
+
+
+    // =========================================================
+    // GET API DATA
+    // =========================================================
+
+    async function getApiData(url) {
+
+        const response =
+            await fetch(
+                url,
+                {
+                    method: "GET",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API request failed: " +
+                response.status
+            );
+        }
+
+
+        return await response.json();
+    }
+
+
+    // =========================================================
+    // LOAD DASHBOARD
+    // =========================================================
+
+    async function loadDashboard() {
+
+        try {
+
+            const results =
+                await Promise.all([
+
+                    getApiData(
+                        contextPath +
+                        "/api/patients"
+                    ),
+
+                    getApiData(
+                        contextPath +
+                        "/api/dentists"
+                    ),
+
+                    getApiData(
+                        contextPath +
+                        "/api/treatments"
+                    ),
+
+                    getApiData(
+                        contextPath +
+                        "/api/billing"
+                    ),
+
+                    getApiData(
+                        contextPath +
+                        "/api/appointments"
+                    )
+
+                ]);
+
+
+            const patients =
+                Array.isArray(results[0])
+                    ? results[0]
+                    : [];
+
+
+            const dentists =
+                Array.isArray(results[1])
+                    ? results[1]
+                    : [];
+
+
+            const treatments =
+                Array.isArray(results[2])
+                    ? results[2]
+                    : [];
+
+
+            const bills =
+                Array.isArray(results[3])
+                    ? results[3]
+                    : [];
+
+
+            const appointments =
+                Array.isArray(results[4])
+                    ? results[4]
+                    : [];
+
+
+            // =================================================
+            // BASIC COUNTS
+            // =================================================
+
+            totalPatientsElement.textContent =
+                patients.length;
+
+
+            totalDentistsElement.textContent =
+                dentists.length;
+
+
+            totalTreatmentsElement.textContent =
+                treatments.length;
+
+
+            totalBillsElement.textContent =
+                bills.length;
+
+
+            // =================================================
+            // APPOINTMENT COUNTS
+            // =================================================
+
+            totalAppointmentsElement.textContent =
+                appointments.length;
+
+
+            scheduledAppointmentsElement.textContent =
+                appointments.filter(
+                    appointment =>
+                        String(
+                            appointment.status || ""
+                        ).toUpperCase() === "SCHEDULED"
+                ).length;
+
+
+            completedAppointmentsElement.textContent =
+                appointments.filter(
+                    appointment =>
+                        String(
+                            appointment.status || ""
+                        ).toUpperCase() === "COMPLETED"
+                ).length;
+
+
+            cancelledAppointmentsElement.textContent =
+                appointments.filter(
+                    appointment =>
+                        String(
+                            appointment.status || ""
+                        ).toUpperCase() === "CANCELLED"
+                ).length;
+
+
+        } catch (error) {
+
+            console.error(
+                "Dashboard API error:",
+                error
+            );
+
+
+            totalPatientsElement.textContent =
+                "—";
+
+            totalDentistsElement.textContent =
+                "—";
+
+            totalTreatmentsElement.textContent =
+                "—";
+
+            totalBillsElement.textContent =
+                "—";
+
+            totalAppointmentsElement.textContent =
+                "—";
+
+            scheduledAppointmentsElement.textContent =
+                "—";
+
+            completedAppointmentsElement.textContent =
+                "—";
+
+            cancelledAppointmentsElement.textContent =
+                "—";
+        }
+    }
+
+
+    // =========================================================
+    // START
+    // =========================================================
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        loadDashboard
+    );
+
+</script>
 
 
 </body>

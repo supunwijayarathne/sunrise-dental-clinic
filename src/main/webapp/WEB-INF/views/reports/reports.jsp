@@ -1,121 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="java.util.List" %>
-
-<%@ page import="com.sunrise.model.ReportStats" %>
-<%@ page import="com.sunrise.model.ReportBill" %>
-<%@ page import="com.sunrise.model.ReportAppointment" %>
-<%@ page import="com.sunrise.model.ReportTreatment" %>
-
-<%
-    // =========================================================
-    // REPORT DATA
-    // =========================================================
-
-    ReportStats revenueStats =
-            (ReportStats) request.getAttribute("revenueStats");
-
-    ReportStats appointmentStats =
-            (ReportStats) request.getAttribute("appointmentStats");
-
-    ReportStats treatmentStats =
-            (ReportStats) request.getAttribute("treatmentStats");
-
-
-    if (revenueStats == null) {
-        revenueStats = new ReportStats();
-    }
-
-    if (appointmentStats == null) {
-        appointmentStats = new ReportStats();
-    }
-
-    if (treatmentStats == null) {
-        treatmentStats = new ReportStats();
-    }
-
-
-    // =========================================================
-    // FILTERS
-    // =========================================================
-
-    String revenueFilter =
-            (String) request.getAttribute("revenueFilter");
-
-    String appointmentFilter =
-            (String) request.getAttribute("appointmentFilter");
-
-    String treatmentFilter =
-            (String) request.getAttribute("treatmentFilter");
-
-
-    String revenueStartDate =
-            (String) request.getAttribute("revenueStartDate");
-
-    String revenueEndDate =
-            (String) request.getAttribute("revenueEndDate");
-
-
-    String appointmentStartDate =
-            (String) request.getAttribute("appointmentStartDate");
-
-    String appointmentEndDate =
-            (String) request.getAttribute("appointmentEndDate");
-
-
-    String treatmentStartDate =
-            (String) request.getAttribute("treatmentStartDate");
-
-    String treatmentEndDate =
-            (String) request.getAttribute("treatmentEndDate");
-
-
-    // =========================================================
-    // DEFAULT VALUES
-    // =========================================================
-
-    if (revenueFilter == null) {
-        revenueFilter = "7D";
-    }
-
-    if (appointmentFilter == null) {
-        appointmentFilter = "7D";
-    }
-
-    if (treatmentFilter == null) {
-        treatmentFilter = "MONTH";
-    }
-
-
-    if (revenueStartDate == null) {
-        revenueStartDate = "";
-    }
-
-    if (revenueEndDate == null) {
-        revenueEndDate = "";
-    }
-
-
-    if (appointmentStartDate == null) {
-        appointmentStartDate = "";
-    }
-
-    if (appointmentEndDate == null) {
-        appointmentEndDate = "";
-    }
-
-
-    if (treatmentStartDate == null) {
-        treatmentStartDate = "";
-    }
-
-    if (treatmentEndDate == null) {
-        treatmentEndDate = "";
-    }
-%>
-
-
 <!DOCTYPE html>
+
 
 <html lang="en">
 
@@ -475,11 +361,11 @@
 
                         Period:
 
-                        <%= revenueStartDate %>
+                        
 
                         -
 
-                        <%= revenueEndDate %>
+                        
 
                     </p>
 
@@ -492,19 +378,19 @@
 
                     <form
                         method="get"
-                        action="<%= request.getContextPath() %>/reports">
+                        action="#">
 
 
                         <input
                             type="hidden"
                             name="appointmentFilter"
-                            value="<%= appointmentFilter %>">
+                            value="7D">
 
 
                         <input
                             type="hidden"
                             name="treatmentFilter"
-                            value="<%= treatmentFilter %>">
+                            value="MONTH">
 
 
                         <div
@@ -534,7 +420,7 @@
 
                                         <option
                                             value="TODAY"
-                                            <%= "TODAY".equals(revenueFilter) ? "selected" : "" %>>
+                                            >
 
                                             Today
 
@@ -543,7 +429,7 @@
 
                                         <option
                                             value="7D"
-                                            <%= "7D".equals(revenueFilter) ? "selected" : "" %>>
+                                            selected>
 
                                             Last 7 Days
 
@@ -552,7 +438,7 @@
 
                                         <option
                                             value="MONTH"
-                                            <%= "MONTH".equals(revenueFilter) ? "selected" : "" %>>
+                                            >
 
                                             This Month
 
@@ -561,7 +447,7 @@
 
                                         <option
                                             value="3M"
-                                            <%= "3M".equals(revenueFilter) ? "selected" : "" %>>
+                                            >
 
                                             Last 3 Months
 
@@ -570,7 +456,7 @@
 
                                         <option
                                             value="YEAR"
-                                            <%= "YEAR".equals(revenueFilter) ? "selected" : "" %>>
+                                            >
 
                                             This Year
 
@@ -579,7 +465,7 @@
 
                                         <option
                                             value="CUSTOM"
-                                            <%= "CUSTOM".equals(revenueFilter) ? "selected" : "" %>>
+                                            >
 
                                             Custom Range
 
@@ -592,7 +478,7 @@
 
                                 <div
                                     id="revenueDates"
-                                    class="<%= "CUSTOM".equals(revenueFilter) ? "flex" : "hidden" %> items-end gap-3">
+                                    class="flex items-end gap-3">
 
 
                                     <div>
@@ -608,7 +494,7 @@
                                         <input
                                             type="date"
                                             name="revenueStartDate"
-                                            value="<%= revenueStartDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
                                     </div>
@@ -627,7 +513,7 @@
                                         <input
                                             type="date"
                                             name="revenueEndDate"
-                                            value="<%= revenueEndDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100">
 
                                     </div>
@@ -684,10 +570,7 @@
 
                             Rs.
 
-                            <%= String.format(
-                                    "%.2f",
-                                    revenueStats.getTotalRevenue()
-                            ) %>
+                            <span id="revenueTotalRevenue">0.00</span>
 
                         </p>
 
@@ -718,10 +601,7 @@
 
                             Rs.
 
-                            <%= String.format(
-                                    "%.2f",
-                                    revenueStats.getAppointmentRevenue()
-                            ) %>
+                            <span id="revenueAppointmentRevenue">0.00</span>
 
                         </p>
 
@@ -752,10 +632,7 @@
 
                             Rs.
 
-                            <%= String.format(
-                                    "%.2f",
-                                    revenueStats.getWalkInRevenue()
-                            ) %>
+                            <span id="revenueWalkInRevenue">0.00</span>
 
                         </p>
 
@@ -850,7 +727,7 @@
                             <p
                                 class="mt-1 font-manrope text-xl font-extrabold text-[#172033]">
 
-                                <%= revenueStats.getTotalBills() %>
+                                <span id="revenueTotalBills">0</span>
 
                             </p>
 
@@ -906,146 +783,8 @@
                             </thead>
 
 
-                            <tbody>
-
-                            <%
-                                List<ReportBill> bills =
-                                        revenueStats.getBills();
-
-                                if (bills == null || bills.isEmpty()) {
-                            %>
-
-                                <tr>
-
-                                    <td
-                                        colspan="8"
-                                        class="px-6 py-12 text-center font-inter text-xs text-slate-400">
-
-                                        No bills found for this period.
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                } else {
-
-                                    for (ReportBill bill : bills) {
-                            %>
-
-                                <tr
-                                    class="border-b border-slate-50 transition hover:bg-slate-50/60">
-
-
-                                    <td
-                                        class="px-6 py-4 font-semibold text-slate-700">
-
-                                        <%= bill.getBillNumber() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-xs text-slate-500">
-
-                                        <%= bill.getCreatedAt() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-700">
-
-                                        <%= bill.getPatientName() != null
-                                                ? bill.getPatientName()
-                                                : "Not provided" %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-700">
-
-                                        <%= bill.getTreatmentName() != null
-                                                ? bill.getTreatmentName()
-                                                : "Not provided" %>
-
-                                    </td>
-
-
-                                    <td class="px-6 py-4">
-
-                                        <% if ("WALK_IN".equals(
-                                                bill.getBillType())) { %>
-
-                                            <span
-                                                class="status-badge bg-amber-50 text-amber-700">
-
-                                                Walk-in
-
-                                            </span>
-
-                                        <% } else { %>
-
-                                            <span
-                                                class="status-badge bg-blue-50 text-blue-700">
-
-                                                Appointment
-
-                                            </span>
-
-                                        <% } %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-right text-slate-600">
-
-                                        Rs.
-
-                                        <%= String.format(
-                                                "%.2f",
-                                                bill.getConsultationFee()
-                                        ) %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-right text-slate-600">
-
-                                        Rs.
-
-                                        <%= String.format(
-                                                "%.2f",
-                                                bill.getTreatmentFee()
-                                        ) %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-right font-bold text-[#172033]">
-
-                                        Rs.
-
-                                        <%= String.format(
-                                                "%.2f",
-                                                bill.getTotalAmount()
-                                        ) %>
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                    }
-
-                                }
-                            %>
-
-                            </tbody>
+                            <tbody id="billsTableBody">
+</tbody>
 
 
                             <tfoot>
@@ -1066,10 +805,7 @@
 
                                         Rs.
 
-                                        <%= String.format(
-                                                "%.2f",
-                                                revenueStats.getTotalRevenue()
-                                        ) %>
+                                        <span id="revenueFooterTotal">0.00</span>
 
                                     </td>
 
@@ -1119,11 +855,11 @@
 
                         Period:
 
-                        <%= appointmentStartDate %>
+                        
 
                         -
 
-                        <%= appointmentEndDate %>
+                        
 
                     </p>
 
@@ -1136,19 +872,19 @@
 
                     <form
                         method="get"
-                        action="<%= request.getContextPath() %>/reports">
+                        action="#">
 
 
                         <input
                             type="hidden"
                             name="revenueFilter"
-                            value="<%= revenueFilter %>">
+                            value="7D">
 
 
                         <input
                             type="hidden"
                             name="treatmentFilter"
-                            value="<%= treatmentFilter %>">
+                            value="MONTH">
 
 
                         <div
@@ -1178,7 +914,7 @@
 
                                         <option
                                             value="TODAY"
-                                            <%= "TODAY".equals(appointmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Today
 
@@ -1187,7 +923,7 @@
 
                                         <option
                                             value="7D"
-                                            <%= "7D".equals(appointmentFilter) ? "selected" : "" %>>
+                                            selected>
 
                                             Last 7 Days
 
@@ -1196,7 +932,7 @@
 
                                         <option
                                             value="MONTH"
-                                            <%= "MONTH".equals(appointmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             This Month
 
@@ -1205,7 +941,7 @@
 
                                         <option
                                             value="3M"
-                                            <%= "3M".equals(appointmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Last 3 Months
 
@@ -1214,7 +950,7 @@
 
                                         <option
                                             value="YEAR"
-                                            <%= "YEAR".equals(appointmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             This Year
 
@@ -1223,7 +959,7 @@
 
                                         <option
                                             value="CUSTOM"
-                                            <%= "CUSTOM".equals(appointmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Custom Range
 
@@ -1236,7 +972,7 @@
 
                                 <div
                                     id="appointmentDates"
-                                    class="<%= "CUSTOM".equals(appointmentFilter) ? "flex" : "hidden" %> items-end gap-3">
+                                    class="flex items-end gap-3">
 
 
                                     <div>
@@ -1252,7 +988,7 @@
                                         <input
                                             type="date"
                                             name="appointmentStartDate"
-                                            value="<%= appointmentStartDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500">
 
                                     </div>
@@ -1271,7 +1007,7 @@
                                         <input
                                             type="date"
                                             name="appointmentEndDate"
-                                            value="<%= appointmentEndDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500">
 
                                     </div>
@@ -1349,7 +1085,7 @@
                             <p
                                 class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                                <%= appointmentStats.getScheduledAppointments() %>
+                                <span id="scheduledAppointments">0</span>
 
                             </p>
 
@@ -1370,7 +1106,7 @@
                             <p
                                 class="mt-2 font-manrope text-2xl font-extrabold text-emerald-700">
 
-                                <%= appointmentStats.getCompletedAppointments() %>
+                                <span id="completedAppointments">0</span>
 
                             </p>
 
@@ -1391,7 +1127,7 @@
                             <p
                                 class="mt-2 font-manrope text-2xl font-extrabold text-red-600">
 
-                                <%= appointmentStats.getCancelledAppointments() %>
+                                <span id="cancelledAppointments">0</span>
 
                             </p>
 
@@ -1412,7 +1148,7 @@
                             <p
                                 class="mt-2 font-manrope text-2xl font-extrabold text-amber-600">
 
-                                <%= appointmentStats.getNoShowAppointments() %>
+                                <span id="noShowAppointments">0</span>
 
                             </p>
 
@@ -1433,7 +1169,7 @@
                             <p
                                 class="mt-2 font-manrope text-2xl font-extrabold text-blue-600">
 
-                                <%= appointmentStats.getBilledAppointments() %>
+                                <span id="billedAppointments">0</span>
 
                             </p>
 
@@ -1458,7 +1194,7 @@
                             <p
                                 class="mt-1 font-manrope text-2xl font-extrabold">
 
-                                <%= appointmentStats.getTotalAppointments() %>
+                                <span id="totalAppointments">0</span>
 
                             </p>
 
@@ -1539,162 +1275,8 @@
                             </thead>
 
 
-                            <tbody>
-
-                            <%
-                                List<ReportAppointment> appointments =
-                                        appointmentStats.getAppointments();
-
-                                if (appointments == null ||
-                                    appointments.isEmpty()) {
-                            %>
-
-                                <tr>
-
-                                    <td
-                                        colspan="7"
-                                        class="px-6 py-12 text-center font-inter text-xs text-slate-400">
-
-                                        No appointments found for this period.
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                } else {
-
-                                    for (ReportAppointment appointment :
-                                            appointments) {
-
-                                        String status =
-                                                appointment.getStatus();
-
-                                        String statusClass =
-                                                "status-default";
-
-
-                                        if (status != null) {
-
-                                            if (status.equalsIgnoreCase(
-                                                    "SCHEDULED")) {
-
-                                                statusClass =
-                                                        "status-scheduled";
-
-                                            } else if (
-                                                    status.equalsIgnoreCase(
-                                                            "COMPLETED")) {
-
-                                                statusClass =
-                                                        "status-completed";
-
-                                            } else if (
-                                                    status.equalsIgnoreCase(
-                                                            "CANCELLED")) {
-
-                                                statusClass =
-                                                        "status-cancelled";
-
-                                            } else if (
-                                                    status.equalsIgnoreCase(
-                                                            "NO SHOW")
-                                                    ||
-                                                    status.equalsIgnoreCase(
-                                                            "NO_SHOW")) {
-
-                                                statusClass =
-                                                        "status-no-show";
-
-                                            } else if (
-                                                    status.equalsIgnoreCase(
-                                                            "BILLED")) {
-
-                                                statusClass =
-                                                        "status-billed";
-                                            }
-                                        }
-                            %>
-
-                                <tr
-                                    class="border-b border-slate-50 transition hover:bg-slate-50/60">
-
-
-                                    <td
-                                        class="px-6 py-4 font-semibold text-slate-700">
-
-                                        <%= appointment.getAppointmentNumber() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-600">
-
-                                        <%= appointment.getAppointmentDate() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-600">
-
-                                        <%= appointment.getAppointmentTime() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-700">
-
-                                        <%= appointment.getPatientName() != null
-                                                ? appointment.getPatientName()
-                                                : "Not provided" %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-700">
-
-                                        <%= appointment.getDentistName() != null
-                                                ? appointment.getDentistName()
-                                                : "Not provided" %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-slate-700">
-
-                                        <%= appointment.getTreatmentName() != null
-                                                ? appointment.getTreatmentName()
-                                                : "Not provided" %>
-
-                                    </td>
-
-
-                                    <td class="px-6 py-4">
-
-                                        <span
-                                            class="status-badge <%= statusClass %>">
-
-                                            <%= status != null
-                                                    ? status.replace("_", " ")
-                                                    : "Unknown" %>
-
-                                        </span>
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                    }
-                                }
-                            %>
-
-                            </tbody>
+                            <tbody id="appointmentsTableBody">
+</tbody>
 
                         </table>
 
@@ -1738,11 +1320,11 @@
 
                         Period:
 
-                        <%= treatmentStartDate %>
+                        
 
                         -
 
-                        <%= treatmentEndDate %>
+                        
 
                     </p>
 
@@ -1755,19 +1337,19 @@
 
                     <form
                         method="get"
-                        action="<%= request.getContextPath() %>/reports">
+                        action="#">
 
 
                         <input
                             type="hidden"
                             name="revenueFilter"
-                            value="<%= revenueFilter %>">
+                            value="7D">
 
 
                         <input
                             type="hidden"
                             name="appointmentFilter"
-                            value="<%= appointmentFilter %>">
+                            value="7D">
 
 
                         <div
@@ -1797,7 +1379,7 @@
 
                                         <option
                                             value="TODAY"
-                                            <%= "TODAY".equals(treatmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Today
 
@@ -1806,7 +1388,7 @@
 
                                         <option
                                             value="7D"
-                                            <%= "7D".equals(treatmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Last 7 Days
 
@@ -1815,7 +1397,7 @@
 
                                         <option
                                             value="MONTH"
-                                            <%= "MONTH".equals(treatmentFilter) ? "selected" : "" %>>
+                                            selected>
 
                                             This Month
 
@@ -1824,7 +1406,7 @@
 
                                         <option
                                             value="3M"
-                                            <%= "3M".equals(treatmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Last 3 Months
 
@@ -1833,7 +1415,7 @@
 
                                         <option
                                             value="YEAR"
-                                            <%= "YEAR".equals(treatmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             This Year
 
@@ -1842,7 +1424,7 @@
 
                                         <option
                                             value="CUSTOM"
-                                            <%= "CUSTOM".equals(treatmentFilter) ? "selected" : "" %>>
+                                            >
 
                                             Custom Range
 
@@ -1855,7 +1437,7 @@
 
                                 <div
                                     id="treatmentDates"
-                                    class="<%= "CUSTOM".equals(treatmentFilter) ? "flex" : "hidden" %> items-end gap-3">
+                                    class="flex items-end gap-3">
 
 
                                     <div>
@@ -1871,7 +1453,7 @@
                                         <input
                                             type="date"
                                             name="treatmentStartDate"
-                                            value="<%= treatmentStartDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500">
 
                                     </div>
@@ -1890,7 +1472,7 @@
                                         <input
                                             type="date"
                                             name="treatmentEndDate"
-                                            value="<%= treatmentEndDate %>"
+                                            value=""
                                             class="rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500">
 
                                     </div>
@@ -1945,9 +1527,7 @@
                         <p
                             class="mt-2 font-manrope text-2xl font-extrabold text-[#172033]">
 
-                            <%= treatmentStats.getTreatments() != null
-                                    ? treatmentStats.getTreatments().size()
-                                    : 0 %>
+                            <span id="treatmentTypes">0</span>
 
                         </p>
 
@@ -1977,26 +1557,7 @@
                             class="mt-2 font-manrope text-2xl font-extrabold text-emerald-700">
 
 
-                            <%
-                                List<ReportTreatment> summaryTreatments =
-                                        treatmentStats.getTreatments();
-
-                                int summaryTotal = 0;
-
-
-                                if (summaryTreatments != null) {
-
-                                    for (ReportTreatment item :
-                                            summaryTreatments) {
-
-                                        summaryTotal +=
-                                                item.getCompletedCount();
-                                    }
-                                }
-                            %>
-
-
-                            <%= summaryTotal %>
+                            <span id="treatmentTotal">0</span>
 
                         </p>
 
@@ -2068,73 +1629,8 @@
                             </thead>
 
 
-                            <tbody>
-
-                            <%
-                                List<ReportTreatment> treatments =
-                                        treatmentStats.getTreatments();
-
-                                int treatmentTotal = 0;
-
-
-                                if (treatments == null ||
-                                    treatments.isEmpty()) {
-                            %>
-
-                                <tr>
-
-                                    <td
-                                        colspan="2"
-                                        class="px-6 py-12 text-center font-inter text-xs text-slate-400">
-
-                                        No completed treatments found for this period.
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                } else {
-
-                                    for (ReportTreatment treatment :
-                                            treatments) {
-
-                                        treatmentTotal +=
-                                                treatment.getCompletedCount();
-                            %>
-
-                                <tr
-                                    class="border-b border-slate-50 transition hover:bg-slate-50/60">
-
-
-                                    <td
-                                        class="px-6 py-4 font-semibold text-slate-700">
-
-                                        <%= treatment.getTreatmentName() %>
-
-                                    </td>
-
-
-                                    <td
-                                        class="px-6 py-4 text-right">
-
-                                        <span
-                                            class="status-badge status-completed">
-
-                                            <%= treatment.getCompletedCount() %>
-
-                                        </span>
-
-                                    </td>
-
-                                </tr>
-
-                            <%
-                                    }
-                                }
-                            %>
-
-                            </tbody>
+                            <tbody id="treatmentsTableBody">
+</tbody>
 
 
                             <tfoot>
@@ -2152,7 +1648,7 @@
                                     <td
                                         class="px-6 py-4 text-right font-manrope text-base font-extrabold text-[#172033]">
 
-                                        <%= treatmentTotal %>
+                                        <span id="treatmentFooterTotal">0</span>
 
                                     </td>
 
@@ -2178,7 +1674,250 @@
          JAVASCRIPT
     ========================================================== -->
 
+    
     <script>
+
+        // =========================================================
+        // REPORT DATA / REST API
+        // =========================================================
+
+        var reportData = null;
+        var revenueChart = null;
+
+
+        function getContextPath() {
+
+            var path = window.location.pathname;
+
+            var firstSlash = path.indexOf("/", 1);
+
+            if (firstSlash === -1) {
+                return "";
+            }
+
+            return path.substring(0, firstSlash);
+        }
+
+
+        function getFilter(prefix) {
+
+            var filterMap = {
+                revenue: "revenueFilter",
+                appointment: "appointmentFilter",
+                appointments: "appointmentFilter",
+                treatment: "treatmentFilter",
+                treatments: "treatmentFilter"
+            };
+
+            var id = filterMap[prefix] || (prefix + "Filter");
+
+            return document.getElementById(id);
+        }
+
+
+        function getDates(prefix) {
+
+            var filterPrefix =
+                prefix === "appointments"
+                    ? "appointment"
+                    : prefix === "treatments"
+                        ? "treatment"
+                        : prefix;
+
+            var start =
+                document.getElementById(
+                    filterPrefix + "StartDate"
+                );
+
+            var end =
+                document.getElementById(
+                    filterPrefix + "EndDate"
+                );
+
+            return {
+                start: start,
+                end: end
+            };
+        }
+
+
+        function formatDate(date) {
+
+            var year =
+                date.getFullYear();
+
+            var month =
+                String(
+                    date.getMonth() + 1
+                ).padStart(2, "0");
+
+            var day =
+                String(
+                    date.getDate()
+                ).padStart(2, "0");
+
+            return year + "-" + month + "-" + day;
+        }
+
+
+        function getRange(prefix) {
+
+            var filter = getFilter(prefix);
+
+            var filterValue =
+                filter
+                    ? filter.value
+                    : (prefix === "treatment"
+                        ? "MONTH"
+                        : "7D");
+
+
+            var dates =
+                getDates(prefix);
+
+
+            if (filterValue === "CUSTOM") {
+
+                if (!dates.start || !dates.end) {
+                    throw new Error(
+                        "Custom date fields could not be found."
+                    );
+                }
+
+                if (!dates.start.value ||
+                    !dates.end.value) {
+
+                    throw new Error(
+                        "Please select both start and end dates."
+                    );
+                }
+
+                return {
+                    startDate: dates.start.value,
+                    endDate: dates.end.value
+                };
+            }
+
+
+            var end = new Date();
+            var start = new Date();
+
+
+            if (filterValue === "TODAY") {
+
+                // same day
+            }
+
+            else if (filterValue === "7D") {
+
+                start.setDate(
+                    end.getDate() - 6
+                );
+            }
+
+            else if (filterValue === "MONTH") {
+
+                start =
+                    new Date(
+                        end.getFullYear(),
+                        end.getMonth(),
+                        1
+                    );
+            }
+
+            else if (filterValue === "3M") {
+
+                start.setMonth(
+                    end.getMonth() - 2
+                );
+
+                start.setDate(1);
+            }
+
+            else if (filterValue === "YEAR") {
+
+                start =
+                    new Date(
+                        end.getFullYear(),
+                        0,
+                        1
+                    );
+            }
+
+            else {
+
+                start.setDate(
+                    end.getDate() - 6
+                );
+            }
+
+
+            return {
+                startDate: formatDate(start),
+                endDate: formatDate(end)
+            };
+        }
+
+
+        function updatePeriodDisplay(prefix, range) {
+
+            var displayPrefix =
+                prefix === "appointments"
+                    ? "appointment"
+                    : prefix === "treatments"
+                        ? "treatment"
+                        : prefix;
+
+            var start =
+                document.getElementById(
+                    displayPrefix + "StartDisplay"
+                );
+
+            var end =
+                document.getElementById(
+                    displayPrefix + "EndDisplay"
+                );
+
+
+            if (start) {
+                start.textContent =
+                    range.startDate;
+            }
+
+            if (end) {
+                end.textContent =
+                    range.endDate;
+            }
+        }
+
+
+        function setValue(id, value) {
+
+            var element =
+                document.getElementById(id);
+
+            if (element) {
+                element.textContent =
+                    value === null ||
+                    value === undefined
+                        ? "0"
+                        : value;
+            }
+        }
+
+
+        function formatMoney(value) {
+
+            return Number(
+                value || 0
+            ).toLocaleString(
+                "en-LK",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+        }
 
 
         // =========================================================
@@ -2187,9 +1926,9 @@
 
         function showReport(name) {
 
-            const sections =
+            var sections =
                 document.querySelectorAll(
-                    '.report-section'
+                    ".report-section"
                 );
 
 
@@ -2197,16 +1936,16 @@
                 function(section) {
 
                     section.classList.remove(
-                        'active'
+                        "active"
                     );
 
                 }
             );
 
 
-            const tabs =
+            var tabs =
                 document.querySelectorAll(
-                    '.report-tab'
+                    ".report-tab"
                 );
 
 
@@ -2214,47 +1953,44 @@
                 function(tab) {
 
                     tab.classList.remove(
-                        'active'
+                        "active"
                     );
 
                 }
             );
 
 
-            const selectedSection =
+            var selectedSection =
                 document.getElementById(name);
 
 
-            let tabId = "";
+            var tabId = "";
 
 
             if (name === "revenue") {
 
                 tabId = "RevenueTab";
-
             }
 
             else if (name === "appointments") {
 
                 tabId = "AppointmentsTab";
-
             }
 
             else if (name === "treatments") {
 
                 tabId = "TreatmentsTab";
-
             }
 
 
-            const selectedTab =
+            var selectedTab =
                 document.getElementById(tabId);
 
 
             if (selectedSection) {
 
                 selectedSection.classList.add(
-                    'active'
+                    "active"
                 );
 
             }
@@ -2263,11 +1999,19 @@
             if (selectedTab) {
 
                 selectedTab.classList.add(
-                    'active'
+                    "active"
                 );
 
             }
 
+
+            loadReportFor(
+                name === "appointments"
+                    ? "appointment"
+                    : name === "treatments"
+                        ? "treatment"
+                        : "revenue"
+            );
         }
 
 
@@ -2277,33 +2021,39 @@
 
         function toggleDates(prefix) {
 
-            const select =
+            var realPrefix =
+                prefix === "appointments"
+                    ? "appointment"
+                    : prefix === "treatments"
+                        ? "treatment"
+                        : prefix;
+
+
+            var select =
                 document.getElementById(
-                    prefix + 'Filter'
+                    realPrefix + "Filter"
                 );
 
 
-            const container =
+            var container =
                 document.getElementById(
-                    prefix + 'Dates'
+                    realPrefix + "Dates"
                 );
 
 
             if (!select || !container) {
-
                 return;
-
             }
 
 
-            if (select.value === 'CUSTOM') {
+            if (select.value === "CUSTOM") {
 
                 container.classList.remove(
-                    'hidden'
+                    "hidden"
                 );
 
                 container.classList.add(
-                    'flex'
+                    "flex"
                 );
 
             }
@@ -2311,15 +2061,758 @@
             else {
 
                 container.classList.remove(
-                    'flex'
+                    "flex"
                 );
 
                 container.classList.add(
-                    'hidden'
+                    "hidden"
                 );
 
             }
+        }
 
+
+        // =========================================================
+        // RENDER BILLS
+        // =========================================================
+
+        function renderBills(bills) {
+
+            var body =
+                document.getElementById(
+                    "billsTableBody"
+                );
+
+            if (!body) {
+                return;
+            }
+
+
+            body.innerHTML = "";
+
+
+            if (!bills || bills.length === 0) {
+
+                body.innerHTML =
+                    '<tr>' +
+                    '<td colspan="8" class="px-6 py-8 text-center text-xs text-slate-400">' +
+                    'No bills found for this period.' +
+                    '</td>' +
+                    '</tr>';
+
+                return;
+            }
+
+
+            bills.forEach(
+                function(bill) {
+
+                    var row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "border-b border-slate-100";
+
+
+                    var typeClass =
+                        String(bill.billType || "")
+                            .toUpperCase() === "WALK_IN"
+                            ? "bg-amber-50 text-amber-700"
+                            : "bg-blue-50 text-blue-700";
+
+
+                    var typeText =
+                        String(bill.billType || "")
+                            .replace("_", " ");
+
+
+                    row.innerHTML =
+                        '<td class="px-6 py-4 text-xs font-semibold text-slate-700">' +
+                            escapeHtml(bill.billNumber || "-") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-xs text-slate-600">' +
+                            escapeHtml(formatDateTime(bill.createdAt)) +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(bill.patientName || "Not provided") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(bill.treatmentName || "Not provided") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4">' +
+                            '<span class="status-badge ' + typeClass + '">' +
+                                escapeHtml(typeText) +
+                            '</span>' +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-right text-slate-600">' +
+                            'Rs. ' + formatMoney(bill.consultationFee) +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-right text-slate-600">' +
+                            'Rs. ' + formatMoney(bill.treatmentFee) +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-right font-semibold text-slate-700">' +
+                            'Rs. ' + formatMoney(bill.totalAmount) +
+                        '</td>';
+
+                    body.appendChild(row);
+                }
+            );
+        }
+
+
+        // =========================================================
+        // RENDER APPOINTMENTS
+        // =========================================================
+
+        function renderAppointments(appointments) {
+
+            var body =
+                document.getElementById(
+                    "appointmentsTableBody"
+                );
+
+            if (!body) {
+                return;
+            }
+
+
+            body.innerHTML = "";
+
+
+            if (!appointments || appointments.length === 0) {
+
+                body.innerHTML =
+                    '<tr>' +
+                    '<td colspan="7" class="px-6 py-8 text-center text-xs text-slate-400">' +
+                    'No appointments found for this period.' +
+                    '</td>' +
+                    '</tr>';
+
+                return;
+            }
+
+
+            appointments.forEach(
+                function(appointment) {
+
+                    var row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "border-b border-slate-100";
+
+
+                    var status =
+                        appointment.status || "UNKNOWN";
+
+
+                    var statusClass =
+                        "bg-slate-50 text-slate-600";
+
+
+                    if (status === "COMPLETED") {
+                        statusClass =
+                            "bg-emerald-50 text-emerald-700";
+                    }
+
+                    else if (status === "CANCELLED") {
+                        statusClass =
+                            "bg-red-50 text-red-700";
+                    }
+
+                    else if (status === "NO_SHOW") {
+                        statusClass =
+                            "bg-amber-50 text-amber-700";
+                    }
+
+                    else if (status === "BILLED") {
+                        statusClass =
+                            "bg-blue-50 text-blue-700";
+                    }
+
+                    else if (status === "SCHEDULED") {
+                        statusClass =
+                            "bg-indigo-50 text-indigo-700";
+                    }
+
+
+                    row.innerHTML =
+                        '<td class="px-6 py-4 text-xs font-semibold text-slate-700">' +
+                            escapeHtml(appointment.appointmentNumber || "-") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-xs text-slate-600">' +
+                            escapeHtml(appointment.appointmentDate || "-") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-xs text-slate-600">' +
+                            escapeHtml(appointment.appointmentTime || "-") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(appointment.patientName || "Not provided") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(appointment.dentistName || "Not provided") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(appointment.treatmentName || "Not provided") +
+                        '</td>' +
+
+                        '<td class="px-6 py-4">' +
+                            '<span class="status-badge ' + statusClass + '">' +
+                                escapeHtml(status.replace("_", " ")) +
+                            '</span>' +
+                        '</td>';
+
+                    body.appendChild(row);
+                }
+            );
+        }
+
+
+        // =========================================================
+        // RENDER TREATMENTS
+        // =========================================================
+
+        function renderTreatments(treatments) {
+
+            var body =
+                document.getElementById(
+                    "treatmentsTableBody"
+                );
+
+            if (!body) {
+                return;
+            }
+
+
+            body.innerHTML = "";
+
+
+            var total = 0;
+
+
+            if (treatments) {
+
+                treatments.forEach(
+                    function(item) {
+
+                        total +=
+                            Number(
+                                item.completedCount || 0
+                            );
+
+                    }
+                );
+            }
+
+
+            setValue(
+                "treatmentTypes",
+                treatments
+                    ? treatments.length
+                    : 0
+            );
+
+
+            setValue(
+                "treatmentTotal",
+                total
+            );
+
+            setValue(
+                "treatmentFooterTotal",
+                total
+            );
+
+
+            if (!treatments ||
+                treatments.length === 0) {
+
+                body.innerHTML =
+                    '<tr>' +
+                    '<td colspan="2" class="px-6 py-8 text-center text-xs text-slate-400">' +
+                    'No treatment data found for this period.' +
+                    '</td>' +
+                    '</tr>';
+
+                return;
+            }
+
+
+            treatments.forEach(
+                function(treatment) {
+
+                    var row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "border-b border-slate-100";
+
+
+                    row.innerHTML =
+                        '<td class="px-6 py-4 text-slate-600">' +
+                            escapeHtml(
+                                treatment.treatmentName ||
+                                "Not provided"
+                            ) +
+                        '</td>' +
+
+                        '<td class="px-6 py-4 text-right">' +
+                            '<span class="font-semibold text-emerald-700">' +
+                                Number(
+                                    treatment.completedCount || 0
+                                ) +
+                            '</span>' +
+                        '</td>';
+
+
+                    body.appendChild(row);
+                }
+            );
+        }
+
+
+        // =========================================================
+        // REVENUE CHART
+        // =========================================================
+
+        function renderRevenueChart(data) {
+
+            var canvas =
+                document.getElementById(
+                    "revenueChart"
+                );
+
+            if (!canvas ||
+                typeof Chart === "undefined") {
+                return;
+            }
+
+
+            if (revenueChart) {
+
+                revenueChart.destroy();
+
+                revenueChart = null;
+            }
+
+
+            var dates =
+                data.revenueDates || [];
+
+
+            var values =
+                data.dailyRevenue || [];
+
+
+            revenueChart =
+                new Chart(
+                    canvas,
+                    {
+
+                        type: "line",
+
+                        data: {
+
+                            labels: dates,
+
+                            datasets: [
+
+                                {
+
+                                    label:
+                                        "Daily Revenue",
+
+                                    data:
+                                        values,
+
+                                    borderWidth:
+                                        2,
+
+                                    tension:
+                                        0.35,
+
+                                    fill:
+                                        true,
+
+                                    pointRadius:
+                                        3,
+
+                                    pointHoverRadius:
+                                        5
+                                }
+                            ]
+                        },
+
+                        options: {
+
+                            responsive:
+                                true,
+
+                            maintainAspectRatio:
+                                false,
+
+                            interaction: {
+
+                                intersect:
+                                    false,
+
+                                mode:
+                                    "index"
+                            },
+
+                            plugins: {
+
+                                legend: {
+
+                                    display:
+                                        false
+                                },
+
+                                tooltip: {
+
+                                    callbacks: {
+
+                                        label:
+                                            function(context) {
+
+                                                return " Rs. " +
+                                                    Number(
+                                                        context.raw || 0
+                                                    ).toLocaleString(
+                                                        "en-LK",
+                                                        {
+                                                            minimumFractionDigits: 2,
+                                                            maximumFractionDigits: 2
+                                                        }
+                                                    );
+                                            }
+                                    }
+                                }
+                            },
+
+                            scales: {
+
+                                x: {
+
+                                    grid: {
+
+                                        display:
+                                            false
+                                    },
+
+                                    ticks: {
+
+                                        font: {
+
+                                            size:
+                                                10
+                                        }
+                                    }
+                                },
+
+                                y: {
+
+                                    beginAtZero:
+                                        true,
+
+                                    grid: {
+
+                                        color:
+                                            "#f1f5f9"
+                                    },
+
+                                    ticks: {
+
+                                        font: {
+
+                                            size:
+                                                10
+                                        },
+
+                                        callback:
+                                            function(value) {
+
+                                                return "Rs. " +
+                                                    Number(
+                                                        value || 0
+                                                    ).toLocaleString(
+                                                        "en-LK"
+                                                    );
+                                            }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                );
+        }
+
+
+        // =========================================================
+        // LOAD REPORT FROM REST API
+        // =========================================================
+
+        async function loadReportFor(prefix) {
+
+            try {
+
+                toggleDates(prefix);
+
+                var range =
+                    getRange(prefix);
+
+
+                updatePeriodDisplay(
+                    prefix,
+                    range
+                );
+
+
+                var url =
+                    getContextPath() +
+                    "/api/reports?startDate=" +
+                    encodeURIComponent(
+                        range.startDate
+                    ) +
+                    "&endDate=" +
+                    encodeURIComponent(
+                        range.endDate
+                    );
+
+
+                console.log(
+                    "Loading report:",
+                    url
+                );
+
+
+                var response =
+                    await fetch(
+                        url,
+                        {
+
+                            method:
+                                "GET",
+
+                            credentials:
+                                "same-origin",
+
+                            headers: {
+
+                                "Accept":
+                                    "application/json"
+                            }
+                        }
+                    );
+
+
+                var data;
+
+
+                try {
+
+                    data =
+                        await response.json();
+
+                }
+
+                catch (jsonError) {
+
+                    throw new Error(
+                        "Invalid response received from the report API."
+                    );
+                }
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data &&
+                        data.message
+                            ? data.message
+                            : "Could not load report."
+                    );
+                }
+
+
+                reportData =
+                    data;
+
+
+                // -----------------------------
+                // Revenue
+                // -----------------------------
+
+                if (prefix === "revenue") {
+
+                    setValue(
+                        "revenueTotalBills",
+                        data.totalBills
+                    );
+
+
+                    setValue(
+                        "revenueTotalRevenue",
+                        formatMoney(
+                            data.totalRevenue
+                        )
+                    );
+
+
+                    setValue(
+                        "revenueAppointmentRevenue",
+                        formatMoney(
+                            data.appointmentRevenue
+                        )
+                    );
+
+
+                    setValue(
+                        "revenueWalkInRevenue",
+                        formatMoney(
+                            data.walkInRevenue
+                        )
+                    );
+
+
+                    setValue(
+                        "revenueFooterTotal",
+                        formatMoney(
+                            data.totalRevenue
+                        )
+                    );
+
+
+                    renderBills(
+                        data.bills || []
+                    );
+
+
+                    renderRevenueChart(
+                        data
+                    );
+                }
+
+
+                // -----------------------------
+                // Appointments
+                // -----------------------------
+
+                if (prefix === "appointment") {
+
+                    setValue(
+                        "scheduledAppointments",
+                        data.scheduledAppointments
+                    );
+
+
+                    setValue(
+                        "completedAppointments",
+                        data.completedAppointments
+                    );
+
+
+                    setValue(
+                        "cancelledAppointments",
+                        data.cancelledAppointments
+                    );
+
+
+                    setValue(
+                        "noShowAppointments",
+                        data.noShowAppointments
+                    );
+
+
+                    setValue(
+                        "billedAppointments",
+                        data.billedAppointments
+                    );
+
+
+                    setValue(
+                        "totalAppointments",
+                        data.totalAppointments
+                    );
+
+
+                    renderAppointments(
+                        data.appointments || []
+                    );
+                }
+
+
+                // -----------------------------
+                // Treatments
+                // -----------------------------
+
+                if (prefix === "treatment") {
+
+                    renderTreatments(
+                        data.treatments || []
+                    );
+                }
+
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Report API error:",
+                    error
+                );
+
+
+                alert(
+                    error.message ||
+                    "Could not load the report."
+                );
+            }
+        }
+
+
+        // =========================================================
+        // SAFE HTML
+        // =========================================================
+
+        function escapeHtml(value) {
+
+            return String(
+                value === null ||
+                value === undefined
+                    ? ""
+                    : value
+            )
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+        }
+
+
+        function formatDateTime(value) {
+
+            if (!value) {
+                return "-";
+            }
+
+            return String(value)
+                .replace("T", " ")
+                .substring(0, 19);
         }
 
 
@@ -2329,9 +2822,9 @@
 
         function printReport(name) {
 
-            const sections =
+            var sections =
                 document.querySelectorAll(
-                    '.report-section'
+                    ".report-section"
                 );
 
 
@@ -2339,26 +2832,24 @@
                 function(section) {
 
                     section.classList.remove(
-                        'printing'
+                        "printing"
                     );
 
                 }
             );
 
 
-            const section =
+            var section =
                 document.getElementById(name);
 
 
             if (!section) {
-
                 return;
-
             }
 
 
             section.classList.add(
-                'printing'
+                "printing"
             );
 
 
@@ -2369,268 +2860,92 @@
                 function() {
 
                     section.classList.remove(
-                        'printing'
+                        "printing"
                     );
 
                 },
                 500
             );
-
         }
 
 
         // =========================================================
-        // REVENUE CHART DATA
+        // INITIALISE
         // =========================================================
 
-        const revenueDates = [
+        document.addEventListener(
+            "DOMContentLoaded",
+            function() {
 
-            <%
-                List<String> dates =
-                        revenueStats.getRevenueDates();
-
-                if (dates != null) {
-
-                    for (int i = 0;
-                         i < dates.size();
-                         i++) {
-
-                        if (i > 0) {
-            %>
-                            ,
-            <%
-                        }
-            %>
-
-            "<%= dates.get(i) %>"
-
-            <%
-                    }
-                }
-            %>
-
-        ];
+                var forms =
+                    document.querySelectorAll(
+                        "form"
+                    );
 
 
-        const revenueValues = [
+                forms.forEach(
+                    function(form) {
 
-            <%
-                List<Double> values =
-                        revenueStats.getDailyRevenue();
+                        form.addEventListener(
+                            "submit",
+                            function(event) {
 
-                if (values != null) {
+                                event.preventDefault();
 
-                    for (int i = 0;
-                         i < values.size();
-                         i++) {
+                                var select =
+                                    form.querySelector(
+                                        "select"
+                                    );
 
-                        if (i > 0) {
-            %>
-                            ,
-            <%
-                        }
-            %>
-
-            <%= values.get(i) %>
-
-            <%
-                    }
-                }
-            %>
-
-        ];
-
-
-        // =========================================================
-        // CREATE REVENUE CHART
-        // =========================================================
-
-        const chart =
-            document.getElementById(
-                'revenueChart'
-            );
-
-
-        if (chart) {
-
-            new Chart(
-                chart,
-                {
-
-                    type: 'line',
-
-
-                    data: {
-
-                        labels: revenueDates,
-
-
-                        datasets: [
-
-                            {
-
-                                label:
-                                    'Daily Revenue',
-
-                                data:
-                                    revenueValues,
-
-                                borderWidth:
-                                    2,
-
-                                tension:
-                                    0.35,
-
-                                fill:
-                                    true,
-
-                                pointRadius:
-                                    3,
-
-                                pointHoverRadius:
-                                    5
-
-                            }
-
-                        ]
-
-                    },
-
-
-                    options: {
-
-                        responsive:
-                            true,
-
-                        maintainAspectRatio:
-                            false,
-
-
-                        interaction: {
-
-                            intersect:
-                                false,
-
-                            mode:
-                                'index'
-
-                        },
-
-
-                        plugins: {
-
-                            legend: {
-
-                                display:
-                                    false
-
-                            },
-
-
-                            tooltip: {
-
-                                callbacks: {
-
-                                    label:
-                                        function(context) {
-
-                                            return ' Rs. ' +
-
-                                                Number(
-                                                    context.raw
-                                                ).toLocaleString(
-                                                    'en-LK',
-                                                    {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }
-                                                );
-
-                                        }
-
+                                if (!select) {
+                                    return;
                                 }
 
-                            }
 
-                        },
-
-
-                        scales: {
-
-                            x: {
-
-                                grid: {
-
-                                    display:
-                                        false
-
-                                },
+                                var id =
+                                    select.id;
 
 
-                                ticks: {
+                                if (id === "revenueFilter") {
 
-                                    font: {
-
-                                        size: 10
-
-                                    }
-
+                                    loadReportFor(
+                                        "revenue"
+                                    );
                                 }
 
-                            },
+                                else if (
+                                    id === "appointmentFilter"
+                                ) {
 
-
-                            y: {
-
-                                beginAtZero:
-                                    true,
-
-
-                                grid: {
-
-                                    color:
-                                        '#f1f5f9'
-
-                                },
-
-
-                                ticks: {
-
-                                    font: {
-
-                                        size: 10
-
-                                    },
-
-
-                                    callback:
-                                        function(value) {
-
-                                            return 'Rs. ' +
-
-                                                Number(
-                                                    value
-                                                ).toLocaleString(
-                                                    'en-LK'
-                                                );
-
-                                        }
-
+                                    loadReportFor(
+                                        "appointment"
+                                    );
                                 }
 
+                                else if (
+                                    id === "treatmentFilter"
+                                ) {
+
+                                    loadReportFor(
+                                        "treatment"
+                                    );
+                                }
                             }
-
-                        }
-
+                        );
                     }
+                );
 
-                }
-            );
 
-        }
+                // Preserve original first tab.
+                showReport(
+                    "revenue"
+                );
 
+            }
+        );
 
     </script>
+
 
 
 </body>

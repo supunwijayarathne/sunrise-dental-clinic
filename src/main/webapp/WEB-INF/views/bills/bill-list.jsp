@@ -1,28 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page import="java.util.List" %>
-<%@ page import="com.sunrise.model.Bill" %>
-
-<%
-    String contextPath = request.getContextPath();
-
-    List<Bill> bills =
-            (List<Bill>) request.getAttribute("bills");
-
-    String keyword =
-            (String) request.getAttribute("keyword");
-
-    String billType =
-            (String) request.getAttribute("billType");
-
-    if (keyword == null) {
-        keyword = "";
-    }
-
-    if (billType == null || billType.isEmpty()) {
-        billType = "ALL";
-    }
-%>
+<% String contextPath = request.getContextPath(); %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -198,9 +176,8 @@
 
 
 
-                <form
-                    method="get"
-                    action="<%= contextPath %>/bills"
+                <div
+                    id="billingSearchForm"
                     class="flex flex-col gap-3 md:flex-row">
 
 
@@ -216,10 +193,7 @@
                             stroke-width="1.8"
                             viewBox="0 0 24 24">
 
-                            <circle
-                                cx="11"
-                                cy="11"
-                                r="7"/>
+                            <circle cx="11" cy="11" r="7"/>
 
                             <path
                                 stroke-linecap="round"
@@ -230,8 +204,7 @@
 
                         <input
                             type="text"
-                            name="keyword"
-                            value="<%= keyword %>"
+                            id="keyword"
                             placeholder="Search bill number, patient, appointment..."
                             class="w-full rounded-lg border border-slate-200 bg-white py-3 pl-11 pr-4 font-inter text-xs text-slate-700 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                         />
@@ -239,54 +212,27 @@
                     </div>
 
 
-
                     <!-- BILL TYPE -->
 
                     <select
-                        name="billType"
+                        id="billType"
                         class="rounded-lg border border-slate-200 bg-white px-4 py-3 font-inter text-xs font-medium text-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 md:w-[190px]"
                     >
 
-                        <option
-                            value="ALL"
-                            <%= "ALL".equalsIgnoreCase(billType)
-                                    ? "selected"
-                                    : "" %>>
+                        <option value="ALL">All Bills</option>
 
-                            All Bills
+                        <option value="APPOINTMENT">Appointment Bills</option>
 
-                        </option>
-
-
-                        <option
-                            value="APPOINTMENT"
-                            <%= "APPOINTMENT".equalsIgnoreCase(billType)
-                                    ? "selected"
-                                    : "" %>>
-
-                            Appointment Bills
-
-                        </option>
-
-
-                        <option
-                            value="WALK_IN"
-                            <%= "WALK_IN".equalsIgnoreCase(billType)
-                                    ? "selected"
-                                    : "" %>>
-
-                            Walk-in Bills
-
-                        </option>
+                        <option value="WALK_IN">Walk-in Bills</option>
 
                     </select>
-
 
 
                     <!-- SEARCH BUTTON -->
 
                     <button
-                        type="submit"
+                        type="button"
+                        id="searchButton"
                         class="inline-flex items-center justify-center rounded-lg bg-[#2563EB] px-6 py-3 font-inter text-xs font-bold text-white transition hover:bg-[#1D4ED8]">
 
                         Search
@@ -294,18 +240,18 @@
                     </button>
 
 
-
                     <!-- CLEAR -->
 
-                    <a
-                        href="<%= contextPath %>/bills"
+                    <button
+                        type="button"
+                        id="clearButton"
                         class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-3 font-inter text-xs font-semibold text-slate-600 transition hover:bg-slate-50">
 
                         Clear
 
-                    </a>
+                    </button>
 
-                </form>
+                </div>
 
             </div>
 
@@ -336,31 +282,17 @@
                         </h2>
 
 
-                        <p
-                            class="mt-1 font-inter text-[10px] text-slate-400">
-
-                            <%= bills != null ? bills.size() : 0 %>
-                            bill(s) found
-
-                        </p>
+                        <p id="billCount" class="mt-1 font-inter text-[10px] text-slate-400">0 bill(s) found</p>
 
                     </div>
 
 
                     <!-- CURRENT FILTER -->
 
-                    <% if (!"ALL".equalsIgnoreCase(billType)) { %>
-
-                        <span
-                            class="rounded-full bg-blue-50 px-3 py-1.5 font-inter text-[10px] font-bold text-blue-700">
-
-                            <%= "WALK_IN".equalsIgnoreCase(billType)
-                                    ? "Walk-in"
-                                    : "Appointment" %>
-
+                    <span
+                            id="currentFilter"
+                            class="hidden rounded-full bg-blue-50 px-3 py-1.5 font-inter text-[10px] font-bold text-blue-700">
                         </span>
-
-                    <% } %>
 
                 </div>
 
@@ -434,239 +366,16 @@
                         <!-- TABLE BODY -->
 
                         <tbody
+                            id="billingTableBody"
                             class="divide-y divide-slate-100">
 
-
-                            <%
-
-                                if (bills != null && !bills.isEmpty()) {
-
-                                    for (Bill bill : bills) {
-
-                            %>
-
-
-                            <tr
-                                class="transition hover:bg-slate-50/70">
-
-
-                                <!-- BILL -->
-
-                                <td
-                                    class="px-6 py-4">
-
-
-                                    <div
-                                        class="font-manrope text-xs font-bold text-slate-800">
-
-                                        <%= bill.getBillNumber() %>
-
-                                    </div>
-
-
-                                    <div
-                                        class="mt-1 font-inter text-[10px] text-slate-400">
-
-                                        Bill ID #<%= bill.getBillId() %>
-
-                                    </div>
-
-                                </td>
-
-
-
-                                <!-- PATIENT -->
-
-                                <td
-                                    class="px-6 py-4">
-
-
-                                    <div
-                                        class="font-inter text-xs font-medium text-slate-700">
-
-                                        Patient #<%= bill.getPatientId() %>
-
-                                    </div>
-
-                                </td>
-
-
-
-                                <!-- TYPE -->
-
-                                <td
-                                    class="px-6 py-4">
-
-
-                                    <% if ("WALK_IN".equals(bill.getBillType())) { %>
-
-
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-amber-50 px-3 py-1.5 font-inter text-[10px] font-bold text-amber-700">
-
-                                            Walk-in
-
-                                        </span>
-
-
-                                    <% } else { %>
-
-
-                                        <span
-                                            class="inline-flex items-center rounded-full bg-blue-50 px-3 py-1.5 font-inter text-[10px] font-bold text-blue-700">
-
-                                            Appointment
-
-                                        </span>
-
-
-                                    <% } %>
-
-                                </td>
-
-
-
-                                <!-- TOTAL -->
-
-                                <td
-                                    class="px-6 py-4">
-
-
-                                    <span
-                                        class="font-manrope text-xs font-bold text-slate-800">
-
-                                        LKR
-                                        <%= String.format(
-                                                "%.2f",
-                                                bill.getTotalAmount()
-                                            ) %>
-
-                                    </span>
-
-                                </td>
-
-
-
-                                <!-- ACTION -->
-
-                                <td
-                                    class="px-6 py-4 text-right">
-
-
-                                    <a
-                                        href="<%= contextPath %>/bills/view?id=<%= bill.getBillId() %>"
-                                        class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-inter text-[10px] font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">
-
-
-                                        View
-
-
-                                        <svg
-                                            class="h-3.5 w-3.5"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="1.8"
-                                            viewBox="0 0 24 24">
-
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M9 5l7 7-7 7"/>
-
-                                        </svg>
-
-
-                                    </a>
-
-                                </td>
-
-
-                            </tr>
-
-
-                            <%
-
-                                    }
-
-                                } else {
-
-                            %>
-
-
-                            <!-- =================================================
-                                 EMPTY STATE
-                            ================================================== -->
-
-                            <tr>
-
-
-                                <td
-                                    colspan="5"
-                                    class="px-6 py-16 text-center">
-
-
-                                    <div
-                                        class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
-
-
-                                        <svg
-                                            class="h-6 w-6 text-slate-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            stroke-width="1.7"
-                                            viewBox="0 0 24 24">
-
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/>
-
-                                            <path
-                                                stroke-linecap="round"
-                                                d="M9 7h6M9 11h6"/>
-
-                                        </svg>
-
-                                    </div>
-
-
-                                    <p
-                                        class="mt-4 font-manrope text-sm font-bold text-slate-700">
-
-                                        No bills found
-
-                                    </p>
-
-
-                                    <p
-                                        class="mt-1 font-inter text-[11px] text-slate-400">
-
-                                        Try changing your search or create a new bill.
-
-                                    </p>
-
-
-                                    <a
-                                        href="<%= contextPath %>/bills/add"
-                                        class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 font-inter text-xs font-bold text-white hover:bg-[#1D4ED8]">
-
-                                        Create Bill
-
-                                    </a>
-
-                                </td>
-
-                            </tr>
-
-
-                            <%
-
-                                }
-
-                            %>
-
-
-                        </tbody>
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center">
+                                <p class="font-inter text-xs text-slate-400">Loading bills...</p>
+                            </td>
+                        </tr>
+
+                    </tbody>
 
                     </table>
 
@@ -701,6 +410,241 @@
 
 </div>
 
+
+
+<script>
+(function () {
+    "use strict";
+
+    var contextPath = "<%= contextPath %>";
+    var billingApiUrl = contextPath + "/api/billing";
+
+    var tableBody = document.getElementById("billingTableBody");
+    var billCount = document.getElementById("billCount");
+    var keywordInput = document.getElementById("keyword");
+    var billTypeSelect = document.getElementById("billType");
+    var searchButton = document.getElementById("searchButton");
+    var clearButton = document.getElementById("clearButton");
+    var currentFilter = document.getElementById("currentFilter");
+
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+    function getBillId(bill) {
+        return bill.billId != null ? bill.billId : "";
+    }
+
+    function getBillNumber(bill) {
+        return bill.billNumber != null ? bill.billNumber : "-";
+    }
+
+    function getPatientId(bill) {
+        return bill.patientId != null ? bill.patientId : "-";
+    }
+
+    function getBillType(bill) {
+        return String(bill.billType || "").toUpperCase();
+    }
+
+    function getTotalAmount(bill) {
+        var amount = Number(bill.totalAmount);
+        return isNaN(amount) ? "0.00" : amount.toFixed(2);
+    }
+
+    function showEmpty(message) {
+        tableBody.innerHTML =
+            '<tr>' +
+                '<td colspan="5" class="px-6 py-16 text-center">' +
+                    '<div class="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">' +
+                        '<svg class="h-6 w-6 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">' +
+                            '<path stroke-linecap="round" stroke-linejoin="round" d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/>' +
+                            '<path stroke-linecap="round" d="M9 7h6M9 11h6"/>' +
+                        '</svg>' +
+                    '</div>' +
+                    '<p class="mt-4 font-manrope text-sm font-bold text-slate-700">' +
+                        escapeHtml(message) +
+                    '</p>' +
+                    '<p class="mt-1 font-inter text-[11px] text-slate-400">' +
+                        'Try changing your search or create a new bill.' +
+                    '</p>' +
+                    '<a href="' + contextPath + '/bills/add" class="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 font-inter text-xs font-bold text-white hover:bg-[#1D4ED8]">' +
+                        'Create Bill' +
+                    '</a>' +
+                '</td>' +
+            '</tr>';
+    }
+
+    function renderBills(bills) {
+        if (!Array.isArray(bills) || bills.length === 0) {
+            billCount.textContent = "0 bill(s) found";
+            showEmpty("No bills found");
+            return;
+        }
+
+        billCount.textContent = bills.length + " bill(s) found";
+
+        var html = "";
+
+        bills.forEach(function (bill) {
+            var billId = getBillId(bill);
+            var type = getBillType(bill);
+            var typeLabel = type === "WALK_IN" ? "Walk-in" : "Appointment";
+            var typeClass = type === "WALK_IN"
+                ? "bg-amber-50 text-amber-700"
+                : "bg-blue-50 text-blue-700";
+
+            html +=
+                '<tr class="transition hover:bg-slate-50/70">' +
+
+                    '<td class="px-6 py-4">' +
+                        '<div class="font-manrope text-xs font-bold text-slate-800">' +
+                            escapeHtml(getBillNumber(bill)) +
+                        '</div>' +
+                        '<div class="mt-1 font-inter text-[10px] text-slate-400">' +
+                            'Bill ID #' + escapeHtml(billId) +
+                        '</div>' +
+                    '</td>' +
+
+                    '<td class="px-6 py-4">' +
+                        '<div class="font-inter text-xs font-medium text-slate-700">' +
+                            'Patient #' + escapeHtml(getPatientId(bill)) +
+                        '</div>' +
+                    '</td>' +
+
+                    '<td class="px-6 py-4">' +
+                        '<span class="inline-flex items-center rounded-full ' + typeClass + ' px-3 py-1.5 font-inter text-[10px] font-bold">' +
+                            typeLabel +
+                        '</span>' +
+                    '</td>' +
+
+                    '<td class="px-6 py-4">' +
+                        '<span class="font-manrope text-xs font-bold text-slate-800">' +
+                            'LKR ' + escapeHtml(getTotalAmount(bill)) +
+                        '</span>' +
+                    '</td>' +
+
+                    '<td class="px-6 py-4 text-right">' +
+                        '<a href="' + contextPath + '/bills/view?id=' + encodeURIComponent(billId) + '"' +
+                           ' class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2 font-inter text-[10px] font-bold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700">' +
+                            'View' +
+                            '<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">' +
+                                '<path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>' +
+                            '</svg>' +
+                        '</a>' +
+                    '</td>' +
+
+                '</tr>';
+        });
+
+        tableBody.innerHTML = html;
+    }
+
+    function updateFilterBadge(type) {
+        if (!currentFilter) {
+            return;
+        }
+
+        if (type === "WALK_IN") {
+            currentFilter.textContent = "Walk-in";
+            currentFilter.classList.remove("hidden");
+        } else if (type === "APPOINTMENT") {
+            currentFilter.textContent = "Appointment";
+            currentFilter.classList.remove("hidden");
+        } else {
+            currentFilter.textContent = "";
+            currentFilter.classList.add("hidden");
+        }
+    }
+
+    function loadBills() {
+        var keyword = keywordInput.value.trim();
+        var billType = billTypeSelect.value;
+
+        tableBody.innerHTML =
+            '<tr>' +
+                '<td colspan="5" class="px-6 py-16 text-center">' +
+                    '<p class="font-inter text-xs text-slate-400">Loading bills...</p>' +
+                '</td>' +
+            '</tr>';
+
+        updateFilterBadge(billType);
+
+        var params = new URLSearchParams();
+
+        if (keyword !== "") {
+            params.set("keyword", keyword);
+        }
+
+        if (billType !== "ALL") {
+            params.set("billType", billType);
+        }
+
+        var url = billingApiUrl;
+
+        if (params.toString() !== "") {
+            url += "?" + params.toString();
+        }
+
+        fetch(url, {
+            method: "GET",
+            credentials: "same-origin",
+            headers: {
+                "Accept": "application/json"
+            }
+        })
+        .then(function (response) {
+            if (!response.ok) {
+                return response.text().then(function (body) {
+                    throw new Error("Billing API returned " + response.status + (body ? ": " + body : ""));
+                });
+            }
+
+            return response.json();
+        })
+        .then(function (data) {
+            renderBills(Array.isArray(data) ? data : []);
+        })
+        .catch(function (error) {
+            console.error("Failed to load bills:", error);
+            billCount.textContent = "Unable to load bills";
+            tableBody.innerHTML =
+                '<tr>' +
+                    '<td colspan="5" class="px-6 py-16 text-center">' +
+                        '<p class="font-manrope text-sm font-bold text-red-600">Unable to load bills</p>' +
+                        '<p class="mt-1 font-inter text-[11px] text-slate-400">' +
+                            'Please check the REST API and try again.' +
+                        '</p>' +
+                    '</td>' +
+                '</tr>';
+        });
+    }
+
+    searchButton.addEventListener("click", loadBills);
+
+    clearButton.addEventListener("click", function () {
+        keywordInput.value = "";
+        billTypeSelect.value = "ALL";
+        loadBills();
+    });
+
+    keywordInput.addEventListener("keydown", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            loadBills();
+        }
+    });
+
+    billTypeSelect.addEventListener("change", loadBills);
+
+    loadBills();
+})();
+</script>
 
 </body>
 

@@ -1,7 +1,4 @@
-<%@ page import="com.sunrise.model.User" %>
-
 <%
-
     String contextPath = request.getContextPath();
 
     String currentPage =
@@ -11,60 +8,16 @@
 
 
     // =========================================================
-    // LOGGED-IN USER
-    // =========================================================
-
-    User loggedUser =
-            (User) session.getAttribute("loggedUser");
-
-
-    boolean isAdmin =
-            loggedUser != null &&
-            "ADMIN".equalsIgnoreCase(
-                    loggedUser.getRole()
-            );
-
-
-    // =========================================================
-    // DASHBOARD URL
-    // =========================================================
-
-    String dashboardUrl;
-
-    if (isAdmin) {
-
-        dashboardUrl =
-                contextPath + "/admin/dashboard";
-
-    } else {
-
-        dashboardUrl =
-                contextPath + "/dashboard";
-
-    }
-
-
-    // =========================================================
     // ACTIVE PAGE DETECTION
     // =========================================================
 
     boolean dashboardActive;
 
-    if (isAdmin) {
-
-        dashboardActive =
-                currentPage.equals(
-                        "/admin/dashboard"
-                );
-
-    } else {
-
-        dashboardActive =
-                currentPage.equals(
-                        "/dashboard"
-                );
-
-    }
+    // Dashboard can be different for admin/receptionist.
+    // Keep the existing URL structure.
+    dashboardActive =
+            currentPage.equals("/dashboard") ||
+            currentPage.equals("/admin/dashboard");
 
 
     boolean patientsActive =
@@ -101,6 +54,8 @@
             currentPage.startsWith(
                     "/reports"
             );
+
+
     boolean helpActive =
             currentPage.startsWith(
                     "/help"
@@ -117,7 +72,6 @@
             currentPage.startsWith(
                     "/admin/edit-user"
             );
-
 %>
 
 
@@ -129,46 +83,39 @@
          BRAND
     ====================================================== -->
 
-    <!-- =====================================================
-     BRAND
-====================================================== -->
+    <div class="mb-8 px-3">
 
-<div class="mb-8 px-3">
+        <div class="flex items-center gap-3">
 
-    <!-- Logo + Brand Name -->
+            <img
+                src="<%= contextPath %>/assets/images/sunrise-logo.png"
+                alt="Sunrise Dental Logo"
+                class="h-9 w-9 object-contain"
+            />
 
-    <div class="flex items-center gap-3">
+            <div class="min-w-0">
 
-        <img
-            src="<%= contextPath %>/assets/images/sunrise-logo.png"
-            alt="Sunrise Dental Logo"
-            class="h-9 w-9 object-contain"
-        />
+                <h1
+                    class="font-manrope text-[16px] font-extrabold
+                           tracking-tight text-white leading-tight">
 
-        <div class="min-w-0">
+                    Sunrise Dental
 
-            <h1
-                class="font-manrope text-[16px] font-extrabold
-                       tracking-tight text-white leading-tight">
+                </h1>
 
-                Sunrise Dental
+                <p
+                    class="mt-0.5 font-inter text-[9px] font-medium
+                           text-slate-500">
 
-            </h1>
+                    Clinic Management System
 
-            <p
-                class="mt-0.5 font-inter text-[9px] font-medium
-                       text-slate-500">
+                </p>
 
-                Clinic Management System
-
-            </p>
+            </div>
 
         </div>
 
     </div>
-
-</div>
-
 
 
     <!-- =====================================================
@@ -193,7 +140,8 @@
             ================================================== -->
 
             <a
-                href="<%= dashboardUrl %>"
+                id="dashboardLink"
+                href="<%= contextPath %>/dashboard"
                 class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
                 <%= dashboardActive
                     ? "text-white"
@@ -220,7 +168,6 @@
                 Dashboard
 
             </a>
-
 
 
             <!-- =================================================
@@ -257,7 +204,6 @@
             </a>
 
 
-
             <!-- =================================================
                  DENTISTS
             ================================================== -->
@@ -290,7 +236,6 @@
                 Dentists
 
             </a>
-
 
 
             <!-- =================================================
@@ -333,7 +278,6 @@
             </a>
 
 
-
             <!-- =================================================
                  APPOINTMENTS
             ================================================== -->
@@ -372,7 +316,6 @@
                 Appointments
 
             </a>
-
 
 
             <!-- =================================================
@@ -418,23 +361,19 @@
     </div>
 
 
-
     <!-- =====================================================
          MANAGEMENT
     ====================================================== -->
 
-    <div>
+    <div id="managementSection">
 
-        <% if (isAdmin) { %>
+        <p
+            id="managementTitle"
+            class="mb-2 px-3 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
 
-    <p
-        class="mb-2 px-3 font-inter text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Management
 
-        Management
-
-    </p>
-
-<% } %>
+        </p>
 
 
         <nav class="space-y-1">
@@ -444,54 +383,82 @@
                  USERS
             ================================================== -->
 
-            <% if (isAdmin) { %>
+            <a
+                id="usersLink"
+                href="<%= contextPath %>/admin/users"
+                class="hidden flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition"
+            >
 
-                <a
-                    href="<%= contextPath %>/admin/users"
-                    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
-                    <%= usersActive
-                        ? "text-white"
-                        : "text-slate-400 hover:bg-[#1f2937] hover:text-white" %>"
-                    style="<%= usersActive
-                        ? "background-color: #2563EB;"
-                        : "" %>"
-                >
+                <svg
+                    class="h-[17px] w-[17px] shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24">
 
-                    <svg
-                        class="h-[17px] w-[17px] shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6"/>
 
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM19 8v6M22 11h-6"/>
+                </svg>
 
-                    </svg>
+                Users
 
-                    Users
-
-                </a>
-
-            <% } %>
-
+            </a>
 
 
             <!-- =================================================
-     REPORTS
-================================================== -->
+                 REPORTS
+            ================================================== -->
 
-<% if (isAdmin) { %>
+            <a
+                id="reportsLink"
+                href="<%= contextPath %>/reports"
+                class="hidden flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition"
+            >
+
+                <svg
+                    class="h-[17px] w-[17px] shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    viewBox="0 0 24 24">
+
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M4 19V5M4 19h17"
+                    />
+
+                    <path
+                        stroke-linecap="round"
+                        d="M8 16v-5M12 16V7M16 16v-8"
+                    />
+
+                </svg>
+
+                Reports
+
+            </a>
+
+
+        </nav>
+
+    </div>
+
+
+    <!-- =================================================
+         HELP
+    ================================================== -->
 
     <a
-        href="<%= contextPath %>/reports"
+        href="<%= contextPath %>/help"
         class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
-        <%= reportsActive
+        <%= helpActive
             ? "text-white"
             : "text-slate-400 hover:bg-[#1f2937] hover:text-white" %>"
-        style="<%= reportsActive
+        style="<%= helpActive
             ? "background-color: #2563EB;"
             : "" %>"
     >
@@ -503,75 +470,28 @@
             stroke-width="1.8"
             viewBox="0 0 24 24">
 
+            <circle
+                cx="12"
+                cy="12"
+                r="9">
+            </circle>
+
             <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                d="M4 19V5M4 19h17"
-            />
+                d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5">
+            </path>
 
             <path
                 stroke-linecap="round"
-                d="M8 16v-5M12 16V7M16 16v-8"
-            />
+                d="M12 16.5h.01">
+            </path>
 
         </svg>
 
-        Reports
+        Help
 
     </a>
-
-<% } %>
-
-
-        </nav>
-
-    </div>
-    
-    <!-- =================================================
-     HELP
-================================================== -->
-
-<a
-    href="<%= contextPath %>/help"
-    class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition
-    <%= helpActive
-        ? "text-white"
-        : "text-slate-400 hover:bg-[#1f2937] hover:text-white" %>"
-    style="<%= helpActive
-        ? "background-color: #2563EB;"
-        : "" %>"
->
-
-    <svg
-        class="h-[17px] w-[17px] shrink-0"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="1.8"
-        viewBox="0 0 24 24">
-
-        <circle
-            cx="12"
-            cy="12"
-            r="9">
-        </circle>
-
-        <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M9.5 9a2.5 2.5 0 015 0c0 1.5-2.5 2-2.5 3.5">
-        </path>
-
-        <path
-            stroke-linecap="round"
-            d="M12 16.5h.01">
-        </path>
-
-    </svg>
-
-    Help
-
-</a>
-
 
 
     <!-- =====================================================
@@ -581,80 +501,53 @@
     <div
         class="mt-auto border-t border-white/[0.06] pt-4">
 
-        <% if (loggedUser != null) { %>
 
-            <%
-                String profileName = loggedUser.getFullName();
+        <!-- =================================================
+             PROFILE
+        ================================================== -->
 
-                if (profileName == null || profileName.trim().isEmpty()) {
-                    profileName = loggedUser.getUsername();
-                }
-
-                String[] nameParts = profileName.trim().split("\\s+");
-                String initials = "";
-
-                if (nameParts.length > 0 && !nameParts[0].isEmpty()) {
-                    initials += nameParts[0].substring(0, 1).toUpperCase();
-                }
-
-                if (nameParts.length > 1 && !nameParts[nameParts.length - 1].isEmpty()) {
-                    initials += nameParts[nameParts.length - 1].substring(0, 1).toUpperCase();
-                }
-
-                if (initials.isEmpty()) {
-                    initials = "U";
-                }
-
-                String displayRole = loggedUser.getRole();
-
-                if (displayRole == null || displayRole.trim().isEmpty()) {
-                    displayRole = "User";
-                } else if ("ADMIN".equalsIgnoreCase(displayRole.trim())) {
-                    displayRole = "Administrator";
-                } else if ("RECEPTIONIST".equalsIgnoreCase(displayRole.trim())) {
-                    displayRole = "Receptionist";
-                }
-            %>
-
-            <!-- PROFILE -->
+        <div
+            id="sidebarProfile"
+            class="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-3">
 
             <div
-                class="mb-3 flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.04] px-3 py-3">
+                id="profileInitials"
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#111827] text-[11px] font-bold text-white">
 
-                <div
-                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/[0.06] bg-[#111827] text-[11px] font-bold text-white">
-
-                    <%= initials %>
-
-                </div>
-
-                <div class="min-w-0 flex-1">
-
-                    <p
-                        class="truncate font-manrope text-[12px] font-semibold text-white">
-
-                        <%= profileName %>
-
-                    </p>
-
-                    <p
-                        class="mt-0.5 truncate font-manrope text-[10px] font-medium text-slate-500">
-
-                        <%= displayRole %>
-
-                    </p>
-
-                </div>
+                U
 
             </div>
 
-        <% } %>
+            <div class="min-w-0 flex-1">
+
+                <p
+                    id="profileName"
+                    class="truncate font-manrope text-[12px] font-semibold text-white">
+
+                    Loading...
+
+                </p>
+
+                <p
+                    id="profileRole"
+                    class="mt-0.5 truncate font-manrope text-[10px] font-medium text-slate-500">
+
+                    User
+
+                </p>
+
+            </div>
+
+        </div>
 
 
-        <!-- LOGOUT -->
+        <!-- =================================================
+             LOGOUT
+        ================================================== -->
 
         <a
-            href="<%= contextPath %>/logout"
+            href="#"
+            id="logoutLink"
             class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold text-slate-400 transition hover:bg-[#1f2937] hover:text-white"
         >
 
@@ -683,8 +576,485 @@
 
 
     </div>
-    
+
+
     <jsp:include page="/WEB-INF/views/common/cookie-banner.jsp" />
 
 
 </aside>
+
+
+<!-- =========================================================
+     SIDEBAR API
+========================================================== -->
+
+<script>
+
+(function () {
+
+    const contextPath = "<%= contextPath %>";
+
+
+    /*
+     * ========================================================
+     * LOAD CURRENT USER
+     * GET /api/auth/me
+     * ========================================================
+     */
+
+    async function loadCurrentUser() {
+
+        try {
+
+            const response = await fetch(
+                contextPath + "/api/auth/me",
+                {
+                    method: "GET",
+                    credentials: "same-origin",
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                }
+            );
+
+
+            if (!response.ok) {
+
+                if (response.status === 401) {
+
+                    window.location.href =
+                        contextPath + "/login";
+
+                    return;
+
+                }
+
+                throw new Error(
+                    "Failed to load current user"
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            /*
+             * API response can contain the user
+             * directly or inside "user".
+             */
+
+            const user =
+                data.user || data;
+
+
+            if (!user) {
+                return;
+            }
+
+
+            /*
+             * =================================================
+             * USER NAME
+             * =================================================
+             */
+
+            let profileName =
+                user.fullName ||
+                user.username ||
+                "User";
+
+
+            /*
+             * =================================================
+             * ROLE
+             * =================================================
+             */
+
+            let role =
+                user.role ||
+                "User";
+
+
+            let displayRole =
+                role;
+
+
+            if (
+                role.toUpperCase() ===
+                "ADMIN"
+            ) {
+
+                displayRole =
+                    "Administrator";
+
+            }
+            else if (
+                role.toUpperCase() ===
+                "RECEPTIONIST"
+            ) {
+
+                displayRole =
+                    "Receptionist";
+
+            }
+
+
+            /*
+             * =================================================
+             * INITIALS
+             * =================================================
+             */
+
+            const nameParts =
+                profileName
+                    .trim()
+                    .split(/\s+/);
+
+
+            let initials = "";
+
+
+            if (
+                nameParts.length > 0 &&
+                nameParts[0]
+            ) {
+
+                initials +=
+                    nameParts[0]
+                        .substring(0, 1)
+                        .toUpperCase();
+
+            }
+
+
+            if (
+                nameParts.length > 1 &&
+                nameParts[nameParts.length - 1]
+            ) {
+
+                initials +=
+                    nameParts[nameParts.length - 1]
+                        .substring(0, 1)
+                        .toUpperCase();
+
+            }
+
+
+            if (!initials) {
+
+                initials = "U";
+
+            }
+
+
+            /*
+             * =================================================
+             * UPDATE PROFILE
+             * =================================================
+             */
+
+            const profileNameElement =
+                document.getElementById(
+                    "profileName"
+                );
+
+
+            const profileRoleElement =
+                document.getElementById(
+                    "profileRole"
+                );
+
+
+            const profileInitialsElement =
+                document.getElementById(
+                    "profileInitials"
+                );
+
+
+            if (profileNameElement) {
+
+                profileNameElement.textContent =
+                    profileName;
+
+            }
+
+
+            if (profileRoleElement) {
+
+                profileRoleElement.textContent =
+                    displayRole;
+
+            }
+
+
+            if (profileInitialsElement) {
+
+                profileInitialsElement.textContent =
+                    initials;
+
+            }
+
+
+            /*
+             * =================================================
+             * ADMIN MENU
+             * =================================================
+             */
+
+            const usersLink =
+                document.getElementById(
+                    "usersLink"
+                );
+
+
+            const reportsLink =
+                document.getElementById(
+                    "reportsLink"
+                );
+
+
+            const managementTitle =
+                document.getElementById(
+                    "managementTitle"
+                );
+
+
+            const isAdmin =
+                role.toUpperCase() ===
+                "ADMIN";
+
+
+            if (isAdmin) {
+
+                /*
+                 * Users
+                 */
+
+                if (usersLink) {
+
+                    usersLink.classList.remove(
+                        "hidden"
+                    );
+
+
+                    usersLink.classList.add(
+                        "text-slate-400",
+                        "hover:bg-[#1f2937]",
+                        "hover:text-white"
+                    );
+
+
+                    <% if (usersActive) { %>
+
+                    usersLink.classList.remove(
+                        "text-slate-400"
+                    );
+
+                    usersLink.classList.add(
+                        "text-white"
+                    );
+
+                    usersLink.style.backgroundColor =
+                        "#2563EB";
+
+                    <% } %>
+
+                }
+
+
+                /*
+                 * Reports
+                 */
+
+                if (reportsLink) {
+
+                    reportsLink.classList.remove(
+                        "hidden"
+                    );
+
+
+                    reportsLink.classList.add(
+                        "text-slate-400",
+                        "hover:bg-[#1f2937]",
+                        "hover:text-white"
+                    );
+
+
+                    <% if (reportsActive) { %>
+
+                    reportsLink.classList.remove(
+                        "text-slate-400"
+                    );
+
+                    reportsLink.classList.add(
+                        "text-white"
+                    );
+
+                    reportsLink.style.backgroundColor =
+                        "#2563EB";
+
+                    <% } %>
+
+                }
+
+
+                if (managementTitle) {
+
+                    managementTitle.classList.remove(
+                        "hidden"
+                    );
+
+                }
+
+
+                /*
+                 * Admin dashboard
+                 */
+
+                const dashboardLink =
+                    document.getElementById(
+                        "dashboardLink"
+                    );
+
+
+                if (dashboardLink) {
+
+                    dashboardLink.href =
+                        contextPath +
+                        "/admin/dashboard";
+
+                }
+
+            }
+            else {
+
+                /*
+                 * Hide management title when
+                 * there are no management items.
+                 */
+
+                if (managementTitle) {
+
+                    managementTitle.classList.add(
+                        "hidden"
+                    );
+
+                }
+
+            }
+
+        }
+        catch (error) {
+
+            console.error(
+                "Sidebar user API error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * ========================================================
+     * LOGOUT
+     * POST /api/auth/logout
+     * ========================================================
+     */
+
+    const logoutLink =
+        document.getElementById(
+            "logoutLink"
+        );
+
+
+    if (logoutLink) {
+
+        logoutLink.addEventListener(
+            "click",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            contextPath +
+                            "/api/auth/logout",
+                            {
+                                method: "POST",
+                                credentials: "same-origin",
+                                headers: {
+                                    "Accept":
+                                        "application/json"
+                                }
+                            }
+                        );
+
+
+                    /*
+                     * Redirect regardless of
+                     * successful API response.
+                     */
+
+                    if (
+                        response.ok ||
+                        response.status === 401
+                    ) {
+
+                        window.location.href =
+                            contextPath + "/login";
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * If API returned an error,
+                     * still redirect to login.
+                     */
+
+                    window.location.href =
+                        contextPath + "/login";
+
+                }
+                catch (error) {
+
+                    console.error(
+                        "Logout API error:",
+                        error
+                    );
+
+
+                    /*
+                     * Fallback
+                     */
+
+                    window.location.href =
+                        contextPath + "/login";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+     * ========================================================
+     * START
+     * ========================================================
+     */
+
+    loadCurrentUser();
+
+})();
+
+</script>
