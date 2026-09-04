@@ -25,8 +25,16 @@ jobs:
       - name: Check Java version
         run: java -version
 
+      - name: Download Jakarta Servlet API
+        run: |
+          mkdir -p ci/lib
+          curl -L -o ci/lib/jakarta-servlet-api.jar \
+            https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.0.0/jakarta.servlet-api-6.0.0.jar
+
       - name: Compile Java source
         run: |
           mkdir -p build/classes
           find src/main/java -name "*.java" > sources.txt
-          javac -d build/classes @sources.txt
+          javac -cp "ci/lib/jakarta-servlet-api.jar:src/main/webapp/WEB-INF/lib/*" \
+            -d build/classes \
+            @sources.txt
