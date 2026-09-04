@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # MySQL database for automated integration tests
+    # MySQL database used for integration tests
     services:
       mysql:
         image: mysql:8.0
@@ -51,7 +51,7 @@ jobs:
           mysql -h 127.0.0.1 -P 3306 -u root -proot \
             sunrise_dental_db < database/sunrise_dental_db.sql
 
-      # 5. Verify database
+      # 5. Verify database tables
       - name: Verify database
         run: |
           echo "Database tables:"
@@ -135,14 +135,14 @@ jobs:
       - name: Run automated service tests
         run: |
           java -jar ci/lib/junit-platform-console-standalone.jar execute \
-            --class-path "build/classes:build/test-classes:ci/lib/*" \
+            --class-path "build/classes:build/test-classes:ci/lib/jakarta-servlet-api.jar:ci/lib/jakarta.mail-api.jar:ci/lib/jakarta.activation-api.jar:ci/lib/angus-mail.jar:ci/lib/angus-activation.jar:ci/lib/mysql-connector-j.jar" \
             --select-package com.sunrise.test.service
 
       # 16. Run database integration tests
       - name: Run database integration tests
         run: |
           java -jar ci/lib/junit-platform-console-standalone.jar execute \
-            --class-path "build/classes:build/test-classes:ci/lib/*" \
+            --class-path "build/classes:build/test-classes:ci/lib/jakarta-servlet-api.jar:ci/lib/jakarta.mail-api.jar:ci/lib/jakarta.activation-api.jar:ci/lib/angus-mail.jar:ci/lib/angus-activation.jar:ci/lib/mysql-connector-j.jar" \
             --select-package com.sunrise.test.integration
 
       # 17. Prepare WAR directory
