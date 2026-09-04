@@ -3,6 +3,8 @@ package com.sunrise.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,33 +17,40 @@ public class TreatmentDAO {
     // ADD TREATMENT
     // =========================================================
 
-    public boolean addTreatment(Treatment treatment) {
+	public boolean addTreatment(Treatment treatment) {
 
-        String sql =
-                "INSERT INTO treatments " +
-                "(treatment_name, description, treatment_fee, active) " +
-                "VALUES (?, ?, ?, ?)";
+	    String sql = "INSERT INTO treatments "
+	            + "(treatment_name, description, treatment_fee, active) "
+	            + "VALUES (?, ?, ?, ?)";
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
+	    try (Connection con = DBConnection.getConnection();
+	         PreparedStatement st = con.prepareStatement(
+	                 sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            st.setString(1, treatment.getTreatmentName());
-            st.setString(2, treatment.getDescription());
-            st.setDouble(3, treatment.getTreatmentFee());
-            st.setBoolean(4, treatment.isActive());
+	        st.setString(1, treatment.getTreatmentName());
+	        st.setString(2, treatment.getDescription());
+	        st.setDouble(3, treatment.getTreatmentFee());
+	        st.setBoolean(4, treatment.isActive());
 
-            return st.executeUpdate() > 0;
+	        int rows = st.executeUpdate();
 
-        } catch (Exception e) {
+	        if (rows > 0) {
 
-            System.out.println("ERROR ADDING TREATMENT:");
-            e.printStackTrace();
-        }
+	            try (ResultSet rs = st.getGeneratedKeys()) {
+	                if (rs.next()) {
+	                    treatment.setTreatmentId(rs.getInt(1));
+	                }
+	            }
 
-        return false;
-    }
+	            return true;
+	        }
+
+	    } catch (ClassNotFoundException | SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 
 
     // =========================================================

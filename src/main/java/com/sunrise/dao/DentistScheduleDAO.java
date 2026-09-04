@@ -184,7 +184,10 @@ public class DentistScheduleDAO {
 
 
             try (PreparedStatement insert =
-                    con.prepareStatement(insertSQL)) {
+                    con.prepareStatement(
+                            insertSQL,
+                            java.sql.Statement.RETURN_GENERATED_KEYS
+                    )) {
 
 
                 for (DentistSchedule schedule : schedules) {
@@ -225,10 +228,21 @@ public class DentistScheduleDAO {
 
 
                     int result =
-                        insert.executeUpdate();
-
+                            insert.executeUpdate();
 
                     inserted += result;
+
+                    // Get generated schedule ID
+                    try (ResultSet rs =
+                            insert.getGeneratedKeys()) {
+
+                        if (rs.next()) {
+
+                            schedule.setScheduleId(
+                                    rs.getInt(1)
+                            );
+                        }
+                    }
 
 
                     System.out.println(

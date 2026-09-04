@@ -56,7 +56,10 @@ public class BillDAO {
             // =================================================
 
             try (PreparedStatement st =
-                    con.prepareStatement(insertSql)) {
+                    con.prepareStatement(
+                            insertSql,
+                            java.sql.Statement.RETURN_GENERATED_KEYS
+                    )) {
 
 
                 // 1. BILL NUMBER
@@ -154,12 +157,22 @@ public class BillDAO {
                 int billRows =
                         st.executeUpdate();
 
-
                 if (billRows <= 0) {
 
                     con.rollback();
 
                     return false;
+                }
+
+                // Get the generated bill ID
+                try (ResultSet rs = st.getGeneratedKeys()) {
+
+                    if (rs.next()) {
+
+                        bill.setBillId(
+                                rs.getInt(1)
+                        );
+                    }
                 }
             }
 

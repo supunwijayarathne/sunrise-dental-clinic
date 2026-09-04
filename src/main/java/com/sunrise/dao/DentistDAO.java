@@ -1,6 +1,9 @@
 package com.sunrise.dao;
 
 import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -12,36 +15,42 @@ import com.sunrise.util.DBConnection;
 public class DentistDAO {
 
     // ADD DENTIST
-    public boolean addDentist(Dentist dentist) {
+	public boolean addDentist(Dentist dentist) {
 
-        String sql =
-                "INSERT INTO dentists " +
-                "(dentist_name, specialization, consultation_fee, " +
-                "phone_number, email, active) " +
-                "VALUES (?, ?, ?, ?, ?, ?)";
+	    String sql = "INSERT INTO dentists "
+	            + "(dentist_name, specialization, consultation_fee, phone_number, email, active) "
+	            + "VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
+	    try (Connection con = DBConnection.getConnection();
+	         PreparedStatement st = con.prepareStatement(
+	                 sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            st.setString(1, dentist.getDentistName());
-            st.setString(2, dentist.getSpecialization());
-            st.setDouble(3, dentist.getConsultationFee());
-            st.setString(4, dentist.getPhoneNumber());
-            st.setString(5, dentist.getEmail());
-            st.setBoolean(6, dentist.isActive());
+	        st.setString(1, dentist.getDentistName());
+	        st.setString(2, dentist.getSpecialization());
+	        st.setDouble(3, dentist.getConsultationFee());
+	        st.setString(4, dentist.getPhoneNumber());
+	        st.setString(5, dentist.getEmail());
+	        st.setBoolean(6, dentist.isActive());
 
-            return st.executeUpdate() > 0;
+	        int rows = st.executeUpdate();
 
-        } catch (Exception e) {
+	        if (rows > 0) {
 
-            System.out.println("ERROR ADDING DENTIST:");
-            e.printStackTrace();
-        }
+	            try (ResultSet rs = st.getGeneratedKeys()) {
+	                if (rs.next()) {
+	                    dentist.setDentistId(rs.getInt(1));
+	                }
+	            }
 
-        return false;
-    }
+	            return true;
+	        }
+
+	    } catch (ClassNotFoundException | SQLException e) {
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 
 
     // GET ALL DENTISTS

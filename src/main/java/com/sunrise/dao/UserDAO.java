@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,7 +57,8 @@ public class UserDAO {
     public boolean markFirstLoginCompleted(int userId) {
 
         String sql =
-                "UPDATE users SET first_login = FALSE WHERE user_id = ?";
+                "UPDATE users SET first_login = FALSE " +
+                "WHERE user_id = ?";
 
         try (
                 Connection con = DBConnection.getConnection();
@@ -78,7 +80,7 @@ public class UserDAO {
 
 
     // =========================================================
-    // ADD RECEPTIONIST
+    // ADD USER
     // =========================================================
 
     public boolean addUser(User user) {
@@ -91,8 +93,15 @@ public class UserDAO {
 
         try (
                 Connection con = DBConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql)
+
+                // IMPORTANT:
+                // This allows us to retrieve the AUTO_INCREMENT user_id
+                PreparedStatement ps = con.prepareStatement(
+                        sql,
+                        Statement.RETURN_GENERATED_KEYS
+                )
         ) {
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
@@ -103,54 +112,117 @@ public class UserDAO {
             ps.setString(8, user.getRole());
             ps.setBoolean(9, user.isActive());
             ps.setBoolean(10, user.isFirstLogin());
-            return ps.executeUpdate() > 0;
+
+            int rows = ps.executeUpdate();
+
+            // Insert failed
+            if (rows <= 0) {
+                return false;
+            }
+
+            // Retrieve generated AUTO_INCREMENT ID
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+
+                if (rs.next()) {
+
+                    user.setUserId(
+                            rs.getInt(1)
+                    );
+                }
+            }
+
+            // Insert succeeded
+            return true;
+
         } catch (Exception e) {
+
             System.out.println("ERROR ADDING USER:");
             e.printStackTrace();
+
+            return false;
         }
-        return false;
     }
 
+
+    // =========================================================
+    // ADD RECEPTIONIST
+    // =========================================================
+
     public boolean addReceptionist(User user) {
+
         user.setRole("RECEPTIONIST");
+
         return addUser(user);
     }
+
 
     // =========================================================
     // GET ALL USERS
     // =========================================================
 
     public List<User> getAllUsers() {
+
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY user_id DESC";
+
+        String sql =
+                "SELECT * FROM users " +
+                "ORDER BY user_id DESC";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()
         ) {
-            while (rs.next()) users.add(mapUser(rs));
+
+            while (rs.next()) {
+
+                users.add(
+                        mapUser(rs)
+                );
+            }
+
         } catch (Exception e) {
+
             System.out.println("ERROR LOADING USERS:");
             e.printStackTrace();
         }
+
         return users;
     }
 
+
+    // =========================================================
+    // GET ALL RECEPTIONISTS
+    // =========================================================
+
     public List<User> getAllReceptionists() {
+
         List<User> receptionists = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE role = 'RECEPTIONIST' ORDER BY user_id DESC";
+
+        String sql =
+                "SELECT * FROM users " +
+                "WHERE role = 'RECEPTIONIST' " +
+                "ORDER BY user_id DESC";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()
         ) {
-            while (rs.next()) receptionists.add(mapUser(rs));
+
+            while (rs.next()) {
+
+                receptionists.add(
+                        mapUser(rs)
+                );
+            }
+
         } catch (Exception e) {
+
             System.out.println("ERROR LOADING RECEPTIONISTS:");
             e.printStackTrace();
         }
+
         return receptionists;
     }
 
@@ -182,10 +254,7 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR FINDING USER:"
-            );
-
+            System.out.println("ERROR FINDING USER:");
             e.printStackTrace();
         }
 
@@ -200,14 +269,20 @@ public class UserDAO {
     public boolean updateUser(User user) {
 
         String sql =
-                "UPDATE users SET full_name = ?, email = ?, " +
-                "phone = ?, address = ?, position = ?, role = ? " +
+                "UPDATE users SET " +
+                "full_name = ?, " +
+                "email = ?, " +
+                "phone = ?, " +
+                "address = ?, " +
+                "position = ?, " +
+                "role = ? " +
                 "WHERE user_id = ?";
 
         try (
                 Connection con = DBConnection.getConnection();
                 PreparedStatement ps = con.prepareStatement(sql)
         ) {
+
             ps.setString(1, user.getFullName());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getPhone());
@@ -215,22 +290,33 @@ public class UserDAO {
             ps.setString(5, user.getPosition());
             ps.setString(6, user.getRole());
             ps.setInt(7, user.getUserId());
+
             return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
+
             System.out.println("ERROR UPDATING USER:");
             e.printStackTrace();
         }
+
         return false;
     }
 
+
+    // =========================================================
+    // UPDATE RECEPTIONIST
+    // =========================================================
+
     public boolean updateReceptionist(User user) {
+
         user.setRole("RECEPTIONIST");
+
         return updateUser(user);
     }
 
 
     // =========================================================
-    // ACTIVATE / DEACTIVATE
+    // ACTIVATE / DEACTIVATE USER
     // =========================================================
 
     public boolean updateStatus(
@@ -253,10 +339,7 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR UPDATING STATUS:"
-            );
-
+            System.out.println("ERROR UPDATING STATUS:");
             e.printStackTrace();
         }
 
@@ -288,10 +371,7 @@ public class UserDAO {
 
         } catch (Exception e) {
 
-            System.out.println(
-                    "ERROR CHECKING USERNAME:"
-            );
-
+            System.out.println("ERROR CHECKING USERNAME:");
             e.printStackTrace();
         }
 
@@ -383,7 +463,6 @@ public class UserDAO {
                 rs.getBoolean("active")
         );
 
-        // NEW USER GUIDE
         user.setFirstLogin(
                 rs.getBoolean("first_login")
         );

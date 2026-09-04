@@ -47,7 +47,18 @@ public class AuthenticationFilter implements Filter {
         if (path.equals("/login")) {
 
             chain.doFilter(request, response);
+            return;
+        }
 
+
+        // =====================================================
+        // ALLOW API AUTHENTICATION ENDPOINTS
+        // =====================================================
+
+        if (path.equals("/api/auth/login")
+                || path.equals("/api/auth/logout")) {
+
+            chain.doFilter(request, response);
             return;
         }
 
@@ -69,7 +80,6 @@ public class AuthenticationFilter implements Filter {
                 || path.endsWith(".ico")) {
 
             chain.doFilter(request, response);
-
             return;
         }
 
@@ -96,8 +106,30 @@ public class AuthenticationFilter implements Filter {
 
         if (loggedUser == null) {
 
+            // API requests should return JSON instead
+            // of redirecting to the JSP login page.
+
+            if (path.startsWith("/api/")) {
+
+                httpResponse.setStatus(
+                        HttpServletResponse.SC_UNAUTHORIZED
+                );
+
+                httpResponse.setContentType(
+                        "application/json"
+                );
+
+                httpResponse.getWriter().write(
+                        "{\"success\":false,\"message\":\"Not authenticated\"}"
+                );
+
+                return;
+            }
+
+            // Normal web application request
             httpResponse.sendRedirect(
-                    contextPath + "/login");
+                    contextPath + "/login"
+            );
 
             return;
         }
@@ -131,10 +163,12 @@ public class AuthenticationFilter implements Filter {
 
         if (path.equals("/dashboard")) {
 
-            if ("ADMIN".equals(loggedUser.getRole())) {
+            if ("ADMIN".equalsIgnoreCase(
+                    loggedUser.getRole())) {
 
                 httpResponse.sendRedirect(
-                        contextPath + "/admin/dashboard");
+                        contextPath + "/admin/dashboard"
+                );
 
                 return;
             }

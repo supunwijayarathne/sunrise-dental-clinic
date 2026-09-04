@@ -1,6 +1,8 @@
 package com.sunrise.dao;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Date;
@@ -19,53 +21,47 @@ public class AppointmentDAO {
     // ADD APPOINTMENT
     // =========================================================
 
-    public boolean addAppointment(Appointment appointment) {
+	public boolean addAppointment(Appointment appointment) {
 
-        String sql =
-                "INSERT INTO appointments " +
-                "(appointment_number, patient_id, dentist_id, " +
-                "treatment_id, appointment_date, appointment_time, " +
-                "status, notes, created_by) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	    String sql = "INSERT INTO appointments "
+	            + "(appointment_number, patient_id, dentist_id, treatment_id, "
+	            + "appointment_date, appointment_time, status, notes, created_by) "
+	            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
+	    try (Connection con = DBConnection.getConnection();
+	         PreparedStatement st = con.prepareStatement(
+	                 sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            st.setString(1, appointment.getAppointmentNumber());
-            st.setInt(2, appointment.getPatientId());
-            st.setInt(3, appointment.getDentistId());
-            st.setInt(4, appointment.getTreatmentId());
+	        st.setString(1, appointment.getAppointmentNumber());
+	        st.setInt(2, appointment.getPatientId());
+	        st.setInt(3, appointment.getDentistId());
+	        st.setInt(4, appointment.getTreatmentId());
+	        st.setDate(5, java.sql.Date.valueOf(appointment.getAppointmentDate()));
+	        st.setTime(6, java.sql.Time.valueOf(appointment.getAppointmentTime()));
+	        st.setString(7, appointment.getStatus());
+	        st.setString(8, appointment.getNotes());
+	        st.setInt(9, appointment.getCreatedBy());
 
-            st.setDate(
-                    5,
-                    Date.valueOf(
-                            appointment.getAppointmentDate()
-                    )
-            );
+	        int rows = st.executeUpdate();
 
-            st.setTime(
-                    6,
-                    Time.valueOf(
-                            appointment.getAppointmentTime()
-                    )
-            );
+	        if (rows > 0) {
 
-            st.setString(7, appointment.getStatus());
-            st.setString(8, appointment.getNotes());
-            st.setInt(9, appointment.getCreatedBy());
+	            try (ResultSet rs = st.getGeneratedKeys()) {
 
-            return st.executeUpdate() > 0;
+	                if (rs.next()) {
+	                    appointment.setAppointmentId(rs.getInt(1));
+	                }
+	            }
 
-        } catch (Exception e) {
+	            return true;
+	        }
 
-            System.out.println("ERROR ADDING APPOINTMENT:");
-            e.printStackTrace();
-        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 
-        return false;
-    }
+	    return false;
+	}
 
 
     // =========================================================

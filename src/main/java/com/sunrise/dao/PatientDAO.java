@@ -16,35 +16,52 @@ public class PatientDAO {
     // CREATE - Add new patient
     // =========================================================
 
-    public boolean addPatient(Patient patient) {
+	// =========================================================
+	// CREATE - Add new patient
+	// =========================================================
 
-        String sql = "INSERT INTO patients "
-                   + "(patient_code, name, address, contact_number, email) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+	public boolean addPatient(Patient patient) {
 
-        try (
-            Connection con = DBConnection.getConnection();
-            PreparedStatement st = con.prepareStatement(sql)
-        ) {
+	    String sql = "INSERT INTO patients "
+	               + "(patient_code, name, address, contact_number, email) "
+	               + "VALUES (?, ?, ?, ?, ?)";
 
-            st.setString(1, patient.getPatientCode());
-            st.setString(2, patient.getName());
-            st.setString(3, patient.getAddress());
-            st.setString(4, patient.getContactNumber());
-            st.setString(5, patient.getEmail());
+	    try (
+	        Connection con = DBConnection.getConnection();
+	        PreparedStatement st = con.prepareStatement(
+	            sql,
+	            java.sql.Statement.RETURN_GENERATED_KEYS
+	        )
+	    ) {
 
-            int rows = st.executeUpdate();
+	        st.setString(1, patient.getPatientCode());
+	        st.setString(2, patient.getName());
+	        st.setString(3, patient.getAddress());
+	        st.setString(4, patient.getContactNumber());
+	        st.setString(5, patient.getEmail());
 
-            return rows > 0;
+	        int rows = st.executeUpdate();
 
-        } catch (Exception e) {
+	        if (rows > 0) {
 
-            System.out.println("ERROR ADDING PATIENT:");
-            e.printStackTrace();
-        }
+	            try (ResultSet rs = st.getGeneratedKeys()) {
 
-        return false;
-    }
+	                if (rs.next()) {
+	                    patient.setPatientId(rs.getInt(1));
+	                }
+	            }
+
+	            return true;
+	        }
+
+	    } catch (Exception e) {
+
+	        System.out.println("ERROR ADDING PATIENT:");
+	        e.printStackTrace();
+	    }
+
+	    return false;
+	}
 
 
     // =========================================================
