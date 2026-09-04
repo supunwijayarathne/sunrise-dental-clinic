@@ -47,6 +47,11 @@ jobs:
           curl -L -o ci/lib/angus-activation.jar \
             https://repo1.maven.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar
 
+      - name: Download MySQL Connector
+        run: |
+          curl -L -o ci/lib/mysql-connector-j.jar \
+            https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.4.0/mysql-connector-j-9.4.0.jar
+
       - name: Compile Java source
         run: |
           mkdir -p build/classes
@@ -57,3 +62,19 @@ jobs:
             -cp "ci/lib/*" \
             -d build/classes \
             @sources.txt
+
+      - name: Download JUnit 5 Console Launcher
+        run: |
+          curl -L -o ci/lib/junit-platform-console-standalone.jar \
+            https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.12.2/junit-platform-console-standalone-1.12.2.jar
+
+      - name: Compile JUnit tests
+        run: |
+          mkdir -p build/test-classes
+
+          find src/test/java -name "*.java" > test-sources.txt
+
+          javac \
+            -cp "build/classes:ci/lib/*" \
+            -d build/test-classes \
+            @test-sources.txt
