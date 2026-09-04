@@ -14,13 +14,19 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: Check Java version
         run: java -version
+
+      - name: Compile Java source
+        run: |
+          mkdir -p build/classes
+          find src/main/java -name "*.java" > sources.txt
+          javac -d build/classes @sources.txt
