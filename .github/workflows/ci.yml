@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
@@ -11,6 +12,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # MySQL database for automated integration tests
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: sunrise_dental_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
 
@@ -29,17 +45,36 @@ jobs:
       - name: Check Java version
         run: java -version
 
-      # 4. Create CI library directory
+      # 4. Import database
+      - name: Import database
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -proot \
+            sunrise_dental_db < database/sunrise_dental_db.sql
+
+      # 5. Verify database
+      - name: Verify database
+        run: |
+          echo "Database tables:"
+          mysql -h 127.0.0.1 -P 3306 -u root -proot \
+            -e "USE sunrise_dental_db; SHOW TABLES;"
+
+      # 6. Verify admin user
+      - name: Verify admin user
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -proot \
+            -e "SELECT user_id, username, role, active FROM sunrise_dental_db.users;"
+
+      # 7. Create CI library directory
       - name: Create CI library directory
         run: mkdir -p ci/lib
 
-      # 5. Download Jakarta Servlet API
+      # 8. Download Jakarta Servlet API
       - name: Download Jakarta Servlet API
         run: |
           curl -fL -o ci/lib/jakarta-servlet-api.jar \
             https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.0.0/jakarta.servlet-api-6.0.0.jar
 
-      # 6. Download Jakarta Mail dependencies
+      # 9. Download Jakarta Mail dependencies
       - name: Download Jakarta Mail dependencies
         run: |
           curl -fL -o ci/lib/jakarta.mail-api.jar \
@@ -54,19 +89,19 @@ jobs:
           curl -fL -o ci/lib/angus-activation.jar \
             https://repo1.maven.org/maven2/org/eclipse/angus/angus-activation/2.0.2/angus-activation-2.0.2.jar
 
-      # 7. Download MySQL Connector
+      # 10. Download MySQL Connector
       - name: Download MySQL Connector
         run: |
           curl -fL -o ci/lib/mysql-connector-j.jar \
             https://repo1.maven.org/maven2/com/mysql/mysql-connector-j/9.4.0/mysql-connector-j-9.4.0.jar
 
-      # 8. Show downloaded libraries
+      # 11. Show downloaded libraries
       - name: Verify CI libraries
         run: |
           echo "CI libraries:"
           ls -lh ci/lib
 
-      # 9. Compile application
+      # 12. Compile application
       - name: Compile Java source
         run: |
           mkdir -p build/classes
@@ -78,13 +113,13 @@ jobs:
             -d build/classes \
             @sources.txt
 
-      # 10. Download JUnit 5
+      # 13. Download JUnit 5
       - name: Download JUnit 5 Console Launcher
         run: |
           curl -fL -o ci/lib/junit-platform-console-standalone.jar \
             https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.12.2/junit-platform-console-standalone-1.12.2.jar
 
-      # 11. Compile tests
+      # 14. Compile JUnit tests
       - name: Compile JUnit tests
         run: |
           mkdir -p build/test-classes
@@ -96,14 +131,21 @@ jobs:
             -d build/test-classes \
             @test-sources.txt
 
-      # 12. Run service tests
+      # 15. Run automated service tests
       - name: Run automated service tests
         run: |
           java -jar ci/lib/junit-platform-console-standalone.jar execute \
             --class-path "build/classes:build/test-classes:ci/lib/*" \
             --select-package com.sunrise.test.service
 
-      # 13. Prepare WAR directory
+      # 16. Run database integration tests
+      - name: Run database integration tests
+        run: |
+          java -jar ci/lib/junit-platform-console-standalone.jar execute \
+            --class-path "build/classes:build/test-classes:ci/lib/*" \
+            --select-package com.sunrise.test.integration
+
+      # 17. Prepare WAR directory
       - name: Prepare WAR
         run: |
           mkdir -p build/war/WEB-INF/classes
@@ -113,7 +155,7 @@ jobs:
 
           cp -r build/classes/* build/war/WEB-INF/classes/
 
-      # 14. Add application libraries to WAR
+      # 18. Add application libraries to WAR
       - name: Add application libraries to WAR
         run: |
           cp ci/lib/jakarta.mail-api.jar build/war/WEB-INF/lib/
@@ -122,13 +164,13 @@ jobs:
           cp ci/lib/angus-activation.jar build/war/WEB-INF/lib/
           cp ci/lib/mysql-connector-j.jar build/war/WEB-INF/lib/
 
-      # 15. Build WAR
+      # 19. Build WAR
       - name: Build WAR package
         run: |
           cd build/war
           jar -cvf ../SunriseDentalClinic.war .
 
-      # 16. Upload WAR artifact
+      # 20. Upload WAR artifact
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:

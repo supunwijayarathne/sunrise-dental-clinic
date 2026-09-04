@@ -35,7 +35,7 @@ public class EmailService {
      */
 
     private static final String EMAIL_USERNAME =
-            "8supun@gmail.com";
+            "8*****@gmail.com";
 
     private static final String EMAIL_PASSWORD =
             "tuaz tyxl bvzq yzdq";
